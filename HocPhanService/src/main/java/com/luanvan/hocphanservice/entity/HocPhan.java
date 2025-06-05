@@ -22,10 +22,7 @@ public class HocPhan {
     int tin_chi;
     String mo_ta;
     String loai_hp;
-    @ManyToOne
-    @JsonBackReference
-    @JoinColumn(name = "hoc_ky_ma_hoc_ky")
-    HocKy hoc_ky;
+    String hoc_phan_tien_quyet;
     @OneToMany(mappedBy = "hoc_phan")
     List<NhomHP> ds_nhom_hp;
 

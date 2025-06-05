@@ -16,7 +16,6 @@ public class NhomHP {
     @Id
     Long maNhomHP;
 
-    String nam_hoc;
 
     int tiet_bat_dau;
     int tiet_ket_thuc;

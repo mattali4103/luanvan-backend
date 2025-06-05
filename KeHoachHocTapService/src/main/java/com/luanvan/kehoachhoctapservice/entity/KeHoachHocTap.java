@@ -1,0 +1,23 @@
+package com.luanvan.kehoachhoctapservice.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Entity
+@Table(name = "ke_hoach_hoc_tap")
+public class KeHoachHocTap {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+    Long sinhVien_id;
+    String ma_hoc_ky;
+    String ma_hoc_phan;
+
+}

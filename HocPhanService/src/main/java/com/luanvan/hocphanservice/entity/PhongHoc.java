@@ -19,10 +19,10 @@ public class PhongHoc {
     String ma_phong;
     String ma_nha_hoc;
     int suc_chua;
-    int tiet_hoc;
-    int tiet_trong;
+    boolean tiet_hoc;
     @OneToMany(mappedBy = "phong_hoc")
     List<NhomHP> ds_nhom_hp;
+
 }
 
 

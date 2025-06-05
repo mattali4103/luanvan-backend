@@ -7,7 +7,7 @@ import lombok.experimental.FieldDefaults;
 import java.util.Set;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "role")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -16,11 +16,7 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    @Column(unique = true)
     String name;
-
-    @ManyToMany(mappedBy = "roles")
+    @OneToMany(mappedBy = "role")
     Set<User> users;
 }

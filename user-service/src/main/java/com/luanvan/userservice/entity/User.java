@@ -6,7 +6,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 
@@ -25,14 +24,8 @@ public class User {
     private String Email;
     private LocalDate NgaySinh;
     private boolean GioiTinh;
-    @ManyToMany
-    Set<Role> roles;
-    @OneToMany(mappedBy = "user")
-    List<GiangVien> giangVien;
 
-    @OneToOne(mappedBy = "user")
-    Admin admin;
-
-    @OneToMany(mappedBy = "user")
-    List<SinhVien> sinhVien;
+    @ManyToOne
+    @JoinColumn(name = "name")
+    Role role;
 }

@@ -10,5 +10,5 @@ import lombok.*;
 public class LoginResponse {
     private String token;
     private boolean isAuthenticated;
-    private String identifier;
+
 }

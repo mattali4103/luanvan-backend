@@ -27,7 +27,5 @@ public class HocKy {
 
     @OneToMany(mappedBy = "hoc_ky")
     List<NhomHP> ds_nhom_hp;
-
-
 }
 

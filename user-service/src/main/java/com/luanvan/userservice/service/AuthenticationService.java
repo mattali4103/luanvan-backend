@@ -1,13 +1,11 @@
 package com.luanvan.userservice.service;
 
 import com.luanvan.userservice.entity.User;
-import com.luanvan.userservice.entity.Role;
 import com.luanvan.userservice.exception.AppException;
 import com.luanvan.userservice.exception.ErrorCode;
-import com.luanvan.userservice.model.Request.AuthenticationRequest;
 import com.luanvan.userservice.model.Request.LoginRequest;
 import com.luanvan.userservice.model.Response.LoginResponse;
-import com.luanvan.userservice.repositorry.UserRepository;
+import com.luanvan.userservice.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -15,18 +13,14 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +32,7 @@ public class AuthenticationService {
     private final UserRepository userRepository;
 
     public LoginResponse authenticate(LoginRequest request) {
-        User user = userRepository.findById(request.getMa_so()).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+        User user = userRepository.findById(request.getMaSo()).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
         boolean isAuthenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if (!isAuthenticated) {
             throw new AppException(ErrorCode.INVALID_PASSWORD);
@@ -50,7 +44,6 @@ public class AuthenticationService {
                 .isAuthenticated(true)
                 .build();
     }
-
 
     private String generateToken(User user) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
@@ -74,12 +67,11 @@ public class AuthenticationService {
 
     private String createScope(User user){
         String role = "";
-        if(!CollectionUtils.isEmpty(user.getRoles())){
-            role  = user.getRoles().stream().map(Role::getName).collect(Collectors.joining(" "));
+        if(user.getRole() != null){
+            role  = user.getRole().toString();
         }
         return role;
     }
-
 //    public void logout(AuthenticationRequest request) throws ParseException, JOSEException {
 //        var signToken = verifyToken(request.getToken(), false);
 //        String jit =  signToken.getJWTClaimsSet().getJWTID();
