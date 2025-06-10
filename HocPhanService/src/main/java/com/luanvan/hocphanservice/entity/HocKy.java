@@ -1,5 +1,6 @@
 package com.luanvan.hocphanservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -16,16 +17,20 @@ import java.util.List;
 @Table(name = "hoc_ky")
 public class HocKy {
     @Id
-    String ma_hoc_ky;
-    LocalDate ngay_bat_dau_hoc;
-    LocalDate ngay_ket_thuc;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long maHocKy;
+    String tenHocKy;
+    LocalDate ngayBatDau;
+    LocalDate ngayKetThuc;
 
 
     @ManyToOne
     @JoinColumn(name = "nam_hoc_id")
-    NamHoc nam_hoc;
+    @JsonBackReference
+    NamHoc namHoc;
 
-    @OneToMany(mappedBy = "hoc_ky")
-    List<NhomHP> ds_nhom_hp;
+    @OneToMany(mappedBy = "hocKy")
+    @JsonBackReference
+    List<NhomHP> DSNhomHP;
 }
 

@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -14,28 +16,29 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "nhom_hoc_phan")
 public class NhomHP {
     @Id
-    Long maNhomHP;
+    String maNhomHP;
+    int tietBatdau;
+    int tietKetthuc;
 
+    int siSo;
+    int siSoCon;
 
-    int tiet_bat_dau;
-    int tiet_ket_thuc;
-
-    int si_so;
-    int si_so_hien_tai;
+    String maGiangVien;
 
 
     @ManyToOne
     @JsonBackReference
     @JoinColumn(name = "ma_hoc_phan")
-    HocPhan hoc_phan;
+    HocPhan hocPhan;
 
     @ManyToOne
     @JsonBackReference
     @JoinColumn(name = "ma_hoc_ky")
-    HocKy hoc_ky;
+    HocKy hocKy;
 
     @ManyToOne
     @JsonBackReference
     @JoinColumn(name = "ma_phong_hoc")
-    PhongHoc phong_hoc;
+    PhongHoc phongHoc;
+
 }

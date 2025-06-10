@@ -1,9 +1,6 @@
 package com.luanvan.profileservice.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,6 +12,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 public class Diem {
     @Id
-    String maHocKy;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+    Long maHocKy;
     Double diemTB;
+    String sinhVienMaSo;
 }

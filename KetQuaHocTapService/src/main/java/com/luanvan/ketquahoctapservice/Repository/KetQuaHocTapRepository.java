@@ -6,6 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface KetQuaHocTapRepository extends JpaRepository<KetQuaHocTap, Long> {
-    List<KetQuaHocTap> findKetQuaHocTapsBySinhVienId(Long sinhVienId);
 }
 

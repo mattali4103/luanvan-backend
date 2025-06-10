@@ -16,6 +16,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 
 @Configuration
@@ -41,11 +42,18 @@ public class SecurityConfig {
     private final CustomJwtDecoder customJwtDecoder;
 
 
+    List<String> publicAPI = List.of(
+            "/api/profile/sinhvien/create",
+            "/api/profile/admin/create",
+            "/api/profile/giangvien/create"
+    );
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(authorizeRequests
-                        -> authorizeRequests
-                        .anyRequest().permitAll()
+        http.authorizeHttpRequests(authorizeRequests ->
+                        authorizeRequests
+                                .requestMatchers(publicAPI.toArray(new String[0])).permitAll()
+                                .anyRequest().authenticated()
                 )
                 .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsFilter()))
                 .csrf(AbstractHttpConfigurer::disable)

@@ -1,5 +1,6 @@
 package com.luanvan.hocphanservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,9 +17,11 @@ import java.util.List;
 @Table(name = "nam_hoc")
 public class NamHoc {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    String nam_bat_dau;
-    String nam_ket_thuc;
-    @OneToMany(mappedBy = "nam_hoc")
-    List<HocKy> hoc_ky;
+    String namBatDau;
+    String namKetThuc;
+    @OneToMany(mappedBy = "namHoc")
+    @JsonBackReference
+    List<HocKy> hocKy;
 }

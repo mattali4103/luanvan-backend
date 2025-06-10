@@ -8,6 +8,6 @@ import lombok.*;
 @Setter
 @Builder
 public class LoginRequest {
-    private String ma_so;
+    private String maSo;
     private String password;
 }

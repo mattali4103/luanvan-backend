@@ -17,6 +17,15 @@ public class UserController {
         this.userService = userService;
     }
 
+    @RequestMapping("/id/{maSo}")
+    public ApiResponse<Object> getUserByMaSo(String maSo){
+        return ApiResponse.builder()
+                .code(200)
+                .message("OK")
+                .data(userService.getUserByMaSo(maSo))
+                .build();
+    }
+
     @PostMapping("register")
     public ApiResponse<Object> register(@RequestBody CreateSinhVienRequest request) {
         return ApiResponse.builder()

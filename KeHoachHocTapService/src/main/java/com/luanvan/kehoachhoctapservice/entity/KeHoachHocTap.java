@@ -16,8 +16,8 @@ public class KeHoachHocTap {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    Long sinhVien_id;
-    String ma_hoc_ky;
-    String ma_hoc_phan;
-
+    String maSo;
+    String maHocKy;
+    String maHocPhan;
+    boolean hocPhanCaiThien;
 }

@@ -23,5 +23,5 @@ public class CreateSinhVienRequest {
     boolean gioiTinh;
     String khoaHoc;
     Role role;
-
+    Long maNganh;
 }

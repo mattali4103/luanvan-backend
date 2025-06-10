@@ -1,6 +1,7 @@
 package com.luanvan.ketquahoctapservice.config;
 
 
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -21,6 +22,11 @@ import java.util.Collections;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    @Bean
+    ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

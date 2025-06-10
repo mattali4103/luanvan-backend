@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "profile-service", url = "${profile_service_url}")
 public interface ProfileClient {
-    @PostMapping(value ="/sinh_vien/create", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value ="/sinhvien/create", produces = MediaType.APPLICATION_JSON_VALUE)
     Object createSinhVien(@RequestBody CreateSinhVienRequest request);
     @PostMapping(value ="/admin/create", produces = MediaType.APPLICATION_JSON_VALUE)
     Object createAdmin(@RequestBody CreateAdminRequest request);
-    @PostMapping(value ="/giang_vien/create", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value ="/giangvien/create", produces = MediaType.APPLICATION_JSON_VALUE)
     Object createGiangVien(@RequestBody CreateGiangVienRequest request);
 
 }

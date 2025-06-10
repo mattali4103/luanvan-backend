@@ -17,13 +17,21 @@ import java.util.List;
 public class KetQuaHocTapController {
     private final KetQuaHocTapService ketQuaHocTapService;
 
-    @GetMapping("/{sinhVienId}")
-    public ApiResponse<List<KetQuaHocTapDTO>> getKetQuaHocTap(@PathVariable Long sinhVienId){
+    @GetMapping("/{maSo}")
+    public ApiResponse<List<KetQuaHocTapDTO>> getKetQuaHocTap(@PathVariable String maSo){
         return ApiResponse.<List<KetQuaHocTapDTO>>builder()
                 .code(200)
                 .message("OK")
-                .data(ketQuaHocTapService.findBySinhVienId(sinhVienId))
+                .data(null)
                 .build();
 
+    }
+    @GetMapping("/test/{maSo}")
+    public ApiResponse<Object> test(@PathVariable String maSo) {
+        return ApiResponse.<Object>builder()
+                .code(200)
+                .message("OK")
+                .data(ketQuaHocTapService.findBySinhVienId(maSo))
+                .build();
     }
 }

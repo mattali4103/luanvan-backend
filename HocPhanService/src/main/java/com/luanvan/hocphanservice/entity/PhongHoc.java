@@ -1,5 +1,6 @@
 package com.luanvan.hocphanservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -16,13 +17,13 @@ import java.util.List;
 @Entity
 public class PhongHoc {
     @Id
-    String ma_phong;
-    String ma_nha_hoc;
-    int suc_chua;
-    boolean tiet_hoc;
-    @OneToMany(mappedBy = "phong_hoc")
-    List<NhomHP> ds_nhom_hp;
-
+    String maPhong;
+    String maNhaHoc;
+    int sucChua;
+    boolean tietHoc;
+    @OneToMany(mappedBy = "phongHoc")
+    @JsonBackReference
+    List<NhomHP> dsNhomHp;
 }
 
 

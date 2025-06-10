@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Admin {
     @Id
-    String maCb;
+    String maSo;
     String ma_so_thue;
     String so_tk;
 }

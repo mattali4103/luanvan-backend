@@ -18,7 +18,7 @@ public class KetQuaHocTap {
     Float diem_so;
     String dieu_kien;
     String ma_hoc_ky;
-    Long sinhVienId;
+    String maSo;
     String ma_hoc_phan;
     Long maNhomHP;
 }

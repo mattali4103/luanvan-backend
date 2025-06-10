@@ -68,7 +68,7 @@ public class AuthenticationService {
     private String createScope(User user){
         String role = "";
         if(user.getRole() != null){
-            role  = user.getRole().toString();
+            role  = user.getRole().getName();
         }
         return role;
     }

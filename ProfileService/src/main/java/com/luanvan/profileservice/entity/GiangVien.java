@@ -1,5 +1,6 @@
 package com.luanvan.profileservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,7 +16,10 @@ import lombok.experimental.FieldDefaults;
 public class GiangVien {
     @Id
     String maSo;
-    Long ma_so_thue;
-    Long so_tk;
-    Long ma_khoa;
+    Long maSoThue;
+    Long soTk;
+    @ManyToOne
+    @JoinColumn(name = "maKhoa")
+    @JsonBackReference
+    Khoa khoa;
 }

@@ -1,6 +1,5 @@
 package com.luanvan.profileservice.exception;
 
-
 import com.luanvan.profileservice.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

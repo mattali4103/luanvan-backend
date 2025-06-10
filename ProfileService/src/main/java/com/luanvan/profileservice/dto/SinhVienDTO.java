@@ -1,5 +1,6 @@
 package com.luanvan.profileservice.dto;
 
+
 import lombok.*;
 import org.springframework.stereotype.Repository;
 
@@ -10,7 +11,8 @@ import org.springframework.stereotype.Repository;
 @Getter
 @Setter
 @Builder
-public class SinhvienDTO {
+public class SinhVienDTO {
     private String maSo;
     private String khoaHoc;
+    private Long maNganh;
 }

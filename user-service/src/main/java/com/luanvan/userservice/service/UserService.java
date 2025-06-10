@@ -9,7 +9,6 @@ import com.luanvan.userservice.model.dto.UserDTO;
 import com.luanvan.userservice.repository.RoleRepository;
 import com.luanvan.userservice.repository.UserRepository;
 import com.luanvan.userservice.repository.httpClient.ProfileClient;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -33,12 +32,22 @@ public class UserService {
         User user = modelMapper.map(request, User.class);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         Role role = roleRepository.findByName("SINHVIEN");
+        if (role == null) {
+            throw new AppException(ErrorCode.USER_NOTFOUND);
+        }
         user.setRole(role);
         userRepository.save(user);
         var createSinhVienRequest = modelMapper.map(request, CreateSinhVienRequest.class);
-        var createProfile = profileClient.createSinhVien(createSinhVienRequest);
+        profileClient.createSinhVien(createSinhVienRequest);
+        return modelMapper.map(user, UserDTO.class);
+    }
 
-        log.info("createSinhVienRequest:{}", createProfile);
+    public UserDTO getUserByMaSo(String maSo) {
+        if (maSo == null || maSo.isEmpty()) {
+            throw new AppException(ErrorCode.USER_NOTFOUND);
+        }
+        User user = userRepository.findById(maSo)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
         return modelMapper.map(user, UserDTO.class);
     }
 }
