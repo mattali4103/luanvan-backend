@@ -58,4 +58,9 @@ public class NganhService {
         nganhRepository.deleteById(maNganh);
     }
 
+    public boolean existByMaNganh(Long maNganh) {
+        return nganhRepository.existsById(maNganh);
+    }
+
+
 }

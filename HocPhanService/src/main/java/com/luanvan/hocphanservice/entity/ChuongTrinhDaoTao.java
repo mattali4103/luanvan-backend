@@ -1,10 +1,8 @@
 package com.luanvan.hocphanservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -18,8 +16,15 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChuongTrinhDaoTao {
     @Id
-    String maNganh;
-    @ManyToMany(mappedBy = "chuongTrinhDaoTaoList")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+    Long maNganh;
+    @ManyToMany
+    @JoinTable(
+        name = "ctdt_hp",
+        joinColumns = @JoinColumn(name = "chuong_trinh_dao_tao_id"),
+        inverseJoinColumns = @JoinColumn(name = "hoc_phan_id")
+    )
     @JsonBackReference
     List<HocPhan> hocPhanList;
     String khoaHoc;

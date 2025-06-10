@@ -53,7 +53,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers(publicAPI.toArray(new String[0])).permitAll()
-                                .anyRequest().authenticated()
+                                .anyRequest().permitAll()
                 )
                 .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsFilter()))
                 .csrf(AbstractHttpConfigurer::disable)

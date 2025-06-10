@@ -4,7 +4,6 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
-
     UNAUTHENTICATED(4001,"Xác thực thất bại" ),
     USER_NOTFOUND(4002, "Người dùng không tồn tại"),
     INVALID_PASSWORD(4003, "Sai mật khẩu" ),

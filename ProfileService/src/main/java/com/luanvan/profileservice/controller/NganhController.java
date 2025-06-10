@@ -21,6 +21,11 @@ public class NganhController {
                 .build();
     }
 
+    @GetMapping("/id/{maNganh}/exist")
+    public boolean existByMaNganh(@PathVariable Long maNganh) {
+            return nganhService.existByMaNganh(maNganh);
+    }
+
     @GetMapping("/id/{maNganh}")
     public ApiResponse<NganhDTO> getNganhByMaNganh(@PathVariable Long maNganh) {
         return ApiResponse.<NganhDTO>builder()

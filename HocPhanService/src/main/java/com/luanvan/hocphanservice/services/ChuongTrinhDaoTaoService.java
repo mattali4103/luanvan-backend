@@ -5,9 +5,11 @@ import com.luanvan.hocphanservice.entity.HocPhan;
 import com.luanvan.hocphanservice.exception.AppException;
 import com.luanvan.hocphanservice.exception.ErrorCode;
 import com.luanvan.hocphanservice.model.ChuongTrinhDaoTaoDTO;
+import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.Request.CTDTDescriptionRequest;
 import com.luanvan.hocphanservice.repository.ChuongTrinhDaoTaoRepository;
 import com.luanvan.hocphanservice.repository.HocPhanRepository;
+import com.luanvan.hocphanservice.repository.httpClient.NganhClient;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -28,22 +30,47 @@ public class ChuongTrinhDaoTaoService {
     private final ModelMapper modelMapper;
     private final ChuongTrinhDaoTaoRepository chuongTrinhDaoTaoRepository;
     private final HocPhanRepository hocPhanRepository;
+    private final NganhClient nganhClient;
 
-    public List<ChuongTrinhDaoTaoDTO> getCTDTByMaNganh() {
-        List<ChuongTrinhDaoTao> chuongTrinhDaoTaoList = chuongTrinhDaoTaoRepository.findAll();
-        return chuongTrinhDaoTaoList.stream()
-                .map(chuongTrinhDaoTao -> modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class))
-                .toList();
+    public ChuongTrinhDaoTaoDTO getCTDTByMaNganh(Long maNganh) {
+        if (maNganh == null) {
+            throw new AppException("MaNganh cannot be null", ErrorCode.INVALID_REQUEST);
+        }
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findByMaNganh(maNganh)
+                .orElseThrow(() -> new AppException("Không tìm thấy ngành trong csdl",ErrorCode.NOTFOUND));
+
+        return modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class);
     }
-
 
     public ChuongTrinhDaoTaoDTO create(ChuongTrinhDaoTaoDTO dto){
         if(dto == null){
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
+
+        if(!nganhClient.existByMaNganh(dto.getMaNganh())){
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+
+
         modelMapper.typeMap(ChuongTrinhDaoTaoDTO.class, ChuongTrinhDaoTao.class)
-                .addMappings(mapper -> mapper.skip(ChuongTrinhDaoTao::setHocPhanList));
+                .addMappings(mapper -> mapper.skip(ChuongTrinhDaoTao::setHocPhanList))
+        .addMappings(mapper -> mapper.skip(ChuongTrinhDaoTao::setId));
         ChuongTrinhDaoTao chuongTrinhDaoTao = modelMapper.map(dto, ChuongTrinhDaoTao.class);
+
+
+        List<String> maHocPhanList = dto.getHocPhanList().stream()
+                .map(HocPhanDTO::getMaHp)
+                .toList();
+
+        List<HocPhan> hocPhanList = hocPhanRepository.findByMaHpIn(maHocPhanList);
+
+        if(hocPhanList.isEmpty()){
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+
+
+
+        chuongTrinhDaoTao.setHocPhanList(hocPhanList);
         chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
         return modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class);
     }
@@ -63,7 +90,7 @@ public class ChuongTrinhDaoTaoService {
         chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
         return updateMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class);
     }
-    public ChuongTrinhDaoTaoDTO getById(String id) {
+    public ChuongTrinhDaoTaoDTO getById(Long id) {
         if (id == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
@@ -71,7 +98,7 @@ public class ChuongTrinhDaoTaoService {
                 .map(chuongTrinhDaoTao -> modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class))
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
     }
-    public void deleteById(String id) {
+    public void deleteById(Long id) {
         if (id == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
@@ -83,9 +110,19 @@ public class ChuongTrinhDaoTaoService {
 
     @Transactional
     public void createDSHocPhanFromFile(CTDTDescriptionRequest request, MultipartFile file) {
-        if(request == null || file == null || file.isEmpty()){
+        if(request == null || file == null || file.isEmpty() ){
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
+
+        if(request.getMaNganh() == null || request.getKhoaHoc() == null){
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        boolean nganhExists = nganhClient.existByMaNganh(request.getMaNganh());
+        if(!nganhExists){
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+
         try{
             Workbook workbook = WorkbookFactory.create(file.getInputStream());
             Sheet sheet = workbook.getSheetAt(0);
