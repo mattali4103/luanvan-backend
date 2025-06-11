@@ -41,4 +41,6 @@ public class NhomHP {
     @JoinColumn(name = "ma_phong_hoc")
     PhongHoc phongHoc;
 
+
+
 }

@@ -19,5 +19,4 @@ public interface ProfileClient {
     Object createAdmin(@RequestBody CreateAdminRequest request);
     @PostMapping(value ="/giangvien/create", produces = MediaType.APPLICATION_JSON_VALUE)
     Object createGiangVien(@RequestBody CreateGiangVienRequest request);
-
 }
