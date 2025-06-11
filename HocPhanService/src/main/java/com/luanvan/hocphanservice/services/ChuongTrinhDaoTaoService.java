@@ -9,6 +9,7 @@ import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.Request.CTDTDescriptionRequest;
 import com.luanvan.hocphanservice.repository.ChuongTrinhDaoTaoRepository;
 import com.luanvan.hocphanservice.repository.HocPhanRepository;
+import com.luanvan.hocphanservice.repository.httpClient.KeHoachHocTapClient;
 import com.luanvan.hocphanservice.repository.httpClient.NganhClient;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,10 +33,37 @@ public class ChuongTrinhDaoTaoService {
     private final ChuongTrinhDaoTaoRepository chuongTrinhDaoTaoRepository;
     private final HocPhanRepository hocPhanRepository;
     private final NganhClient nganhClient;
+    private final KeHoachHocTapClient keHoachHocTapClient;
+    private final HocPhanService hocPhanService;
+
+
+    public List<HocPhanDTO> findHocPhanNotInKeHoachHocTap(String maSo, String khoaHoc) {
+        if(maSo.isEmpty()){
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+
+//      Lấy mã học phần có trong chương trình đào tạo
+        List<String> maHocPhanInCTDT = chuongTrinhDaoTao.getHocPhanList().stream()
+                .map(HocPhan::getMaHp)
+                .toList();
+//      Lấy mã học phần có trong kế hoạch học tập
+        List<String> maHocPhanInKHHT = keHoachHocTapClient.getHocPhanByMaSo(maSo);
+        if(maHocPhanInKHHT == null || maHocPhanInKHHT.isEmpty()) {
+            return chuongTrinhDaoTao.getHocPhanList().stream()
+                    .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
+                    .collect(Collectors.toList());
+        }
+        List<String> maHocPhanNotInKHHT = maHocPhanInCTDT.stream()
+                .filter(maHocPhan -> !maHocPhanInKHHT.contains(maHocPhan))
+                .toList();
+        return hocPhanService.getDSHocPhanIn(maHocPhanNotInKHHT);
+    }
 
     public ChuongTrinhDaoTaoDTO getCTDTByMaNganh(Long maNganh) {
         if (maNganh == null) {
-            throw new AppException("MaNganh cannot be null", ErrorCode.INVALID_REQUEST);
+            throw new AppException(ErrorCode.INVALID_REQUEST);
         }
         ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findByMaNganh(maNganh)
                 .orElseThrow(() -> new AppException("Không tìm thấy ngành trong csdl",ErrorCode.NOTFOUND));
@@ -53,8 +82,7 @@ public class ChuongTrinhDaoTaoService {
 
 
         modelMapper.typeMap(ChuongTrinhDaoTaoDTO.class, ChuongTrinhDaoTao.class)
-                .addMappings(mapper -> mapper.skip(ChuongTrinhDaoTao::setHocPhanList))
-        .addMappings(mapper -> mapper.skip(ChuongTrinhDaoTao::setId));
+                .addMappings(mapper -> mapper.skip(ChuongTrinhDaoTao::setHocPhanList));
         ChuongTrinhDaoTao chuongTrinhDaoTao = modelMapper.map(dto, ChuongTrinhDaoTao.class);
 
 
@@ -90,19 +118,19 @@ public class ChuongTrinhDaoTaoService {
         chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
         return updateMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class);
     }
-    public ChuongTrinhDaoTaoDTO getById(Long id) {
-        if (id == null) {
+    public ChuongTrinhDaoTaoDTO getByKhoaHoc(String khoaHoc) {
+        if(khoaHoc == null || khoaHoc.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        return chuongTrinhDaoTaoRepository.findById(id)
+        return chuongTrinhDaoTaoRepository.findById(khoaHoc)
                 .map(chuongTrinhDaoTao -> modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class))
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
     }
-    public void deleteById(Long id) {
-        if (id == null) {
+    public void deleteById(String khoaHoc) {
+        if(khoaHoc == null || khoaHoc.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(id)
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc)
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
         chuongTrinhDaoTaoRepository.delete(chuongTrinhDaoTao);
     }

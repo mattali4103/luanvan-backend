@@ -3,6 +3,8 @@ package com.luanvan.kehoachhoctapservice.repository;
 import com.luanvan.kehoachhoctapservice.entity.KeHoachHocTap;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,4 +22,6 @@ public interface KeHoachHocTapRepository extends JpaRepository<KeHoachHocTap, Lo
     Long countKeHoachHocTapsByMaSo(String maSo);
     Long countKeHoachHocTapByMaSoAndMaHocKy(String maSo, String maHocKy);
     Long countKeHoachHocTapByMaSoAndMaHocKyAndHocPhanCaiThien(String maSo, String maHocKy, boolean b);
+    @Query("SELECT k.maHocPhan FROM KeHoachHocTap k WHERE k.maSo = :maSo")
+    List<String> findMaHocPhanByMaSo(@Param("maSo") String maSo);
 }

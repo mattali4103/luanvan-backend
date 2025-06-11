@@ -77,6 +77,20 @@ public class KeHoachHocTapService {
                 .toList();
     }
 
+    public List<String> getMaHocPhanByMaSo(String maSo){
+        if (maSo == null || maSo.isEmpty()) {
+            throw new AppException(ErrorCode.USER_NOTFOUND);
+        }
+
+        List<String> maHocPhanList = keHoachHocTapRepository.findMaHocPhanByMaSo(maSo);
+
+        if (maHocPhanList.isEmpty()) {
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+        return maHocPhanList;
+    }
+
+
     public KeHoachHocTapDTO update(KeHoachHocTapDTO khht) {
         if (khht.getId() == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);

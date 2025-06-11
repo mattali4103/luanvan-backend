@@ -14,9 +14,8 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChuongTrinhDaoTaoDTO {
-    Long id;
+    String khoaHoc;
     Long maNganh;
     String noiDung;
-    String khoaHoc;
     List<HocPhanDTO> hocPhanList;
 }

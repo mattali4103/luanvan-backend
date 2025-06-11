@@ -19,6 +19,11 @@ public class KeHoachHocTapController {
         this.keHoachHocTapService = keHoachHocTapService;
     }
 
+    @GetMapping("/sinhvien/hoc_phan_in_ke_hoach_by_ma_so/{maSo}")
+    public List<String> getMaHocPhanByMaSo(@PathVariable String maSo){
+        return  keHoachHocTapService.getMaHocPhanByMaSo(maSo);
+    }
+
     @GetMapping("/sinhvien/hocky/count")
     public ApiResponse<KeHoachHocTapCountResponse> countKeHoachHocTapByMaSoAndMaHocKy(@RequestBody KeHoachHocTapRequest request) {
         return ApiResponse.<KeHoachHocTapCountResponse>builder()

@@ -1,12 +1,14 @@
 package com.luanvan.hocphanservice.controller;
-
-
 import com.luanvan.hocphanservice.model.ChuongTrinhDaoTaoDTO;
+import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.Request.CTDTDescriptionRequest;
+import com.luanvan.hocphanservice.model.Request.HocPhanRequest;
 import com.luanvan.hocphanservice.model.Response.ApiResponse;
 import com.luanvan.hocphanservice.services.ChuongTrinhDaoTaoService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/ctdt")
@@ -17,12 +19,21 @@ public class ChuongTrinhDaoTaoController {
         this.chuongTrinhDaoTaoService = chuongTrinhDaoTaoService;
     }
 
-    @GetMapping("/id/{maHp}")
-    public ApiResponse<ChuongTrinhDaoTaoDTO> getChuongTrinhDaoTaoById(@PathVariable Long maHp) {
+    @GetMapping("/hoc_phan_not_in_ke_hoach")
+    public ApiResponse<List<HocPhanDTO>> getHocPhanNotInKeHoachHocTap(@RequestBody HocPhanRequest request) {
+        return ApiResponse.<List<HocPhanDTO>>builder()
+                .code(200)
+                .message("OK")
+                .data(chuongTrinhDaoTaoService.findHocPhanNotInKeHoachHocTap(request.getMaSo(), request.getKhoaHoc()))
+                .build();
+    }
+
+    @GetMapping("/id/{khoaHoc}")
+    public ApiResponse<ChuongTrinhDaoTaoDTO> getChuongTrinhDaoTaoByKhoaHoc(@PathVariable String khoaHoc) {
         return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
                 .code(200)
                 .message("OK")
-                .data(chuongTrinhDaoTaoService.getById(maHp))
+                .data(chuongTrinhDaoTaoService.getByKhoaHoc(khoaHoc))
                 .build();
     }
     @GetMapping("/nganh/{maNganh}")
@@ -68,7 +79,7 @@ public class ChuongTrinhDaoTaoController {
                 .build();
     }
     @DeleteMapping("/delete/{id}")
-    public ApiResponse<Void> deleteChuongTrinhDaoTao(@PathVariable Long id) {
+    public ApiResponse<Void> deleteChuongTrinhDaoTao(@PathVariable String id) {
         chuongTrinhDaoTaoService.deleteById(id);
         return ApiResponse.<Void>builder()
                 .code(204)

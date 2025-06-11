@@ -25,6 +25,17 @@ public class HocPhanService {
         this.modelMapper = modelMapper;
     }
 
+    public List<HocPhanDTO> getDSHocPhanIn(List<String> maHocPhanList) {
+        if (maHocPhanList.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        List<HocPhan> hocPhanList = hocPhanRepository.findByMaHpIn(maHocPhanList);
+        return hocPhanList.stream()
+                .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
+                .collect(Collectors.toList());
+    }
+
+
     public List<HocPhanDTO> getDsHocPhan() {
         List<HocPhan> hocPhanList = hocPhanRepository.findAll();
         return hocPhanList.stream().map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class)).collect(Collectors.toList());
@@ -87,6 +98,18 @@ public class HocPhanService {
         } catch (IOException e) {
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
+    }
+
+//    Lấy học phần không có trong không có trong danh sách
+    public List<HocPhanDTO> getHocPhanNotInList(List<String> maHocPhanList) {
+        if(maHocPhanList.isEmpty()){
+            List<HocPhan> hocPhanList = hocPhanRepository.findAll();
+            return hocPhanList.stream().map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class)).collect(Collectors.toList());
+        }
+        List<HocPhan> hocPhanList = hocPhanRepository.findByMaHpNotIn(maHocPhanList);
+        return hocPhanList.stream()
+                .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
+                .collect(Collectors.toList());
     }
 
     protected String getStringCellValue(Cell cell) {

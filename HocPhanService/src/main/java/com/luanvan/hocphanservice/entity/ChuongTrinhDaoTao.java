@@ -16,8 +16,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChuongTrinhDaoTao {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    String khoaHoc;
     Long maNganh;
     @ManyToMany
     @JoinTable(
@@ -27,6 +26,6 @@ public class ChuongTrinhDaoTao {
     )
     @JsonBackReference
     List<HocPhan> hocPhanList;
-    String khoaHoc;
+
     String noiDung;
 }
