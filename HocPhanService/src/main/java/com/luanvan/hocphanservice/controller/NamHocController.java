@@ -24,7 +24,13 @@ public class NamHocController {
                 .data(namHocService.getNamHocById(id))
                 .build();
     }
-    @GetMapping("/all")
+
+    @GetMapping(value = "nam_hoc_in/list")
+    List<NamHocDTO> getAllNamHoc(@RequestBody List<Long> namHocList){
+        return namHocService.getNamHocByMaNamHocIn(namHocList);
+    }
+
+    @GetMapping("/list")
     public ApiResponse<List<NamHocDTO>> getAllNamHoc() {
         return ApiResponse.<List<NamHocDTO>>builder()
                 .code(200)

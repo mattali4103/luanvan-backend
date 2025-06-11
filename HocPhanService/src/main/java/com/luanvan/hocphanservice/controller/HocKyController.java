@@ -3,6 +3,7 @@ package com.luanvan.hocphanservice.controller;
 
 import com.luanvan.hocphanservice.model.HocKyDTO;
 import com.luanvan.hocphanservice.model.Request.HocKyRequest;
+import com.luanvan.hocphanservice.model.Response.ApiResponse;
 import com.luanvan.hocphanservice.services.HocKyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,12 @@ public class HocKyController {
         return ResponseEntity.ok(hocKyDTO);
     }
 
+    @PostMapping("/hoc_ky_in/list")
+    public List<HocKyDTO> getHocKyIn(@RequestBody List<Long> hocKyList){
+        return hocKyService.findHocKyIn(hocKyList);
+    }
+
+
     @GetMapping("/id/{id}")
     public ResponseEntity<HocKyDTO> getHocKyById(@PathVariable("id") Long id) {
         HocKyDTO hocKyDTO = hocKyService.getHocKyById(id);
@@ -34,8 +41,12 @@ public class HocKyController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<HocKyDTO>> getAllHocKy() {
+    public ApiResponse<List<HocKyDTO>> getAllHocKy() {
         List<HocKyDTO> list = hocKyService.getAllHocKy();
-        return ResponseEntity.ok(list);
+        return ApiResponse.<List<HocKyDTO>>builder()
+                .code(200)
+                .message("OK")
+                .data(list)
+                .build();
     }
 }

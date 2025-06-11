@@ -26,6 +26,9 @@ public class ChuongTrinhDaoTao {
     )
     @JsonBackReference
     List<HocPhan> hocPhanList;
-
     String noiDung;
+
+    @OneToMany(mappedBy = "chuongTrinhDaoTao", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<HocPhanTuChon> nhomHocPhanTuChon;
+
 }

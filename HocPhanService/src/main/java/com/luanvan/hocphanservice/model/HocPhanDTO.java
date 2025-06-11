@@ -1,8 +1,6 @@
 package com.luanvan.hocphanservice.model;
 
 
-import jakarta.persistence.Id;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,7 +11,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Data
 public class HocPhanDTO {
-    @Id
     String maHp;
     String tenHp;
     int tinChi;

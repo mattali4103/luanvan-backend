@@ -1,5 +1,6 @@
 package com.luanvan.hocphanservice.repository.httpClient;
 
+import com.luanvan.hocphanservice.model.Response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -2,6 +2,7 @@ package com.luanvan.profileservice.dto;
 
 
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Repository;
 
 @AllArgsConstructor
@@ -11,8 +12,10 @@ import org.springframework.stereotype.Repository;
 @Getter
 @Setter
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class SinhVienDTO {
-    private String maSo;
-    private String khoaHoc;
-    private Long maNganh;
+    String maSo;
+    String khoaHoc;
+    String maLop;
+    LopDTO lopDTO;
 }

@@ -3,9 +3,7 @@ package com.luanvan.userservice.repository.httpClient;
 import com.luanvan.userservice.model.Request.CreateAdminRequest;
 import com.luanvan.userservice.model.Request.CreateGiangVienRequest;
 import com.luanvan.userservice.model.Request.CreateSinhVienRequest;
-import com.luanvan.userservice.model.dto.UserDTO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,5 +17,4 @@ public interface ProfileClient {
     Object createAdmin(@RequestBody CreateAdminRequest request);
     @PostMapping(value ="/giangvien/create", produces = MediaType.APPLICATION_JSON_VALUE)
     Object createGiangVien(@RequestBody CreateGiangVienRequest request);
-
 }

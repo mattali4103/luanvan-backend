@@ -2,27 +2,26 @@ package com.luanvan.profileservice.services;
 
 import com.luanvan.profileservice.dto.SinhVienDTO;
 import com.luanvan.profileservice.dto.request.CreateSinhVienRequest;
+import com.luanvan.profileservice.dto.response.ProfileResponse;
 import com.luanvan.profileservice.entity.Lop;
 import com.luanvan.profileservice.entity.SinhVien;
 import com.luanvan.profileservice.exception.AppException;
 import com.luanvan.profileservice.exception.ErrorCode;
 import com.luanvan.profileservice.repository.LopRepository;
 import com.luanvan.profileservice.repository.SinhVienRepository;
+import lombok.RequiredArgsConstructor;
+import org.bouncycastle.math.raw.Mod;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class SinhVienService {
     private final SinhVienRepository sinhVienRepository;
     private final ModelMapper modelMapper;
     private final LopRepository lopRepository;
-
-    public SinhVienService(SinhVienRepository sinhVienRepository, LopRepository lopRepository, ModelMapper modelMapper) {
-        this.sinhVienRepository = sinhVienRepository;
-        this.modelMapper = modelMapper;
-        this.lopRepository = lopRepository;
-    }
+    private final ModelMapper sinhVienToDTOMapper;
 
     public void deleteSinhVien(String maSo) {
         if (maSo == null || maSo.isEmpty()) {
@@ -48,7 +47,7 @@ public class SinhVienService {
         modelMapper.map(sinhvienDTO, sv);
 
         sinhVienRepository.save(sv);
-        return modelMapper.map(sv, SinhVienDTO.class);
+        return sinhVienToDTOMapper.map(sv, SinhVienDTO.class);
     }
 
     @Transactional
@@ -60,19 +59,24 @@ public class SinhVienService {
                         mapper.skip(SinhVien::setLop));
         SinhVien sv = new SinhVien();
         modelMapper.map(request, sv);
-
         sv.setLop(lop);
-
         sinhVienRepository.save(sv);
-
-        return modelMapper.map(sv, SinhVienDTO.class);
+        return sinhVienToDTOMapper.map(sv, SinhVienDTO.class);
     }
 
     public SinhVienDTO findById(String maSo) {
         SinhVien sinhVien = sinhVienRepository.findById(maSo)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
-        ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(sinhVien, SinhVienDTO.class);
     }
-
+    public ProfileResponse getMyInfo(String maSo){
+        SinhVien sinhVien = sinhVienRepository.findById(maSo)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+        return ProfileResponse.builder()
+                .maSo(sinhVien.getMaSo())
+                .maLop(sinhVien.getLop().getMaLop())
+                .khoaHoc(sinhVien.getKhoaHoc())
+                .tenNganh(sinhVien.getLop().getNganh().getTenNganh())
+                .build();
+    }
 }

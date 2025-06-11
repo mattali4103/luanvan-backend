@@ -16,5 +16,4 @@ public class NganhDTO {
     Long maNganh;
     String tenNganh;
     KhoaDTO khoa;
-    List<LopDTO> lopDTO;
 }

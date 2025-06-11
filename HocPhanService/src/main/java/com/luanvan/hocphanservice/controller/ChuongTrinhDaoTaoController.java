@@ -3,29 +3,39 @@ import com.luanvan.hocphanservice.model.ChuongTrinhDaoTaoDTO;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.Request.CTDTDescriptionRequest;
 import com.luanvan.hocphanservice.model.Request.HocPhanRequest;
+import com.luanvan.hocphanservice.model.Request.KeHoachHocTapRequest;
 import com.luanvan.hocphanservice.model.Response.ApiResponse;
+import com.luanvan.hocphanservice.model.Response.TinChiResponse;
 import com.luanvan.hocphanservice.services.ChuongTrinhDaoTaoService;
+import com.luanvan.hocphanservice.services.HocPhanService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/ctdt")
 public class ChuongTrinhDaoTaoController {
     private final ChuongTrinhDaoTaoService chuongTrinhDaoTaoService;
+    private final HocPhanService hocPhanService;
 
-    public ChuongTrinhDaoTaoController(ChuongTrinhDaoTaoService chuongTrinhDaoTaoService) {
+    public ChuongTrinhDaoTaoController(ChuongTrinhDaoTaoService chuongTrinhDaoTaoService, HocPhanService hocPhanService) {
         this.chuongTrinhDaoTaoService = chuongTrinhDaoTaoService;
+        this.hocPhanService = hocPhanService;
     }
 
-    @GetMapping("/hoc_phan_not_in_ke_hoach")
-    public ApiResponse<List<HocPhanDTO>> getHocPhanNotInKeHoachHocTap(@RequestBody HocPhanRequest request) {
+    @PostMapping("/hoc_phan_not_in/{khoaHoc}")
+    List<HocPhanDTO> getHocPhanNotInCTDT(@PathVariable String khoaHoc, @RequestBody List<String> hocPhanList) {
+        return chuongTrinhDaoTaoService.getHocPhanNotInCTDT(hocPhanList, khoaHoc);
+    }
+
+    @GetMapping("/khoahoc/{khoaHoc}")
+    public ApiResponse<List<HocPhanDTO>> getHocPhanByKhoaHoc(@PathVariable String khoaHoc) {
         return ApiResponse.<List<HocPhanDTO>>builder()
                 .code(200)
                 .message("OK")
-                .data(chuongTrinhDaoTaoService.findHocPhanNotInKeHoachHocTap(request.getMaSo(), request.getKhoaHoc()))
+                .data(chuongTrinhDaoTaoService.getHocPhanInCTDTByKhoaHoc(khoaHoc))
                 .build();
+
     }
 
     @GetMapping("/id/{khoaHoc}")
@@ -85,5 +95,15 @@ public class ChuongTrinhDaoTaoController {
                 .code(204)
                 .message("Deleted")
                 .build();
+    }
+
+//    API for Service
+    @PostMapping("/count/tinchi/{khoaHoc}")
+    public TinChiResponse getTongTinchi(@PathVariable String khoaHoc, @RequestBody List<KeHoachHocTapRequest> request) {
+        return chuongTrinhDaoTaoService.getCountTinChiByCTDT(khoaHoc, request);
+    }
+    @PostMapping("/hocphan/by_loai_hp")
+    public List<HocPhanDTO> getHocPhanInCTDTByLoaiHp(@RequestBody HocPhanRequest request) {
+       return hocPhanService.getHocPhanInCTDTByLoaiHp(request.getLoaiHp(), request.getKhoaHoc());
     }
 }

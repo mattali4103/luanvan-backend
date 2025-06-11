@@ -10,7 +10,9 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class KeHoachHocTapRequest {
+    Long id;
     String maSo;
-    String maHocKy;
+    String maHocPhan;
+    Long maHocKy;
     boolean hocPhanCaiThien;
 }

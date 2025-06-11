@@ -9,11 +9,12 @@ import lombok.*;
 @Builder
 public class KetQuaHocTapDTO {
     Long id;
-    String diem_chu;
-    Float diem_so;
-    String dieu_kien;
-    String ma_hoc_ky;
+    String diemChu;
+    Float diemSo;
+    String dieuKien;
+    Long maHocKy;
     String maSo;
-    String ma_hoc_phan;
+    String maHp;
+    Long soTinChi;
     Long maNhomHP;
 }

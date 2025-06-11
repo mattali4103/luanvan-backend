@@ -12,13 +12,27 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class HocKyService {
     private final HocKyRepository hocKyRepository;
-    private final NamHocRepository namHocRepository;
     ModelMapper modelMapper = new ModelMapper();
+
+
+    public List<HocKyDTO> findHocKyIn(List<Long> hocPhanList) {
+        if(hocPhanList.isEmpty()){
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        List<HocKy> hocKyList = hocKyRepository.findByMaHocKyIn(hocPhanList);
+
+        modelMapper.typeMap(HocKy.class, HocKyDTO.class).addMappings(mapper -> {
+            mapper.map(HocKy::getNamHoc, HocKyDTO::setNamHocDTO);
+        });
+
+        return hocKyList.stream().map(hocKy -> modelMapper.map(hocKy, HocKyDTO.class)).toList();
+    }
 
     public HocKyDTO create(HocKyRequest hocKyRequest) {
         if(hocKyRequest.getNamHocId() == null) {
@@ -33,6 +47,10 @@ public class HocKyService {
     public HocKyDTO getHocKyById(Long maHocKy) {
         HocKy hocKy = hocKyRepository.findById(maHocKy)
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+
+        modelMapper.typeMap(HocKy.class, HocKyDTO.class).addMappings(mapper -> {
+            mapper.map(HocKy::getNamHoc, HocKyDTO::setNamHocDTO);
+        });
         return modelMapper.map(hocKy, HocKyDTO.class);
     }
 

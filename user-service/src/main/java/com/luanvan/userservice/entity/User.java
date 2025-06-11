@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 
 @Entity
@@ -24,7 +25,6 @@ public class User {
     private LocalDate NgaySinh;
     private boolean GioiTinh;
 
-    @ManyToOne
-    @JoinColumn(name = "name")
-    Role role;
+    @ManyToMany
+    Set<Role> roles;
 }

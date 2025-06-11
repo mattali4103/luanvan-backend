@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -40,6 +41,14 @@ public class NamHocService {
         modelMapper.map(namHocDTO, namHoc);
         namHocRepository.save(namHoc);
         return modelMapper.map(namHoc, NamHocDTO.class);
+    }
+
+    public List<NamHocDTO> getNamHocByMaNamHocIn(List<Long> maNamHocList) {
+        if(maNamHocList.isEmpty()){
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+        List<NamHoc> namHocList = namHocRepository.findByIdIn(maNamHocList);
+        return namHocList.stream().map(mapper -> modelMapper.map(mapper, NamHocDTO.class)).toList();
     }
 
     public List<NamHocDTO> getAllNamHoc() {

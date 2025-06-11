@@ -2,16 +2,19 @@ package com.luanvan.hocphanservice.services;
 
 import com.luanvan.hocphanservice.entity.ChuongTrinhDaoTao;
 import com.luanvan.hocphanservice.entity.HocPhan;
+import com.luanvan.hocphanservice.entity.HocPhanTuChon;
 import com.luanvan.hocphanservice.exception.AppException;
 import com.luanvan.hocphanservice.exception.ErrorCode;
 import com.luanvan.hocphanservice.model.ChuongTrinhDaoTaoDTO;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.Request.CTDTDescriptionRequest;
+import com.luanvan.hocphanservice.model.Request.KeHoachHocTapRequest;
+import com.luanvan.hocphanservice.model.Response.TinChiResponse;
 import com.luanvan.hocphanservice.repository.ChuongTrinhDaoTaoRepository;
 import com.luanvan.hocphanservice.repository.HocPhanRepository;
-import com.luanvan.hocphanservice.repository.httpClient.KeHoachHocTapClient;
 import com.luanvan.hocphanservice.repository.httpClient.NganhClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -25,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChuongTrinhDaoTaoService {
@@ -33,33 +37,8 @@ public class ChuongTrinhDaoTaoService {
     private final ChuongTrinhDaoTaoRepository chuongTrinhDaoTaoRepository;
     private final HocPhanRepository hocPhanRepository;
     private final NganhClient nganhClient;
-    private final KeHoachHocTapClient keHoachHocTapClient;
     private final HocPhanService hocPhanService;
 
-
-    public List<HocPhanDTO> findHocPhanNotInKeHoachHocTap(String maSo, String khoaHoc) {
-        if(maSo.isEmpty()){
-            throw new AppException(ErrorCode.INVALID_REQUEST);
-        }
-        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc)
-                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
-
-//      Lấy mã học phần có trong chương trình đào tạo
-        List<String> maHocPhanInCTDT = chuongTrinhDaoTao.getHocPhanList().stream()
-                .map(HocPhan::getMaHp)
-                .toList();
-//      Lấy mã học phần có trong kế hoạch học tập
-        List<String> maHocPhanInKHHT = keHoachHocTapClient.getHocPhanByMaSo(maSo);
-        if(maHocPhanInKHHT == null || maHocPhanInKHHT.isEmpty()) {
-            return chuongTrinhDaoTao.getHocPhanList().stream()
-                    .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
-                    .collect(Collectors.toList());
-        }
-        List<String> maHocPhanNotInKHHT = maHocPhanInCTDT.stream()
-                .filter(maHocPhan -> !maHocPhanInKHHT.contains(maHocPhan))
-                .toList();
-        return hocPhanService.getDSHocPhanIn(maHocPhanNotInKHHT);
-    }
 
     public ChuongTrinhDaoTaoDTO getCTDTByMaNganh(Long maNganh) {
         if (maNganh == null) {
@@ -70,6 +49,7 @@ public class ChuongTrinhDaoTaoService {
 
         return modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class);
     }
+
 
     public ChuongTrinhDaoTaoDTO create(ChuongTrinhDaoTaoDTO dto){
         if(dto == null){
@@ -96,8 +76,6 @@ public class ChuongTrinhDaoTaoService {
             throw new AppException(ErrorCode.NOTFOUND);
         }
 
-
-
         chuongTrinhDaoTao.setHocPhanList(hocPhanList);
         chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
         return modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class);
@@ -122,7 +100,7 @@ public class ChuongTrinhDaoTaoService {
         if(khoaHoc == null || khoaHoc.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        return chuongTrinhDaoTaoRepository.findById(khoaHoc)
+        return chuongTrinhDaoTaoRepository.findById(khoaHoc.toUpperCase())
                 .map(chuongTrinhDaoTao -> modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class))
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
     }
@@ -130,7 +108,7 @@ public class ChuongTrinhDaoTaoService {
         if(khoaHoc == null || khoaHoc.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc)
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc.toUpperCase())
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
         chuongTrinhDaoTaoRepository.delete(chuongTrinhDaoTao);
     }
@@ -175,5 +153,71 @@ public class ChuongTrinhDaoTaoService {
         }catch(IOException e){
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
+    }
+
+    public List<HocPhanDTO> getHocPhanInCTDTByKhoaHoc(String khoaHoc) {
+        if(khoaHoc == null || khoaHoc.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc.toUpperCase())
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST));
+        return chuongTrinhDaoTao.getHocPhanList().stream().map(
+                hocPhan -> modelMapper.map(hocPhan,HocPhanDTO.class)).toList();
+    }
+
+    public List<HocPhanDTO> getHocPhanNotInCTDT(List<String> hocPhanList, String khoaHoc) {
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc.toUpperCase()).orElseThrow(
+                () -> new AppException(ErrorCode.NOTFOUND)
+        );
+
+//      DS mã học phần trong CTDT
+        List<String> maHocPhanInCTDT = chuongTrinhDaoTao.getHocPhanList().stream()
+                .map(HocPhan::getMaHp)
+                .toList();
+        if(hocPhanList == null || hocPhanList.isEmpty()) {
+            return chuongTrinhDaoTao.getHocPhanList().stream()
+                    .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
+                    .collect(Collectors.toList());
+        }
+        List<String> maHocPhanNotInCTDT = maHocPhanInCTDT.stream().filter(
+                maHocPhan -> !hocPhanList.contains(maHocPhan)).toList()
+        ;
+
+        return hocPhanService.getDSHocPhanIn(maHocPhanNotInCTDT);
+    }
+
+    public TinChiResponse getCountTinChiByCTDT(String khoaHoc, List<KeHoachHocTapRequest> hocPhanList) {
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc).orElseThrow(
+                () -> new AppException(ErrorCode.NOTFOUND)
+        );
+        if(hocPhanList.isEmpty()){
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        TinChiResponse tinChiResponse = new TinChiResponse();
+
+        Long tongSoTinChi = chuongTrinhDaoTaoRepository.tongTinChi(khoaHoc);
+        Long tongSoTinChiTuChon = chuongTrinhDaoTao.getNhomHocPhanTuChon() != null
+                ? chuongTrinhDaoTao.getNhomHocPhanTuChon().stream().mapToLong(HocPhanTuChon::getTinChiYeuCau).sum()
+                : 0L;
+
+        tinChiResponse.setTongSoTinChi(tongSoTinChi + tongSoTinChiTuChon);
+
+        List<String> newHocPhanList = new LinkedList<>();
+        List<String> hocPhanCaiThienList = new LinkedList<>();
+
+        hocPhanList.forEach(dto ->{
+            String maHp = dto.getMaHocPhan();
+            if(dto.isHocPhanCaiThien()){
+                hocPhanCaiThienList.add(maHp);
+            }
+            else{
+                newHocPhanList.add(maHp);
+            }
+        });
+
+        tinChiResponse.setSoTinChiTichLuy(hocPhanRepository.countTinChiIn(newHocPhanList));
+        tinChiResponse.setSoTinChiCaiThien(hocPhanRepository.countTinChiIn(hocPhanCaiThienList));
+        return tinChiResponse;
     }
 }

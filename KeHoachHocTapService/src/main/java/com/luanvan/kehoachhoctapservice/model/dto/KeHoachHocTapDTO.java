@@ -1,4 +1,4 @@
-package com.luanvan.kehoachhoctapservice.model;
+package com.luanvan.kehoachhoctapservice.model.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 public class KeHoachHocTapDTO {
     Long id;
     String maSo;
-    String maHocKy;
+    Long maHocKy;
     String maHocPhan;
     boolean hocPhanCaiThien;
 }

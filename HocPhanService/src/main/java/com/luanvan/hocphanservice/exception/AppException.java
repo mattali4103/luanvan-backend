@@ -1,6 +1,4 @@
 package com.luanvan.hocphanservice.exception;
-
-
 import lombok.Getter;
 import lombok.Setter;
 

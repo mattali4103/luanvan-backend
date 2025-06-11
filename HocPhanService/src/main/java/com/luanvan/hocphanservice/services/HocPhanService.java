@@ -4,27 +4,25 @@ import com.luanvan.hocphanservice.entity.HocPhan;
 import com.luanvan.hocphanservice.exception.AppException;
 import com.luanvan.hocphanservice.exception.ErrorCode;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
+
 import com.luanvan.hocphanservice.repository.HocPhanRepository;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class HocPhanService {
     private final HocPhanRepository hocPhanRepository;
     private final ModelMapper modelMapper;
-
-    public HocPhanService(HocPhanRepository hocPhanRepository, ModelMapper modelMapper) {
-        this.hocPhanRepository = hocPhanRepository;
-        this.modelMapper = modelMapper;
-    }
-
     public List<HocPhanDTO> getDSHocPhanIn(List<String> maHocPhanList) {
         if (maHocPhanList.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
@@ -100,6 +98,20 @@ public class HocPhanService {
         }
     }
 
+//    Thấy học phần nằm trong CTDT dựa theo loại học phần và  khoá học
+    public List<HocPhanDTO> getHocPhanInCTDTByLoaiHp(String loaiHp, String khoaHoc){
+        if(loaiHp == null || khoaHoc == null){
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        List<HocPhan> hocPhanList = hocPhanRepository.findHocPhanByLoaiHpInChuongTrinhDaoTao(loaiHp, khoaHoc);
+
+        if(hocPhanList.isEmpty()){
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+        return hocPhanList.stream().map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class)).toList();
+    }
+
+
 //    Lấy học phần không có trong không có trong danh sách
     public List<HocPhanDTO> getHocPhanNotInList(List<String> maHocPhanList) {
         if(maHocPhanList.isEmpty()){
@@ -123,5 +135,16 @@ public class HocPhanService {
             case FORMULA -> cell.getCellFormula();
             default -> "";
         };
+    }
+
+    public Long getCountByMaHocPhanIn(List<String> maHocPhanList) {
+        validate(Collections.singletonList(maHocPhanList));
+        return hocPhanRepository.countTinChiIn(maHocPhanList);
+    }
+
+    private void validate(List<Object> list){
+        if(list.isEmpty()){
+            throw new AppException(ErrorCode.INVALID_INPUT);
+        }
     }
 }

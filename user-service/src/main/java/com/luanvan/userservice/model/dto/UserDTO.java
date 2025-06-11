@@ -3,6 +3,8 @@ package com.luanvan.userservice.model.dto;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -12,5 +14,5 @@ import lombok.experimental.FieldDefaults;
 public class UserDTO {
     String maSo;
     String password;
-    RoleDTO role;
+    List<RoleDTO> roles;
 }

@@ -20,8 +20,6 @@ public class SinhVien {
     @Id
     String maSo;
     String khoaHoc;
-
-
     @ManyToOne
     @JoinColumn(name = "maLop")
     @JsonManagedReference

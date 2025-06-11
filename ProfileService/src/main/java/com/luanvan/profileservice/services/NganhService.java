@@ -27,9 +27,7 @@ public class NganhService {
         modelMapper.typeMap(NganhDTO.class, Nganh.class)
                 .addMappings(mapper -> mapper.skip(Nganh::setMaNganh))
                 .addMappings(mapper -> mapper.skip(Nganh::setDsLop));
-
         Nganh nganh = modelMapper.map(nganhDTO, Nganh.class);
-
         Khoa khoa = khoaRepository.findById(nganhDTO.getKhoa().getMaKhoa())
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
         nganh.setKhoa(khoa);

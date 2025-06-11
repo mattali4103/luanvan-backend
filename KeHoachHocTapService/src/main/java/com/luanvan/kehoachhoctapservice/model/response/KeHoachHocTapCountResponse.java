@@ -10,6 +10,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class KeHoachHocTapCountResponse {
-    Long soHocPhanDangKy;
-    Long soHocPhanCaiThien;
+//    Long soTinChiDangKy;
+    Long soTinChiCaiThien;
 }

@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,9 +20,10 @@ public class CreateSinhVienRequest {
     String password;
     String hoTen;
     String email;
+    String maLop;
     LocalDate ngaySinh;
     boolean gioiTinh;
     String khoaHoc;
-    Role role;
+    List<Role> roles;
     Long maNganh;
 }

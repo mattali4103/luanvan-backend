@@ -18,6 +18,16 @@ public class HocPhanController {
         this.hocPhanService = hocPhanService;
     }
 
+
+
+
+    @PostMapping("/sinhvien/hoc_phan_in_khht")
+    List<HocPhanDTO> getHocPhanIn(@RequestBody List<String> hocPhanList) {
+        return hocPhanService.getDSHocPhanIn(hocPhanList);
+    }
+
+
+
     //    API doc file excel
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
     ApiResponse<Void> saveFileData(@RequestParam("file") MultipartFile file) {
@@ -27,7 +37,6 @@ public class HocPhanController {
                 .message("success")
                 .build();
     }
-
 
     @GetMapping("/id/{maHp}")
     public ApiResponse<HocPhanDTO> getHocPhanById(@PathVariable String maHp) {
@@ -55,7 +64,6 @@ public class HocPhanController {
                 .data(hocPhanService.createDSHocPhan(DSHocPhanDTO))
                 .build();
     }
-
     @GetMapping("/list")
     public ApiResponse<List<HocPhanDTO>> getDsHocPhan() {
         return ApiResponse.<List<HocPhanDTO>>builder()
@@ -63,5 +71,11 @@ public class HocPhanController {
                 .message("success")
                 .data(hocPhanService.getDsHocPhan())
                 .build();
+    }
+
+//    API for Service
+    @PostMapping("/count/tin_chi")
+    public Long countTinChiIn(@RequestBody List<String> maHocPhanList) {
+        return hocPhanService.getCountByMaHocPhanIn(maHocPhanList);
     }
 }
