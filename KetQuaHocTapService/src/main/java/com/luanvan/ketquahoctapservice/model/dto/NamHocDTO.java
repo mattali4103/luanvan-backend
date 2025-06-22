@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NamHocDTO {
-    Long maNamHoc;
+    Long id;
     String namBatDau;
     String namKetThuc;
 

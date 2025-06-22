@@ -20,10 +20,10 @@ public class User {
     String maSo;
     String password;
 
-    private String HoTen;
-    private String Email;
-    private LocalDate NgaySinh;
-    private boolean GioiTinh;
+    private String hoTen;
+    private String email;
+    private LocalDate ngaySinh;
+    private boolean gioiTinh;
 
     @ManyToMany
     Set<Role> roles;

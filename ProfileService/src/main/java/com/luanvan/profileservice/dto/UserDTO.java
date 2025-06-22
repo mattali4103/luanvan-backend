@@ -1,25 +1,21 @@
-package com.luanvan.profileservice.dto.response;
+package com.luanvan.profileservice.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class ProfileResponse {
+public class UserDTO {
     String maSo;
-    String khoaHoc;
-    String tenNganh;
+    String password;
     String hoTen;
+    String email;
     LocalDate ngaySinh;
     boolean gioiTinh;
-    String maLop;
-    Long maSoThue;
-    Long soTk;
-    Long maKhoa;
 }

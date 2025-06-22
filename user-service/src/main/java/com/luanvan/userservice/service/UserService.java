@@ -6,11 +6,11 @@ import com.luanvan.userservice.entity.User;
 import com.luanvan.userservice.exception.AppException;
 import com.luanvan.userservice.exception.ErrorCode;
 import com.luanvan.userservice.model.Request.CreateSinhVienRequest;
+import com.luanvan.userservice.model.dto.RoleDTO;
 import com.luanvan.userservice.model.dto.UserDTO;
 import com.luanvan.userservice.repository.RoleRepository;
 import com.luanvan.userservice.repository.UserRepository;
 import com.luanvan.userservice.repository.httpClient.ProfileClient;
-import com.luanvan.userservice.utils.SecurityUltils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -60,7 +60,9 @@ public class UserService {
         var createSinhVienRequest = modelMapper.map(request, CreateSinhVienRequest.class);
         profileClient.createSinhVien(createSinhVienRequest);
         userRepository.save(user);
-        return modelMapper.map(user, UserDTO.class);
+        UserDTO userDTO = modelMapper.map(user, UserDTO.class);
+        userDTO.setRoles(user.getRoles().stream().map(role -> modelMapper.map(role, RoleDTO.class)).toList());
+        return userDTO;
     }
 
     public UserDTO getUserByMaSo(String maSo) {
@@ -69,6 +71,11 @@ public class UserService {
         }
         User user = userRepository.findById(maSo)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
-        return modelMapper.map(user, UserDTO.class);
+        return UserDTO.builder()
+                .maSo(maSo)
+                .hoTen(user.getHoTen())
+                .gioiTinh(user.isGioiTinh())
+                .ngaySinh(user.getNgaySinh())
+                .build();
     }
 }

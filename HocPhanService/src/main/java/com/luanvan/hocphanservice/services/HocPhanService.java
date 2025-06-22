@@ -7,17 +7,20 @@ import com.luanvan.hocphanservice.model.HocPhanDTO;
 
 import com.luanvan.hocphanservice.repository.HocPhanRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class HocPhanService {
@@ -32,7 +35,6 @@ public class HocPhanService {
                 .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
                 .collect(Collectors.toList());
     }
-
 
     public List<HocPhanDTO> getDsHocPhan() {
         List<HocPhan> hocPhanList = hocPhanRepository.findAll();
@@ -104,15 +106,15 @@ public class HocPhanService {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
         List<HocPhan> hocPhanList = hocPhanRepository.findHocPhanByLoaiHpInChuongTrinhDaoTao(loaiHp, khoaHoc);
-
         if(hocPhanList.isEmpty()){
-            throw new AppException(ErrorCode.NOTFOUND);
+            return new ArrayList<>();
         }
         return hocPhanList.stream().map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class)).toList();
     }
 
 
 //    Lấy học phần không có trong không có trong danh sách
+    @SuppressWarnings("unused")
     public List<HocPhanDTO> getHocPhanNotInList(List<String> maHocPhanList) {
         if(maHocPhanList.isEmpty()){
             List<HocPhan> hocPhanList = hocPhanRepository.findAll();

@@ -1,7 +1,7 @@
 package com.luanvan.userservice.controller;
-
 import com.luanvan.userservice.model.Request.CreateSinhVienRequest;
 import com.luanvan.userservice.model.Response.ApiResponse;
+import com.luanvan.userservice.model.dto.UserDTO;
 import com.luanvan.userservice.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +14,9 @@ public class UserController {
         this.userService = userService;
     }
 
-    @RequestMapping("/id/{maSo}")
-    public ApiResponse<Object> getUserByMaSo(@PathVariable String maSo){
-        return ApiResponse.builder()
+    @RequestMapping("/info/{maSo}")
+    public ApiResponse<UserDTO> getUserByMaSo(@PathVariable String maSo){
+        return ApiResponse.<UserDTO>builder()
                 .code(200)
                 .message("OK")
                 .data(userService.getUserByMaSo(maSo))
@@ -30,5 +30,10 @@ public class UserController {
                 .message("OK")
                 .data(userService.create(request))
                 .build();
+    }
+// PRIVATE API
+    @RequestMapping("/id/{maSo}")
+    public UserDTO getUserInfoByMaSo(@PathVariable String maSo){
+        return userService.getUserByMaSo(maSo);
     }
 }

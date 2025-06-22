@@ -3,6 +3,7 @@ package com.luanvan.userservice.model.dto;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @AllArgsConstructor
@@ -14,5 +15,9 @@ import java.util.List;
 public class UserDTO {
     String maSo;
     String password;
+    String hoTen;
+    String email;
+    LocalDate ngaySinh;
+    boolean gioiTinh;
     List<RoleDTO> roles;
 }

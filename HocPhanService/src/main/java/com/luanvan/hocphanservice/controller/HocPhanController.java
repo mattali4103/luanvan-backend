@@ -18,15 +18,10 @@ public class HocPhanController {
         this.hocPhanService = hocPhanService;
     }
 
-
-
-
     @PostMapping("/sinhvien/hoc_phan_in_khht")
     List<HocPhanDTO> getHocPhanIn(@RequestBody List<String> hocPhanList) {
         return hocPhanService.getDSHocPhanIn(hocPhanList);
     }
-
-
 
     //    API doc file excel
     @PostMapping(value = "/upload", consumes = "multipart/form-data")

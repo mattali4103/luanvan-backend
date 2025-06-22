@@ -5,14 +5,12 @@ import com.luanvan.hocphanservice.exception.AppException;
 import com.luanvan.hocphanservice.exception.ErrorCode;
 import com.luanvan.hocphanservice.model.HocKyDTO;
 import com.luanvan.hocphanservice.model.Request.HocKyRequest;
+import com.luanvan.hocphanservice.model.Response.HocKyResponse;
 import com.luanvan.hocphanservice.repository.HocKyRepository;
-import com.luanvan.hocphanservice.repository.NamHocRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,17 +19,15 @@ public class HocKyService {
     ModelMapper modelMapper = new ModelMapper();
 
 
-    public List<HocKyDTO> findHocKyIn(List<Long> hocPhanList) {
+    public List<HocKyResponse> findHocKyIn(List<Long> hocPhanList) {
         if(hocPhanList.isEmpty()){
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
         List<HocKy> hocKyList = hocKyRepository.findByMaHocKyIn(hocPhanList);
 
-        modelMapper.typeMap(HocKy.class, HocKyDTO.class).addMappings(mapper -> {
-            mapper.map(HocKy::getNamHoc, HocKyDTO::setNamHocDTO);
-        });
+        modelMapper.typeMap(HocKy.class, HocKyDTO.class).addMappings(mapper -> mapper.map(HocKy::getNamHoc, HocKyDTO::setNamHocDTO));
 
-        return hocKyList.stream().map(hocKy -> modelMapper.map(hocKy, HocKyDTO.class)).toList();
+        return hocKyList.stream().map(hocKy -> modelMapper.map(hocKy, HocKyResponse.class)).toList();
     }
 
     public HocKyDTO create(HocKyRequest hocKyRequest) {
@@ -48,9 +44,7 @@ public class HocKyService {
         HocKy hocKy = hocKyRepository.findById(maHocKy)
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
 
-        modelMapper.typeMap(HocKy.class, HocKyDTO.class).addMappings(mapper -> {
-            mapper.map(HocKy::getNamHoc, HocKyDTO::setNamHocDTO);
-        });
+        modelMapper.typeMap(HocKy.class, HocKyDTO.class).addMappings(mapper -> mapper.map(HocKy::getNamHoc, HocKyDTO::setNamHocDTO));
         return modelMapper.map(hocKy, HocKyDTO.class);
     }
 

@@ -14,5 +14,5 @@ public class HocKyDTO {
     String tenHocKy;
     LocalDate ngayBatDau;
     LocalDate ngayKetThuc;
-    NamHocDTO namHocDTO;
+    NamHocDTO namHoc;
 }

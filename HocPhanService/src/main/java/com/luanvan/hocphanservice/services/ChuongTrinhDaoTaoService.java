@@ -45,18 +45,18 @@ public class ChuongTrinhDaoTaoService {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
         ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findByMaNganh(maNganh)
-                .orElseThrow(() -> new AppException("Không tìm thấy ngành trong csdl",ErrorCode.NOTFOUND));
+                .orElseThrow(() -> new AppException("Không tìm thấy ngành trong csdl", ErrorCode.NOTFOUND));
 
         return modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class);
     }
 
 
-    public ChuongTrinhDaoTaoDTO create(ChuongTrinhDaoTaoDTO dto){
-        if(dto == null){
+    public ChuongTrinhDaoTaoDTO create(ChuongTrinhDaoTaoDTO dto) {
+        if (dto == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
 
-        if(!nganhClient.existByMaNganh(dto.getMaNganh())){
+        if (!nganhClient.existByMaNganh(dto.getMaNganh())) {
             throw new AppException(ErrorCode.NOTFOUND);
         }
 
@@ -65,14 +65,13 @@ public class ChuongTrinhDaoTaoService {
                 .addMappings(mapper -> mapper.skip(ChuongTrinhDaoTao::setHocPhanList));
         ChuongTrinhDaoTao chuongTrinhDaoTao = modelMapper.map(dto, ChuongTrinhDaoTao.class);
 
-
         List<String> maHocPhanList = dto.getHocPhanList().stream()
                 .map(HocPhanDTO::getMaHp)
                 .toList();
 
         List<HocPhan> hocPhanList = hocPhanRepository.findByMaHpIn(maHocPhanList);
 
-        if(hocPhanList.isEmpty()){
+        if (hocPhanList.isEmpty()) {
             throw new AppException(ErrorCode.NOTFOUND);
         }
 
@@ -80,7 +79,6 @@ public class ChuongTrinhDaoTaoService {
         chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
         return modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class);
     }
-
 
 
     public ChuongTrinhDaoTaoDTO update(ChuongTrinhDaoTaoDTO dto) {
@@ -96,16 +94,18 @@ public class ChuongTrinhDaoTaoService {
         chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
         return updateMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class);
     }
+
     public ChuongTrinhDaoTaoDTO getByKhoaHoc(String khoaHoc) {
-        if(khoaHoc == null || khoaHoc.isEmpty()) {
+        if (khoaHoc == null || khoaHoc.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
         return chuongTrinhDaoTaoRepository.findById(khoaHoc.toUpperCase())
                 .map(chuongTrinhDaoTao -> modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class))
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
     }
+
     public void deleteById(String khoaHoc) {
-        if(khoaHoc == null || khoaHoc.isEmpty()) {
+        if (khoaHoc == null || khoaHoc.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
         ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc.toUpperCase())
@@ -116,53 +116,78 @@ public class ChuongTrinhDaoTaoService {
 
     @Transactional
     public void createDSHocPhanFromFile(CTDTDescriptionRequest request, MultipartFile file) {
-        if(request == null || file == null || file.isEmpty() ){
+        if (request == null || file == null || file.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
 
-        if(request.getMaNganh() == null || request.getKhoaHoc() == null){
+        if (request.getMaNganh() == null || request.getKhoaHoc() == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
 
         boolean nganhExists = nganhClient.existByMaNganh(request.getMaNganh());
-        if(!nganhExists){
+        if (!nganhExists) {
             throw new AppException(ErrorCode.NOTFOUND);
         }
 
-        try{
+        try {
             Workbook workbook = WorkbookFactory.create(file.getInputStream());
             Sheet sheet = workbook.getSheetAt(0);
             List<String> maHocPhanList = new LinkedList<>();
-            sheet.forEach(row -> {
-                if(row.getCell(0) == null || row.getCell(0).getStringCellValue().isEmpty()) {
-                    return;
+
+            // Skip the header row if it exists (start from row 1)
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                var row = sheet.getRow(i);
+                if (row == null) continue;
+
+                var cell = row.getCell(0);
+                if (cell != null && !cell.getStringCellValue().trim().isEmpty()) {
+                    String maHocPhan = cell.getStringCellValue().trim();
+                    log.info("Reading course code: {}", maHocPhan);
+                    maHocPhanList.add(maHocPhan);
                 }
-                String maHocPhan = row.getCell(0).getStringCellValue();
-                maHocPhanList.add(maHocPhan);
-            });
+            }
+
+            log.info("Total course codes found: {}", maHocPhanList.size());
+
+            if (maHocPhanList.isEmpty()) {
+                throw new AppException("No course codes found in the file", ErrorCode.INVALID_INPUT);
+            }
+
             List<HocPhan> chuongTrinhList = hocPhanRepository.findByMaHpIn(maHocPhanList);
-            if(chuongTrinhList.isEmpty()){
+            log.info("Found {} courses in database out of {} requested", chuongTrinhList.size(), maHocPhanList.size());
+
+            log.info("Course not found in database: {}",
+                    maHocPhanList.stream()
+                            .filter(maHocPhan -> chuongTrinhList.stream()
+                                    .noneMatch(hocPhan -> hocPhan.getMaHp().equals(maHocPhan)))
+                            .toList());
+
+            if (chuongTrinhList.isEmpty()) {
                 throw new AppException(ErrorCode.NOTFOUND);
             }
+
             modelMapper.typeMap(CTDTDescriptionRequest.class, ChuongTrinhDaoTao.class)
-                    .addMappings(mapper
-                            -> mapper.skip(ChuongTrinhDaoTao::setHocPhanList));
+                    .addMappings(mapper -> mapper.skip(ChuongTrinhDaoTao::setHocPhanList));
+
             ChuongTrinhDaoTao chuongTrinhDaoTao = modelMapper.map(request, ChuongTrinhDaoTao.class);
             chuongTrinhDaoTao.setHocPhanList(chuongTrinhList);
             chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
-        }catch(IOException e){
+
+            log.info("Successfully created curriculum with {} courses", chuongTrinhList.size());
+        } catch (IOException e) {
+            log.error("Error reading Excel file: {}", e.getMessage());
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
     }
 
     public List<HocPhanDTO> getHocPhanInCTDTByKhoaHoc(String khoaHoc) {
-        if(khoaHoc == null || khoaHoc.isEmpty()) {
+        if (khoaHoc == null || khoaHoc.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
         ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc.toUpperCase())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST));
         return chuongTrinhDaoTao.getHocPhanList().stream().map(
-                hocPhan -> modelMapper.map(hocPhan,HocPhanDTO.class)).toList();
+                hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class)).toList();
     }
 
     public List<HocPhanDTO> getHocPhanNotInCTDT(List<String> hocPhanList, String khoaHoc) {
@@ -174,14 +199,13 @@ public class ChuongTrinhDaoTaoService {
         List<String> maHocPhanInCTDT = chuongTrinhDaoTao.getHocPhanList().stream()
                 .map(HocPhan::getMaHp)
                 .toList();
-        if(hocPhanList == null || hocPhanList.isEmpty()) {
+        if (hocPhanList == null || hocPhanList.isEmpty()) {
             return chuongTrinhDaoTao.getHocPhanList().stream()
                     .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
                     .collect(Collectors.toList());
         }
         List<String> maHocPhanNotInCTDT = maHocPhanInCTDT.stream().filter(
-                maHocPhan -> !hocPhanList.contains(maHocPhan)).toList()
-        ;
+                maHocPhan -> !hocPhanList.contains(maHocPhan)).toList();
 
         return hocPhanService.getDSHocPhanIn(maHocPhanNotInCTDT);
     }
@@ -190,7 +214,7 @@ public class ChuongTrinhDaoTaoService {
         ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc).orElseThrow(
                 () -> new AppException(ErrorCode.NOTFOUND)
         );
-        if(hocPhanList.isEmpty()){
+        if (hocPhanList.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
 
@@ -206,12 +230,11 @@ public class ChuongTrinhDaoTaoService {
         List<String> newHocPhanList = new LinkedList<>();
         List<String> hocPhanCaiThienList = new LinkedList<>();
 
-        hocPhanList.forEach(dto ->{
+        hocPhanList.forEach(dto -> {
             String maHp = dto.getMaHocPhan();
-            if(dto.isHocPhanCaiThien()){
+            if (dto.isHocPhanCaiThien()) {
                 hocPhanCaiThienList.add(maHp);
-            }
-            else{
+            } else {
                 newHocPhanList.add(maHp);
             }
         });

@@ -1,5 +1,6 @@
 package com.luanvan.kehoachhoctapservice.model.response;
 
+import com.luanvan.kehoachhoctapservice.model.dto.HocKyDTO;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,7 +10,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class KeHoachHocTapCountResponse {
-//    Long soTinChiDangKy;
+public class ThongKeTinChi {
+    HocKyDTO hocKy;
+    Long soTinChiDangKy;
     Long soTinChiCaiThien;
 }

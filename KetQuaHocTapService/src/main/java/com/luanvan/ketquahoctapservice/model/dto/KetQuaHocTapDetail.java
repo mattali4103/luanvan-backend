@@ -11,12 +11,10 @@ import lombok.experimental.FieldDefaults;
 public class KetQuaHocTapDetail {
     Long id;
     String diemChu;
-    Float diemSo;
-    String dieuKien;
-    HocPhanDTO hocPhanDTO;
-    HocKyDTO hocKyDTO;
-    NamHocDTO namHocDTO;
+    Double diemSo;
+    boolean dieuKien;
     Long maNhomHP;
-    int soTinChi;
-
+    Long soTinChi;
+    HocPhanDTO hocPhan;
+    HocKyDTO hocKy;
 }

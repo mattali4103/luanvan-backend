@@ -1,6 +1,7 @@
 package com.luanvan.profileservice.services;
 
 import com.luanvan.profileservice.dto.SinhVienDTO;
+import com.luanvan.profileservice.dto.UserDTO;
 import com.luanvan.profileservice.dto.request.CreateSinhVienRequest;
 import com.luanvan.profileservice.dto.response.ProfileResponse;
 import com.luanvan.profileservice.entity.Lop;
@@ -9,12 +10,14 @@ import com.luanvan.profileservice.exception.AppException;
 import com.luanvan.profileservice.exception.ErrorCode;
 import com.luanvan.profileservice.repository.LopRepository;
 import com.luanvan.profileservice.repository.SinhVienRepository;
+import com.luanvan.profileservice.repository.httpClient.UserClient;
 import lombok.RequiredArgsConstructor;
-import org.bouncycastle.math.raw.Mod;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SinhVienService {
@@ -22,7 +25,7 @@ public class SinhVienService {
     private final ModelMapper modelMapper;
     private final LopRepository lopRepository;
     private final ModelMapper sinhVienToDTOMapper;
-
+    private final UserClient userClient;
     public void deleteSinhVien(String maSo) {
         if (maSo == null || maSo.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
@@ -72,7 +75,11 @@ public class SinhVienService {
     public ProfileResponse getMyInfo(String maSo){
         SinhVien sinhVien = sinhVienRepository.findById(maSo)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+        UserDTO userDTO = userClient.getUserById(sinhVien.getMaSo());
         return ProfileResponse.builder()
+                .hoTen(userDTO.getHoTen())
+                .gioiTinh(userDTO.isGioiTinh())
+                .ngaySinh(userDTO.getNgaySinh())
                 .maSo(sinhVien.getMaSo())
                 .maLop(sinhVien.getLop().getMaLop())
                 .khoaHoc(sinhVien.getKhoaHoc())

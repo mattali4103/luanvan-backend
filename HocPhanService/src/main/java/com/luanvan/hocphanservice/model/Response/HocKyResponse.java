@@ -1,17 +1,16 @@
-package com.luanvan.kehoachhoctapservice.model.dto;
+package com.luanvan.hocphanservice.model.Response;
 
+import com.luanvan.hocphanservice.model.NamHocDTO;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class HocKyDTO {
+public class HocKyResponse {
     Long maHocKy;
     String tenHocKy;
     LocalDate ngayBatDau;

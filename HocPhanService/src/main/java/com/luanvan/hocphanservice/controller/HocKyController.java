@@ -4,6 +4,7 @@ package com.luanvan.hocphanservice.controller;
 import com.luanvan.hocphanservice.model.HocKyDTO;
 import com.luanvan.hocphanservice.model.Request.HocKyRequest;
 import com.luanvan.hocphanservice.model.Response.ApiResponse;
+import com.luanvan.hocphanservice.model.Response.HocKyResponse;
 import com.luanvan.hocphanservice.services.HocKyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class HocKyController {
     }
 
     @PostMapping("/hoc_ky_in/list")
-    public List<HocKyDTO> getHocKyIn(@RequestBody List<Long> hocKyList){
+    public List<HocKyResponse> getHocKyIn(@RequestBody List<Long> hocKyList){
         return hocKyService.findHocKyIn(hocKyList);
     }
 

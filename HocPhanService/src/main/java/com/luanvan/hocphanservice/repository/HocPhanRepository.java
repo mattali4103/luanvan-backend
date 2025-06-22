@@ -20,11 +20,13 @@ public interface HocPhanRepository extends JpaRepository<HocPhan, String> {
     @Query("SELECT COALESCE(SUM(hp.tinChi), 0) FROM HocPhan hp WHERE hp.maHp IN :maHocPhanList")
     Long countTinChiIn(@Param("maHocPhanList") List<String> maHocPhanList);
 
+    @SuppressWarnings("unused")
     @Query("SELECT hp from HocPhan hp JOIN hp.chuongTrinhDaoTaoList")
     List<HocPhan> findHocPhanInChuongTrinhDaoTao();
 
     @Query("SELECT hp FROM HocPhan hp JOIN hp.chuongTrinhDaoTaoList ctdt WHERE hp.loaiHp = :loaiHp AND ctdt.khoaHoc = :khoaHoc")
     List<HocPhan> findHocPhanByLoaiHpInChuongTrinhDaoTao(@Param("loaiHp") String loaiHp, @Param("khoaHoc") String khoaHoc);
+
 
 }
 
