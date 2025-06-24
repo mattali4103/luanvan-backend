@@ -16,7 +16,7 @@ public enum ErrorCode {
     HOCPHAN_NOTFOUND(4009, "Không tìm thấy học phần"),
     KHHT_FOUND_BUT_HOCPHAN_NOTFOUND(4011, "Kế hoạch học tập đã tồn tại nhưng học phần không tồn tại trong hệ thống"),
     KHHT_EXISTED_NOTFOUND(4012, "Không tìm thấy kế hoạch học tập đã yêu cầu"),
-    ;
+    LIST_EMPTY(4021,"Danh sách rỗng" ), FILE_PARSING_ERROR(4022, "Lỗi khi đọc file Excel"),;
     private final int code;
     private final String message;
 

@@ -9,10 +9,7 @@ import com.luanvan.kehoachhoctapservice.model.response.TinChiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,6 +30,12 @@ public interface HocPhanClient {
     TinChiResponse getCountTinChiByCTDT(@PathVariable String khoaHoc, @RequestBody List<KeHoachHocTapRequest> hocPhanList);
     @PostMapping("/ctdt/hocphan/by_loai_hp")
     List<HocPhanDTO> getHocPhanInCTDTByLoaiHp(@RequestBody HocPhanRequest request);
+    @GetMapping("/hocky/find_by_name")
+    HocKyDTO findHocKyByName(
+            @RequestParam("namBatDau") String namBatDau,
+            @RequestParam("namKetThuc") String namKetThuc,
+            @RequestParam("tenHocKy") String tenHocKy
+    );
 }
 
 

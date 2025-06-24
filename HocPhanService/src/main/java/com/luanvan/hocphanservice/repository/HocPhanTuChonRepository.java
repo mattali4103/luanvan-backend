@@ -19,4 +19,8 @@ public interface HocPhanTuChonRepository extends JpaRepository<HocPhanTuChon, Lo
     Optional<HocPhanTuChon> findByTenNhomLikeAndChuongTrinhDaoTao_KhoaHoc(
             @Param("tenNhom") String tenNhom,
             @Param("khoaHoc") String khoaHoc);
+    @Query("SELECT hptc FROM HocPhanTuChon hptc " +
+            "WHERE hptc.chuongTrinhDaoTao.khoaHoc = :khoaHoc " +
+            "AND hptc.chuongTrinhDaoTao.maNganh = :maNganh")
+    List<HocPhanTuChon> findAllCTDTByKhoaHocAndMaNganh(String khoaHoc, Long maNganh);
 }

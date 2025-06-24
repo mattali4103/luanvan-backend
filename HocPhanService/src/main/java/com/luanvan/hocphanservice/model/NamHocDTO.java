@@ -3,6 +3,8 @@ package com.luanvan.hocphanservice.model;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @Getter
 @Setter

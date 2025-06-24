@@ -60,6 +60,7 @@ public class KeHoachHocTapController {
                 .data(keHoachHocTapService.countKeHoachHocTapsByMaSo(maSo,khoaHoc))
                 .build();
     }
+
     @GetMapping("/sinhvien/detail/page")
     public ApiResponse<PageResponse<KeHoachHocTapDetail>> getKHHTDetailByMaSo(
             @RequestParam(value = "maSo") String maSo,
@@ -145,5 +146,6 @@ public class KeHoachHocTapController {
                 .message("Xóa kế hoạch học tập thành công")
                 .build();
     }
+
 
 }

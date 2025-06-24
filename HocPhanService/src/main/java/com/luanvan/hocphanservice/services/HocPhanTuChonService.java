@@ -32,12 +32,12 @@ public class HocPhanTuChonService {
         return modelMapper.map(hptc, HocPhanTuChonDTO.class);
     }
 
-    public HocPhanTuChonDTO create(HocPhanTuChonDTO dto){
+    public HocPhanTuChonDTO create(HocPhanTuChonDTO dto) {
         validate(dto);
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.typeMap(HocPhanTuChonDTO.class, HocPhanTuChon.class).addMappings(config -> config.skip(HocPhanTuChon::setHocPhanTuChonList));
         HocPhanTuChon hocPhanTuChon = modelMapper.map(dto, HocPhanTuChon.class);
-        if(dto.getHocPhanTuChonList() != null && !dto.getHocPhanTuChonList().isEmpty()){
+        if (dto.getHocPhanTuChonList() != null && !dto.getHocPhanTuChonList().isEmpty()) {
             List<HocPhan> hocPhanList = new LinkedList<>();
             dto.getHocPhanTuChonList().forEach(hocPhanDTO -> {
                 HocPhan hocPhan = hocPhanRepository.findById(hocPhanDTO.getMaHp()).orElse(new HocPhan());
@@ -51,7 +51,7 @@ public class HocPhanTuChonService {
         return modelMapper.map(hocPhanTuChonRepository.save(hocPhanTuChon), HocPhanTuChonDTO.class);
     }
 
-    public HocPhanTuChonDTO addHocPhanTuChon(Long id, List<HocPhanDTO> dtoList){
+    public HocPhanTuChonDTO addHocPhanTuChon(Long id, List<HocPhanDTO> dtoList) {
         validate(Collections.singletonList(dtoList));
         HocPhanTuChon hocPhanTuChon = hocPhanTuChonRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.INVALID_REQUEST)
@@ -67,8 +67,7 @@ public class HocPhanTuChonService {
     }
 
 
-
-    public HocPhanTuChonDTO getHocPhanTuChon(Long id){
+    public HocPhanTuChonDTO getHocPhanTuChon(Long id) {
         validate(id);
         HocPhanTuChon hocPhanTuChon = hocPhanTuChonRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.INVALID_REQUEST)
@@ -76,25 +75,40 @@ public class HocPhanTuChonService {
         return modelMapper.map(hocPhanTuChon, HocPhanTuChonDTO.class);
     }
 
-    public void deleteHocPhanTuChon(Long id){
+    public List<HocPhanTuChonDTO> getAllByKhoaHocAndMaNganh(String khoaHoc, Long maNganh) {
+        validate(khoaHoc);
+        validate(maNganh);
+        List<HocPhanTuChon> hocPhanTuChonList = hocPhanTuChonRepository.findAllCTDTByKhoaHocAndMaNganh(khoaHoc, maNganh);
+        if (hocPhanTuChonList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return hocPhanTuChonList.stream()
+                .map(hocPhanTuChon -> modelMapper.map(hocPhanTuChon, HocPhanTuChonDTO.class))
+                .toList();
+    }
+
+    public void deleteHocPhanTuChon(Long id) {
         validate(id);
         hocPhanTuChonRepository.deleteById(id);
     }
 
-    private void validate(Long id){
-        if(id == null){
+    private void validate(Long id) {
+        if (id == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
     }
-    private void validate(Object object){
-        if(object == null){
+
+    private void validate(Object object) {
+        if (object == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
     }
-    private void validate(List<Object> list){
-        if(list == null || list.isEmpty()){
+
+    private void validate(List<Object> list) {
+        if (list == null || list.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
     }
+
 
 }

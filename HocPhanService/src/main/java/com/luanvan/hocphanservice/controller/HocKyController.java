@@ -29,6 +29,8 @@ public class HocKyController {
     }
 
 
+
+
     @GetMapping("/id/{id}")
     public ResponseEntity<HocKyDTO> getHocKyById(@PathVariable("id") Long id) {
         HocKyDTO hocKyDTO = hocKyService.getHocKyById(id);
@@ -49,5 +51,14 @@ public class HocKyController {
                 .message("OK")
                 .data(list)
                 .build();
+    }
+//    Private
+    @GetMapping("/find_by_name")
+    public HocKyDTO findHocKyByName(
+            @RequestParam("namBatDau") String namBatDau,
+            @RequestParam("namKetThuc") String namKetThuc,
+            @RequestParam("tenHocKy") String tenHocKy
+    ) {
+        return hocKyService.findHocKyByName(namBatDau, namKetThuc, tenHocKy);
     }
 }

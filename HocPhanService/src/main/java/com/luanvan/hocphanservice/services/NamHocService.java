@@ -19,6 +19,12 @@ public class NamHocService {
     private final NamHocRepository namHocRepository;
     ModelMapper modelMapper = new ModelMapper();
 
+    public NamHocDTO findByNamBatDauAndNamKetThuc(String namBatDau, String namKetThuc) {
+        NamHoc namHoc = namHocRepository.findByNamBatDauAndNamBatDau(namBatDau, namKetThuc)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        return modelMapper.map(namHoc, NamHocDTO.class);
+    }
+
     public NamHocDTO create(NamHocDTO namHocDTO) {
         namHocRepository.findByNamBatDau(namHocDTO.getNamBatDau())
                 .ifPresent(namHoc -> {

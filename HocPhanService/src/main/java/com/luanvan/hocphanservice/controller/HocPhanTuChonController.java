@@ -61,4 +61,15 @@ public class HocPhanTuChonController {
                 .data(hocPhanTuChonService.getHocPhanTuChonByNameAndKhoaHoc(request.getLoaiHp(), request.getKhoaHoc()))
                 .build();
     }
+    @GetMapping("/list")
+    public ApiResponse<List<HocPhanTuChonDTO>> getAllByKhoaHoc(
+            @RequestParam("khoaHoc") String khoaHoc,
+            @RequestParam("maNganh") Long maNganh
+    ) {
+        return ApiResponse.<List<HocPhanTuChonDTO>>builder()
+                .code(200)
+                .message("OK")
+                .data(hocPhanTuChonService.getAllByKhoaHocAndMaNganh(khoaHoc, maNganh))
+                .build();
+    }
 }

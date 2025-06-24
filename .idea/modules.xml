@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/HocPhanService/HocPhanService.iml" filepath="$PROJECT_DIR$/HocPhanService/HocPhanService.iml" />
+      <module fileurl="file://$PROJECT_DIR$/KeHoachHocTapService/KeHoachHocTapService.iml" filepath="$PROJECT_DIR$/KeHoachHocTapService/KeHoachHocTapService.iml" />
+      <module fileurl="file://$PROJECT_DIR$/KetQuaHocTapService/KetQuaHocTapService.iml" filepath="$PROJECT_DIR$/KetQuaHocTapService/KetQuaHocTapService.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/LuanVan.iml" filepath="$PROJECT_DIR$/.idea/LuanVan.iml" />
     </modules>
   </component>

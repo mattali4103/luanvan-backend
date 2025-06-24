@@ -38,6 +38,14 @@ public class NamHocController {
                 .data(namHocService.getAllNamHoc())
                 .build();
     }
+    @PostMapping("/find")
+    public ApiResponse<NamHocDTO> findByNamBatDauAndNamKetThuc(@RequestBody NamHocDTO namHocDTO) {
+        return ApiResponse.<NamHocDTO>builder()
+                .code(200)
+                .message("success")
+                .data(namHocService.findByNamBatDauAndNamKetThuc(namHocDTO.getNamBatDau(), namHocDTO.getNamKetThuc()))
+                .build();
+    }
 
     @PostMapping("/create")
     public ApiResponse<NamHocDTO> createNamHoc(@RequestBody NamHocDTO namHocDTO) {

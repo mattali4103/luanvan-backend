@@ -1,18 +1,17 @@
-package com.luanvan.hocphanservice.model.Request;
-
+package com.luanvan.kehoachhoctapservice.model.dto;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-
 @Getter
 @Setter
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class KeHoachHocTapRequest {
-    String maSo;
-    String maHocPhan;
+@Data
+public class KeHoachHocTapMauDTO{
+    Long id;
+    String khoaHoc;
+    Long maNganh;
     Long maHocKy;
-    boolean hocPhanCaiThien;
+    String maHocPhan;
 }

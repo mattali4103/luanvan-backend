@@ -18,6 +18,13 @@ public class HocKyService {
     private final HocKyRepository hocKyRepository;
     ModelMapper modelMapper = new ModelMapper();
 
+    public HocKyDTO findHocKyByName(String namBatDau, String namKetThuc, String tenHocKy) {
+        HocKy hocKy = hocKyRepository.findNamHocByName(namBatDau, namKetThuc, tenHocKy);
+        if (hocKy == null) {
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+        return modelMapper.map(hocKy, HocKyDTO.class);
+    }
 
     public List<HocKyResponse> findHocKyIn(List<Long> hocPhanList) {
         if(hocPhanList.isEmpty()){

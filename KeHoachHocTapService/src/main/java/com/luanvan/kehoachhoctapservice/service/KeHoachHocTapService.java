@@ -19,6 +19,7 @@ import com.luanvan.kehoachhoctapservice.repository.httpClient.HocPhanClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -215,12 +216,8 @@ public class KeHoachHocTapService {
             throw new AppException(ErrorCode.USER_NOTFOUND);
         }
         Sort sort = Sort.by(Sort.Direction.ASC, "maHocKy", "maHocPhan");
-        Pageable pageable = PageRequest.of(page,size, sort);
-        List<KeHoachHocTapDTO> khhtList = keHoachHocTapRepository.findKeHoachHocTapsByMaSo(maSo, pageable)
-                .stream()
-                .map(khht -> modelMapper.map(khht, KeHoachHocTapDTO.class))
-                .toList();
-
+        Pageable pageable = PageRequest.of(page - 1,size, sort);
+        Page<KeHoachHocTap> khhtList = keHoachHocTapRepository.findKeHoachHocTapsByMaSo(maSo, pageable);
         if (khhtList.isEmpty()) {
             return PageResponse.<KeHoachHocTapDetail>builder()
                     .currentPage(page)
@@ -230,17 +227,20 @@ public class KeHoachHocTapService {
                     .data(Collections.emptyList())
                     .build();
         }
+        List<KeHoachHocTapDTO> khhtDTOList = khhtList.stream()
+                .map(khht -> modelMapper.map(khht, KeHoachHocTapDTO.class))
+                .toList();
 
-        List<HocKyDTO> hocKyDTOList = getHocKyFromKHHTList(khhtList);
-        List<HocPhanDTO> hocPhanDTOList = getHocPhanFromKHHTList(khhtList);
+        List<HocKyDTO> hocKyDTOList = getHocKyFromKHHTList(khhtDTOList);
+        List<HocPhanDTO> hocPhanDTOList = getHocPhanFromKHHTList(khhtDTOList);
 
-        List<KeHoachHocTapDetail> khhtDetailList = getKeHoachHocTapDetails(khhtList, hocPhanDTOList, hocKyDTOList);
+        List<KeHoachHocTapDetail> khhtDetailList = getKeHoachHocTapDetails(khhtDTOList, hocPhanDTOList, hocKyDTOList);
 
         return PageResponse.<KeHoachHocTapDetail>builder()
                 .currentPage(page)
                 .pageSize(size)
-                .totalElements(khhtDetailList.size())
-                .totalPages((int) Math.ceil((double) khhtDetailList.size() / size))
+                .totalElements(khhtList.getTotalElements())
+                .totalPages(khhtList.getTotalPages())
                 .data(khhtDetailList)
                 .build();
     }
@@ -249,7 +249,7 @@ public class KeHoachHocTapService {
 //    Lấy học phần có trong khht
     public List<KeHoachHocTapDetail> getKHHTDetailByLoaiHP(String maSo, String khoaHoc, String loaiHp){
         List<KeHoachHocTapDTO> khhtList = getKeHoachHocTapsByMaSo(maSo);
-        if(khhtList.isEmpty()){
+        if(khhtList.isEmpty()) {
             return Collections.emptyList();
         }
         List<Long> maHocKyList = khhtList.stream()
@@ -277,9 +277,8 @@ public class KeHoachHocTapService {
         }
         List<KeHoachHocTap> keHoachHocTaps = keHoachHocTapRepository.findKeHoachHocTapsByMaSo(maSo);
         if (keHoachHocTaps.isEmpty()) {
-            throw new AppException(ErrorCode.NOTFOUND);
+            return Collections.emptyList();
         }
-
         return keHoachHocTaps.stream()
                 .map(khht -> modelMapper.map(khht, KeHoachHocTapDTO.class))
                 .toList();
