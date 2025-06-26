@@ -39,7 +39,7 @@ public class KeHoachHocTapController {
         return ApiResponse.<List<KeHoachHocTapDetail>>builder()
                 .code(200)
                 .message("OK")
-                .data(keHoachHocTapService.getKHHTDetailByLoaiHP(request.getMaSo(),request.getKhoaHoc(),request.getLoaiHp()))
+                .data(keHoachHocTapService.getKHHTDetailByLoaiHP(request.getMaSo(),request.getKhoaHoc(), request.getMaNganh(),request.getLoaiHp()))
                 .build();
     }
 
@@ -52,12 +52,12 @@ public class KeHoachHocTapController {
                 .build();
     }
 
-    @GetMapping("/sinhvien/tinchi/count/{khoaHoc}/{maSo}")
-    public ApiResponse<TinChiResponse> countKeHoachHocTapsByMaSo(@PathVariable String khoaHoc, @PathVariable String maSo) {
+    @GetMapping("/sinhvien/tinchi/count/{khoaHoc}/{maNganh}/{maSo}")
+    public ApiResponse<TinChiResponse> countKeHoachHocTapsByMaSo(@PathVariable String khoaHoc, @PathVariable Long maNganh, @PathVariable String maSo) {
         return ApiResponse.<TinChiResponse>builder()
                 .code(200)
                 .message("OK")
-                .data(keHoachHocTapService.countKeHoachHocTapsByMaSo(maSo,khoaHoc))
+                .data(keHoachHocTapService.countKeHoachHocTapsByMaSo(maSo, khoaHoc, maNganh))
                 .build();
     }
 

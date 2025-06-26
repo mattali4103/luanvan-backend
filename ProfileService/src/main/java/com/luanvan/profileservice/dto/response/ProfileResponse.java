@@ -14,6 +14,7 @@ import java.time.LocalDate;
 public class ProfileResponse {
     String maSo;
     String khoaHoc;
+    Long maNganh;
     String tenNganh;
     String hoTen;
     LocalDate ngaySinh;

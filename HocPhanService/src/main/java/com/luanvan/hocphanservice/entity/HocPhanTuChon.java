@@ -27,6 +27,6 @@ public class HocPhanTuChon {
     List<HocPhan> hocPhanTuChonList;
 
     @ManyToOne
-    @JoinColumn(name = "ma_ctdt")
+    @JoinColumn(name = "chuong_trinh_dao_tao_id")
     ChuongTrinhDaoTao chuongTrinhDaoTao;
 }

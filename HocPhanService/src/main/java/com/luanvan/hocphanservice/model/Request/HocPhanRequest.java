@@ -11,5 +11,6 @@ import lombok.experimental.FieldDefaults;
 public class HocPhanRequest {
     String maSo;
     String khoaHoc;
+    Long maNganh;
     String loaiHp;
 }

@@ -23,35 +23,35 @@ public class ChuongTrinhDaoTaoController {
         this.hocPhanService = hocPhanService;
     }
 
-    @PostMapping("/hoc_phan_not_in/{khoaHoc}")
-    List<HocPhanDTO> getHocPhanNotInCTDT(@PathVariable String khoaHoc, @RequestBody List<String> hocPhanList) {
-        return chuongTrinhDaoTaoService.getHocPhanNotInCTDT(hocPhanList, khoaHoc);
+    @PostMapping("/hoc_phan_not_in/{khoaHoc}/{maNganh}")
+    List<HocPhanDTO> getHocPhanNotInCTDT(@PathVariable String khoaHoc, @PathVariable Long maNganh, @RequestBody List<String> hocPhanList) {
+        return chuongTrinhDaoTaoService.getHocPhanNotInCTDT(hocPhanList, khoaHoc, maNganh);
     }
 
-    @GetMapping("/khoahoc/{khoaHoc}")
-    public ApiResponse<List<HocPhanDTO>> getHocPhanByKhoaHoc(@PathVariable String khoaHoc) {
+    @GetMapping("/khoahoc/{khoaHoc}/{maNganh}")
+    public ApiResponse<List<HocPhanDTO>> getHocPhanByKhoaHoc(@PathVariable String khoaHoc, @PathVariable Long maNganh) {
         return ApiResponse.<List<HocPhanDTO>>builder()
                 .code(200)
                 .message("OK")
-                .data(chuongTrinhDaoTaoService.getHocPhanInCTDTByKhoaHoc(khoaHoc))
+                .data(chuongTrinhDaoTaoService.getHocPhanInCTDTByKhoaHoc(khoaHoc, maNganh))
                 .build();
 
     }
 
-    @GetMapping("/id/{khoaHoc}")
-    public ApiResponse<ChuongTrinhDaoTaoDTO> getChuongTrinhDaoTaoByKhoaHoc(@PathVariable String khoaHoc) {
+    @GetMapping("/id/{khoaHoc}/{maNganh}")
+    public ApiResponse<ChuongTrinhDaoTaoDTO> getChuongTrinhDaoTaoByKhoaHoc(@PathVariable String khoaHoc, @PathVariable Long maNganh) {
         return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
                 .code(200)
                 .message("OK")
-                .data(chuongTrinhDaoTaoService.getByKhoaHoc(khoaHoc))
+                .data(chuongTrinhDaoTaoService.getByKhoaHocAndMaNganh(khoaHoc, maNganh))
                 .build();
     }
-    @GetMapping("/nganh/{maNganh}")
-    public ApiResponse<ChuongTrinhDaoTaoDTO> getChuongTrinhDaoTaoByNganh(@PathVariable Long maNganh) {
+    @GetMapping("/get/{khoaHoc}/{maNganh}")
+    public ApiResponse<ChuongTrinhDaoTaoDTO> getChuongTrinhDaoTaoByNganh(@PathVariable String khoaHoc, @PathVariable Long maNganh) {
         return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
                 .code(200)
                 .message("OK")
-                .data(chuongTrinhDaoTaoService.getCTDTByMaNganh(maNganh))
+                .data(chuongTrinhDaoTaoService.getCTDT(khoaHoc, maNganh))
                 .build();
     }
     @PostMapping("/create")
@@ -89,7 +89,7 @@ public class ChuongTrinhDaoTaoController {
                 .build();
     }
     @DeleteMapping("/delete/{id}")
-    public ApiResponse<Void> deleteChuongTrinhDaoTao(@PathVariable String id) {
+    public ApiResponse<Void> deleteChuongTrinhDaoTao(@PathVariable Long id) {
         chuongTrinhDaoTaoService.deleteById(id);
         return ApiResponse.<Void>builder()
                 .code(204)
@@ -98,12 +98,12 @@ public class ChuongTrinhDaoTaoController {
     }
 
 //    API for Service
-    @PostMapping("/count/tinchi/{khoaHoc}")
-    public TinChiResponse getTongTinchi(@PathVariable String khoaHoc, @RequestBody List<KeHoachHocTapRequest> request) {
-        return chuongTrinhDaoTaoService.getCountTinChiByCTDT(khoaHoc, request);
+    @PostMapping("/count/tinchi/{khoaHoc}/{maNganh}")
+    public TinChiResponse getTongTinchi(@PathVariable String khoaHoc,@PathVariable Long maNganh, @RequestBody List<KeHoachHocTapRequest> request) {
+        return chuongTrinhDaoTaoService.getCountTinChiByCTDT(khoaHoc, maNganh, request);
     }
     @PostMapping("/hocphan/by_loai_hp")
     public List<HocPhanDTO> getHocPhanInCTDTByLoaiHp(@RequestBody HocPhanRequest request) {
-       return hocPhanService.getHocPhanInCTDTByLoaiHp(request.getLoaiHp(), request.getKhoaHoc());
+       return hocPhanService.getHocPhanInCTDTByLoaiHp(request.getLoaiHp(), request.getKhoaHoc(), request.getMaNganh());
     }
 }

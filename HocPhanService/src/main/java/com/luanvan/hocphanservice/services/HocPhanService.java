@@ -101,11 +101,11 @@ public class HocPhanService {
     }
 
 //    Thấy học phần nằm trong CTDT dựa theo loại học phần và  khoá học
-    public List<HocPhanDTO> getHocPhanInCTDTByLoaiHp(String loaiHp, String khoaHoc){
+    public List<HocPhanDTO> getHocPhanInCTDTByLoaiHp(String loaiHp, String khoaHoc, Long maNganh) {
         if(loaiHp == null || khoaHoc == null){
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        List<HocPhan> hocPhanList = hocPhanRepository.findHocPhanByLoaiHpInChuongTrinhDaoTao(loaiHp, khoaHoc);
+        List<HocPhan> hocPhanList = hocPhanRepository.findHocPhanByLoaiHpInChuongTrinhDaoTao(loaiHp, khoaHoc, maNganh);
         if(hocPhanList.isEmpty()){
             return new ArrayList<>();
         }

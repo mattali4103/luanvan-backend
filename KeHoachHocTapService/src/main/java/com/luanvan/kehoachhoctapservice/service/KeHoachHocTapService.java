@@ -47,7 +47,7 @@ public class KeHoachHocTapService {
         return hocPhanClient.getHocKyIn(hocKyList);
     }
 
-    public TinChiResponse countKeHoachHocTapsByMaSo(String maSo, String khoaHoc) {
+    public TinChiResponse countKeHoachHocTapsByMaSo(String maSo, String khoaHoc, Long maNganh) {
         if (maSo == null || maSo.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
@@ -63,7 +63,7 @@ public class KeHoachHocTapService {
         modelMapper.typeMap(KeHoachHocTap.class, KeHoachHocTapRequest.class)
                 .addMappings(mapper -> mapper.map(KeHoachHocTap::getMaHocPhan, KeHoachHocTapRequest::setMaHocPhan));
         List<KeHoachHocTapRequest> request = khhtList.stream().map(khht -> modelMapper.map(khht, KeHoachHocTapRequest.class)).toList();
-        return hocPhanClient.getCountTinChiByCTDT(khoaHoc, request);
+        return hocPhanClient.getCountTinChiByCTDT(khoaHoc, maNganh, request);
     }
 
     public List<ThongKeTinChi> countKHHTGroupByHocKy(String maSo) {
@@ -247,7 +247,7 @@ public class KeHoachHocTapService {
 
 
 //    Lấy học phần có trong khht
-    public List<KeHoachHocTapDetail> getKHHTDetailByLoaiHP(String maSo, String khoaHoc, String loaiHp){
+    public List<KeHoachHocTapDetail> getKHHTDetailByLoaiHP(String maSo, String khoaHoc, Long maNganh ,String loaiHp){
         List<KeHoachHocTapDTO> khhtList = getKeHoachHocTapsByMaSo(maSo);
         if(khhtList.isEmpty()) {
             return Collections.emptyList();
@@ -255,7 +255,7 @@ public class KeHoachHocTapService {
         List<Long> maHocKyList = khhtList.stream()
                 .map(KeHoachHocTapDTO::getMaHocKy)
                 .toList();
-        List<HocPhanDTO> hocPhanDTOList = hocPhanClient.getHocPhanInCTDTByLoaiHp(HocPhanRequest.builder().khoaHoc(khoaHoc).loaiHp(loaiHp).build());
+        List<HocPhanDTO> hocPhanDTOList = hocPhanClient.getHocPhanInCTDTByLoaiHp(HocPhanRequest.builder().khoaHoc(khoaHoc).maNganh(maNganh).loaiHp(loaiHp).build());
         List<HocKyDTO> hocKyDTOList = hocPhanClient.getHocKyIn(maHocKyList);
 
         return getKeHoachHocTapDetails(khhtList, hocPhanDTOList, hocKyDTOList);

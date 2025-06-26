@@ -11,6 +11,7 @@ import com.luanvan.userservice.model.dto.UserDTO;
 import com.luanvan.userservice.repository.RoleRepository;
 import com.luanvan.userservice.repository.UserRepository;
 import com.luanvan.userservice.repository.httpClient.ProfileClient;
+import com.luanvan.userservice.utils.SecurityUltils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -39,18 +40,18 @@ public class UserService {
         User user = modelMapper.map(request, User.class);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         Set<Role> roles = new HashSet<>();
-//        String currentRole = SecurityUltils.getCurrentUserRole();
-//        if(currentRole.equals("SCOPE_ADMIN")){
-//            request.getRoles().forEach(role -> {
-//                Role userRole = roleRepository.findByName(role.getName());
-//                if (userRole != null) {
-//                    roles.add(role);
-//                }
-//            });
-//        }
-//        else{
-//            roles.add(roleRepository.findByName("SINHVIEN"));
-//        }
+        String currentRole = SecurityUltils.getCurrentUserRole();
+        if(currentRole.equals("SCOPE_ADMIN")){
+            request.getRoles().forEach(role -> {
+                Role userRole = roleRepository.findByName(role.getName());
+                if (userRole != null) {
+                    roles.add(role);
+                }
+            });
+        }
+        else{
+            roles.add(roleRepository.findByName("SINHVIEN"));
+        }
         request.getRoles().forEach(roleDTO -> {
             Role role = roleRepository.findByName(roleDTO.getName());
             roles.add(role);
@@ -61,7 +62,13 @@ public class UserService {
         profileClient.createSinhVien(createSinhVienRequest);
         userRepository.save(user);
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
-        userDTO.setRoles(user.getRoles().stream().map(role -> modelMapper.map(role, RoleDTO.class)).toList());
+        userDTO.setRoles(
+                user.getRoles().stream()
+                        .map(role -> RoleDTO.builder()
+                                .name(role.getName())
+                                .build())
+                        .toList()
+        );
         return userDTO;
     }
 

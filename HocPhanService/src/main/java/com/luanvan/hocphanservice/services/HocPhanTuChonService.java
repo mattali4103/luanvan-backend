@@ -45,7 +45,7 @@ public class HocPhanTuChonService {
             });
             hocPhanTuChon.setHocPhanTuChonList(hocPhanList);
         }
-        hocPhanTuChon.setChuongTrinhDaoTao(chuongTrinhDaoTaoRepository.findById(dto.getKhoaHoc()).orElseThrow(
+        hocPhanTuChon.setChuongTrinhDaoTao(chuongTrinhDaoTaoRepository.findByKhoaHocAndMaNganh(dto.getKhoaHoc(), dto.getMaNganh()).orElseThrow(
                 () -> new AppException(ErrorCode.INVALID_REQUEST)
         ));
         return modelMapper.map(hocPhanTuChonRepository.save(hocPhanTuChon), HocPhanTuChonDTO.class);

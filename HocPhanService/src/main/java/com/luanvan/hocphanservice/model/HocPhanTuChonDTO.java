@@ -18,5 +18,6 @@ public class HocPhanTuChonDTO {
     String tenNhom;
     Long tinChiYeuCau;
     String khoaHoc;
+    Long maNganh;
     List<HocPhanDTO> hocPhanTuChonList;
 }

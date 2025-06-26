@@ -40,11 +40,11 @@ public class ChuongTrinhDaoTaoService {
     private final HocPhanService hocPhanService;
 
 
-    public ChuongTrinhDaoTaoDTO getCTDTByMaNganh(Long maNganh) {
-        if (maNganh == null) {
+    public ChuongTrinhDaoTaoDTO getCTDT(String khoaHoc, Long maNganh) {
+        if (maNganh == null && khoaHoc == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findByMaNganh(maNganh)
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findByKhoaHocAndMaNganh(khoaHoc, maNganh)
                 .orElseThrow(() -> new AppException("Không tìm thấy ngành trong csdl", ErrorCode.NOTFOUND));
 
         return modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class);
@@ -93,20 +93,20 @@ public class ChuongTrinhDaoTaoService {
         return updateMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class);
     }
 
-    public ChuongTrinhDaoTaoDTO getByKhoaHoc(String khoaHoc) {
+    public ChuongTrinhDaoTaoDTO getByKhoaHocAndMaNganh(String khoaHoc, Long maNganh) {
         if (khoaHoc == null || khoaHoc.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        return chuongTrinhDaoTaoRepository.findById(khoaHoc.toUpperCase())
+        return chuongTrinhDaoTaoRepository.findByKhoaHocAndMaNganh(khoaHoc, maNganh)
                 .map(chuongTrinhDaoTao -> modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class))
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
     }
 
-    public void deleteById(String khoaHoc) {
-        if (khoaHoc == null || khoaHoc.isEmpty()) {
+    public void deleteById(Long id) {
+        if (id == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc.toUpperCase())
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
         chuongTrinhDaoTaoRepository.delete(chuongTrinhDaoTao);
     }
@@ -125,6 +125,10 @@ public class ChuongTrinhDaoTaoService {
         boolean nganhExists = nganhClient.existByMaNganh(request.getMaNganh());
         if (!nganhExists) {
             throw new AppException(ErrorCode.NOTFOUND);
+        }
+
+        if(chuongTrinhDaoTaoRepository.existsChuongTrinhDaoTaoByKhoaHocAndMaNganh(request.getKhoaHoc(), request.getMaNganh())) {
+            throw new AppException("Chương trình đào tạo đã tồn tại cho khóa học và ngành này", ErrorCode.INVALID_INPUT);
         }
 
         try {
@@ -178,18 +182,18 @@ public class ChuongTrinhDaoTaoService {
         }
     }
 
-    public List<HocPhanDTO> getHocPhanInCTDTByKhoaHoc(String khoaHoc) {
+    public List<HocPhanDTO> getHocPhanInCTDTByKhoaHoc(String khoaHoc, Long maNganh) {
         if (khoaHoc == null || khoaHoc.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc.toUpperCase())
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findByKhoaHocAndMaNganh(khoaHoc.toUpperCase(), maNganh)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST));
         return chuongTrinhDaoTao.getHocPhanList().stream().map(
                 hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class)).toList();
     }
 
-    public List<HocPhanDTO> getHocPhanNotInCTDT(List<String> hocPhanList, String khoaHoc) {
-        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc.toUpperCase()).orElseThrow(
+    public List<HocPhanDTO> getHocPhanNotInCTDT(List<String> hocPhanList, String khoaHoc, Long maNganh) {
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findByKhoaHocAndMaNganh(khoaHoc, maNganh).orElseThrow(
                 () -> new AppException(ErrorCode.NOTFOUND)
         );
 
@@ -208,8 +212,8 @@ public class ChuongTrinhDaoTaoService {
         return hocPhanService.getDSHocPhanIn(maHocPhanNotInCTDT);
     }
 
-    public TinChiResponse getCountTinChiByCTDT(String khoaHoc, List<KeHoachHocTapRequest> hocPhanList) {
-        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(khoaHoc).orElseThrow(
+    public TinChiResponse getCountTinChiByCTDT(String khoaHoc, Long maNganh, List<KeHoachHocTapRequest> hocPhanList) {
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findByKhoaHocAndMaNganh(khoaHoc, maNganh).orElseThrow(
                 () -> new AppException(ErrorCode.NOTFOUND)
         );
         if (hocPhanList.isEmpty()) {
@@ -218,7 +222,9 @@ public class ChuongTrinhDaoTaoService {
 
         TinChiResponse tinChiResponse = new TinChiResponse();
 
-        Long tongSoTinChi = chuongTrinhDaoTaoRepository.tongTinChi(khoaHoc);
+        Long tongSoTinChi = chuongTrinhDaoTaoRepository.tongTinChi(khoaHoc, maNganh);
+        log.info("Total credits in curriculum: {}", tongSoTinChi);
+
         Long tongSoTinChiTuChon = chuongTrinhDaoTao.getNhomHocPhanTuChon() != null
                 ? chuongTrinhDaoTao.getNhomHocPhanTuChon().stream().mapToLong(HocPhanTuChon::getTinChiYeuCau).sum()
                 : 0L;

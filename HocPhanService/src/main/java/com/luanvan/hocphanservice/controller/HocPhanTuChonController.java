@@ -4,7 +4,6 @@ import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.HocPhanTuChonDTO;
 import com.luanvan.hocphanservice.model.Request.HocPhanRequest;
 import com.luanvan.hocphanservice.model.Response.ApiResponse;
-import com.luanvan.hocphanservice.services.ChuongTrinhDaoTaoService;
 import com.luanvan.hocphanservice.services.HocPhanTuChonService;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +15,7 @@ public class HocPhanTuChonController {
     private final HocPhanTuChonService hocPhanTuChonService;
 
 
-    public HocPhanTuChonController(HocPhanTuChonService hocPhanTuChonService, ChuongTrinhDaoTaoService chuongTrinhDaoTaoService) {
+    public HocPhanTuChonController(HocPhanTuChonService hocPhanTuChonService ) {
         this.hocPhanTuChonService = hocPhanTuChonService;
 
     }

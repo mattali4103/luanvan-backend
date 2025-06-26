@@ -26,8 +26,8 @@ public interface HocPhanClient {
     List<NamHocDTO> getAllNamHoc(@RequestBody List<String> namHocList);
     @PostMapping("/ctdt/hoc_phan_not_in/{khoaHoc}")
     List<HocPhanDTO> getHocPhanNotInCTDT(@PathVariable String khoaHoc, @RequestBody List<String> hocPhanList);
-    @GetMapping("/ctdt/count/tinchi/{khoaHoc}")
-    TinChiResponse getCountTinChiByCTDT(@PathVariable String khoaHoc, @RequestBody List<KeHoachHocTapRequest> hocPhanList);
+    @PostMapping("/ctdt/count/tinchi/{khoaHoc}/{maNganh}")
+    TinChiResponse getCountTinChiByCTDT(@PathVariable String khoaHoc, @PathVariable Long maNganh , @RequestBody List<KeHoachHocTapRequest> hocPhanList);
     @PostMapping("/ctdt/hocphan/by_loai_hp")
     List<HocPhanDTO> getHocPhanInCTDTByLoaiHp(@RequestBody HocPhanRequest request);
     @GetMapping("/hocky/find_by_name")

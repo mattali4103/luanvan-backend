@@ -83,6 +83,7 @@ public class SinhVienService {
                 .maSo(sinhVien.getMaSo())
                 .maLop(sinhVien.getLop().getMaLop())
                 .khoaHoc(sinhVien.getKhoaHoc())
+                .maNganh(sinhVien.getLop().getNganh().getMaNganh())
                 .tenNganh(sinhVien.getLop().getNganh().getTenNganh())
                 .build();
     }

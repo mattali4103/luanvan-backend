@@ -16,13 +16,15 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChuongTrinhDaoTao {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
     String khoaHoc;
     Long maNganh;
     @ManyToMany
     @JoinTable(
-        name = "ctdt_hp",
-        joinColumns = @JoinColumn(name = "chuong_trinh_dao_tao_id"),
-        inverseJoinColumns = @JoinColumn(name = "hoc_phan_id")
+            name = "ctdt_hp",
+            joinColumns = @JoinColumn(name = "chuong_trinh_dao_tao_id"),
+            inverseJoinColumns = @JoinColumn(name = "hoc_phan_id")
     )
     @JsonBackReference
     List<HocPhan> hocPhanList;
@@ -30,5 +32,4 @@ public class ChuongTrinhDaoTao {
 
     @OneToMany(mappedBy = "chuongTrinhDaoTao", cascade = CascadeType.ALL, orphanRemoval = true)
     List<HocPhanTuChon> nhomHocPhanTuChon;
-
 }

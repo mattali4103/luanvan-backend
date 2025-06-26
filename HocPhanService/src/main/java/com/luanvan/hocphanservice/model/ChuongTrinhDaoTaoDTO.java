@@ -1,7 +1,5 @@
 package com.luanvan.hocphanservice.model;
 
-
-import com.luanvan.hocphanservice.entity.ChuongTrinhDaoTao;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
