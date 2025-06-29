@@ -41,9 +41,11 @@ public class LopService {
     }
 
     public LopDTO getLopByMaLop(String maLop) {
-        return lopRepository.findById(maLop)
-                .map(lop -> modelMapper.map(lop, LopDTO.class))
+        Lop lop = lopRepository.findById(maLop)
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        LopDTO lopDTO = modelMapper.map(lop, LopDTO.class);
+        lopDTO.setSiSoCon(lopRepository.countSinhVienByMaLop(maLop));
+        return lopDTO;
     }
 
     public List<ProfileResponse> getSinhVienProfileByLop(String maLop) {
@@ -54,5 +56,24 @@ public class LopService {
             return Collections.emptyList();
         }
         return list;
+    }
+
+    /**
+     * Cập nhật số lượng sinh viên hiện tại (siSoCon) của lớp
+     * @param maLop mã lớp cần cập nhật
+     */
+    public void updateSiSoCon(String maLop) {
+        Long siSoCon = lopRepository.countSinhVienByMaLop(maLop);
+        lopRepository.updateSiSoCon(maLop, siSoCon);
+    }
+
+    /**
+     * Cập nhật siSoCon cho tất cả các lớp
+     */
+    public void updateAllSiSoCon() {
+        List<Lop> allLops = lopRepository.findAll();
+        for (Lop lop : allLops) {
+            updateSiSoCon(lop.getMaLop());
+        }
     }
 }

@@ -1,5 +1,4 @@
 package com.luanvan.kehoachhoctapservice.repository;
-
 import com.luanvan.kehoachhoctapservice.entity.KeHoachHocTapMau;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,17 +13,6 @@ public interface KeHoachHocTapMauRepository extends JpaRepository<KeHoachHocTapM
     boolean existsByKhoaHocAndMaNganh(String khoaHoc, Long maNganh);
     List<KeHoachHocTapMau> findByKhoaHocAndMaNganh(String khoaHoc, Long maNganh);
     List<KeHoachHocTapMau> findByKhoaHocAndMaNganhAndMaHocKy(String khoaHoc, Long maNganh, Long maHocKy);
-
-    /**
-     * Tìm mã học kỳ gần nhất (nhỏ nhất) có sẵn trong kế hoạch học tập mẫu
-     * cho khóa học và mã ngành cụ thể, bắt đầu từ mã học kỳ được chỉ định
-     */
-    @Query("SELECT MIN(k.maHocKy) FROM KeHoachHocTapMau k " +
-           "WHERE k.khoaHoc = :khoaHoc AND k.maNganh = :maNganh " +
-           "AND k.maHocKy >= :startHocKy")
-    Optional<Long> findNearestMaHocKy(@Param("khoaHoc") String khoaHoc,
-                                      @Param("maNganh") Long maNganh,
-                                      @Param("startHocKy") Long startHocKy);
 
     /**
      * Tìm danh sách kế hoạch học tập mẫu theo khóa học, mã ngành và mã học kỳ gần nhất
@@ -47,4 +35,5 @@ public interface KeHoachHocTapMauRepository extends JpaRepository<KeHoachHocTapM
 
     List<KeHoachHocTapMau> findKeHoachHocTapMauByKhoaHocAndMaNganh(String khoaHoc, Long maNganh);
 
+    boolean existsByKhoaHocAndMaNganhAndMaHocPhan(String khoaHoc, Long maNganh, String maHocPhan);
 }

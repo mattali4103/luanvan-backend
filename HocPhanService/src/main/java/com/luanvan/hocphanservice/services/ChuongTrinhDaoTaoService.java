@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -210,6 +212,24 @@ public class ChuongTrinhDaoTaoService {
                 maHocPhan -> !hocPhanList.contains(maHocPhan)).toList();
 
         return hocPhanService.getDSHocPhanIn(maHocPhanNotInCTDT);
+
+    }
+    public List<ChuongTrinhDaoTaoDTO> getCTDTByMaNganh(Long maNganh) {
+        if (maNganh == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        List<ChuongTrinhDaoTao> chuongTrinhDaoTaoList = chuongTrinhDaoTaoRepository.findByMaNganh(maNganh);
+        if (chuongTrinhDaoTaoList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<ChuongTrinhDaoTaoDTO> result = new ArrayList<>();
+        //Skip HocPhanList
+        chuongTrinhDaoTaoList.forEach(chuongTrinhDaoTao -> {
+            ChuongTrinhDaoTaoDTO dto = modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoDTO.class);
+            dto.setHocPhanList(Collections.emptyList());
+            result.add(dto);
+        });
+        return result;
     }
 
     public TinChiResponse getCountTinChiByCTDT(String khoaHoc, Long maNganh, List<KeHoachHocTapRequest> hocPhanList) {
@@ -247,4 +267,6 @@ public class ChuongTrinhDaoTaoService {
         tinChiResponse.setSoTinChiCaiThien(hocPhanRepository.countTinChiIn(hocPhanCaiThienList));
         return tinChiResponse;
     }
+
+
 }

@@ -2,6 +2,7 @@ package com.luanvan.kehoachhoctapservice.controller;
 
 import com.luanvan.kehoachhoctapservice.entity.KeHoachHocTapMau;
 import com.luanvan.kehoachhoctapservice.model.dto.HocKyDTO;
+import com.luanvan.kehoachhoctapservice.model.dto.KeHoachHocTapMauDTO;
 import com.luanvan.kehoachhoctapservice.model.response.ApiResponse;
 import com.luanvan.kehoachhoctapservice.model.response.KeHoachHocTapDetail;
 import com.luanvan.kehoachhoctapservice.model.response.KeHoachHocTapGroup;
@@ -19,6 +20,15 @@ public class KeHoachHocTapMauController {
 
     public KeHoachHocTapMauController(KeHoachHocTapMauService keHoachHocTapMauService) {
         this.keHoachHocTapMauService = keHoachHocTapMauService;
+    }
+
+    @PostMapping("/creates") // Tạo mới danh sách kế hoạch học tập mẫu
+    public ApiResponse<Void> createKeHoachHocTapMau(@RequestBody List<KeHoachHocTapMauDTO> dtoList) {
+        keHoachHocTapMauService.createKeHoachHocTapMau(dtoList);
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .message("Created successfully")
+                .build();
     }
 
     @GetMapping("/by_ma_nganh")

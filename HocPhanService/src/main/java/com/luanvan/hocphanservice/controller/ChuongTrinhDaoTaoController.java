@@ -1,4 +1,5 @@
 package com.luanvan.hocphanservice.controller;
+import com.luanvan.hocphanservice.entity.ChuongTrinhDaoTao;
 import com.luanvan.hocphanservice.model.ChuongTrinhDaoTaoDTO;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.Request.CTDTDescriptionRequest;
@@ -21,6 +22,16 @@ public class ChuongTrinhDaoTaoController {
     public ChuongTrinhDaoTaoController(ChuongTrinhDaoTaoService chuongTrinhDaoTaoService, HocPhanService hocPhanService) {
         this.chuongTrinhDaoTaoService = chuongTrinhDaoTaoService;
         this.hocPhanService = hocPhanService;
+    }
+
+    @GetMapping("/get_by_ma_nganh/{maNganh}")
+    public ApiResponse<List<ChuongTrinhDaoTaoDTO>> getCTDTByMaNganh(
+            @PathVariable Long maNganh) {
+        return ApiResponse.<List<ChuongTrinhDaoTaoDTO>>builder()
+                .code(200)
+                .message("OK")
+                .data(chuongTrinhDaoTaoService.getCTDTByMaNganh(maNganh))
+                .build();
     }
 
 
