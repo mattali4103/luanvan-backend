@@ -1,12 +1,15 @@
 package com.luanvan.profileservice.services;
 
 import com.luanvan.profileservice.dto.GiangVienDTO;
+import com.luanvan.profileservice.dto.UserDTO;
+import com.luanvan.profileservice.dto.response.ProfileResponse;
 import com.luanvan.profileservice.entity.GiangVien;
 import com.luanvan.profileservice.entity.Khoa;
 import com.luanvan.profileservice.exception.AppException;
 import com.luanvan.profileservice.exception.ErrorCode;
 import com.luanvan.profileservice.repository.GiangVienRepository;
 import com.luanvan.profileservice.repository.KhoaRepository;
+import com.luanvan.profileservice.repository.httpClient.UserClient;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -16,7 +19,22 @@ import org.springframework.stereotype.Service;
 public class GiangVienService {
     private final GiangVienRepository giangVienRepository;
     private final KhoaRepository khoaRepository;
+    private final UserClient userClient;
 
+    public ProfileResponse getMyInfo(String maSo) {
+        if (maSo == null || maSo.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        GiangVien giangVien = giangVienRepository.findById(maSo).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+        UserDTO userDTO = userClient.getUserById(maSo);
+        return ProfileResponse.builder()
+                .maSo(maSo)
+                .hoTen(userDTO.getHoTen())
+                .gioiTinh(userDTO.isGioiTinh())
+                .ngaySinh(userDTO.getNgaySinh())
+                .maKhoa(giangVien.getKhoa().getMaKhoa())
+                .build();
+    }
 
     public void deleteGiangVien(String maSo) {
         if (maSo == null || maSo.isEmpty()) {

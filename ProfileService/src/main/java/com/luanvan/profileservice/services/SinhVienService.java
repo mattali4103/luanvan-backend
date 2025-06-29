@@ -17,6 +17,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -72,9 +74,21 @@ public class SinhVienService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
         return modelMapper.map(sinhVien, SinhVienDTO.class);
     }
+
+    public List<ProfileResponse> getAllSinhVienByLop(Lop lop) {
+        List<SinhVien> sinhVienList = sinhVienRepository.findSinhViensByLop(lop);
+        if (sinhVienList.isEmpty()) {
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+        return sinhVienList.stream().map(this::getProfileResponse).toList();
+    }
     public ProfileResponse getMyInfo(String maSo){
         SinhVien sinhVien = sinhVienRepository.findById(maSo)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+        return getProfileResponse(sinhVien);
+    }
+
+    private ProfileResponse getProfileResponse(SinhVien sinhVien) {
         UserDTO userDTO = userClient.getUserById(sinhVien.getMaSo());
         return ProfileResponse.builder()
                 .hoTen(userDTO.getHoTen())

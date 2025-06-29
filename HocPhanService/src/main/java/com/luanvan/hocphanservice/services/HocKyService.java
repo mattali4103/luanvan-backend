@@ -1,11 +1,13 @@
 package com.luanvan.hocphanservice.services;
 
 import com.luanvan.hocphanservice.entity.HocKy;
+import com.luanvan.hocphanservice.entity.HocKyHienTai;
 import com.luanvan.hocphanservice.exception.AppException;
 import com.luanvan.hocphanservice.exception.ErrorCode;
 import com.luanvan.hocphanservice.model.HocKyDTO;
 import com.luanvan.hocphanservice.model.Request.HocKyRequest;
 import com.luanvan.hocphanservice.model.Response.HocKyResponse;
+import com.luanvan.hocphanservice.repository.HocKyHienTaiRepository;
 import com.luanvan.hocphanservice.repository.HocKyRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -16,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HocKyService {
     private final HocKyRepository hocKyRepository;
+    private final HocKyHienTaiRepository hocKyHienTaiRepository;
     ModelMapper modelMapper = new ModelMapper();
 
     public HocKyDTO findHocKyByName(String namBatDau, String namKetThuc, String tenHocKy) {
@@ -68,5 +71,18 @@ public class HocKyService {
         return hocKyList.stream()
                 .map(hocKy -> modelMapper.map(hocKy, HocKyDTO.class))
                 .toList();
+    }
+    public HocKyDTO getCurrentHocKy() {
+        Long maHocKy = hocKyHienTaiRepository.findMaHocKyHienTai();
+        return hocKyRepository.findById(maHocKy)
+                .map(hocKy -> modelMapper.map(hocKy, HocKyDTO.class))
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+    }
+    public Long updateCurrentHocKy(Long maHocKy) {
+        HocKyHienTai hocKyHienTai = hocKyHienTaiRepository.findById(maHocKy)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        hocKyHienTai.setMaHocKy(maHocKy);
+        hocKyHienTaiRepository.save(hocKyHienTai);
+        return hocKyHienTai.getMaHocKy();
     }
 }

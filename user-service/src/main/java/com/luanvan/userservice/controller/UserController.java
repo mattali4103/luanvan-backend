@@ -28,7 +28,7 @@ public class UserController {
         return ApiResponse.builder()
                 .code(200)
                 .message("OK")
-                .data(userService.create(request))
+                .data(userService.createSinhVien(request))
                 .build();
     }
 // PRIVATE API

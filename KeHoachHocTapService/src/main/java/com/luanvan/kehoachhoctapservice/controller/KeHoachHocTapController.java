@@ -21,12 +21,23 @@ public class KeHoachHocTapController {
         this.keHoachHocTapService = keHoachHocTapService;
     }
 
-    @GetMapping("/sinhvien/hoc_phan_not_in_khht/{maSo}/{khoaHoc}")
-    public ApiResponse<List<HocPhanDTO>> getHocPhanNotInKHHTByKhoaHoc(@PathVariable String maSo, @PathVariable String khoaHoc) {
+
+
+    @PostMapping("/sinhvien/goi_y")
+    public ApiResponse<List<HocPhanDTO>> getRecommendKHHT(@RequestBody HocPhanRequest request) {
         return ApiResponse.<List<HocPhanDTO>>builder()
                 .code(200)
                 .message("OK")
-                .data(keHoachHocTapService.getHocPhanNotInCTDT(maSo,khoaHoc))
+                .data(keHoachHocTapService.getRecommendKHHT(request.getMaSo(), request.getKhoaHoc(), request.getMaNganh()))
+                .build();
+    }
+
+    @GetMapping("/sinhvien/hoc_phan_not_in_khht/{maSo}/{khoaHoc}/{maNganh}")
+    public ApiResponse<List<HocPhanDTO>> getHocPhanNotInKHHTByKhoaHoc(@PathVariable String maSo, @PathVariable String khoaHoc, @PathVariable Long maNganh) {
+        return ApiResponse.<List<HocPhanDTO>>builder()
+                .code(200)
+                .message("OK")
+                .data(keHoachHocTapService.getHocPhanNotInCTDT(maSo,khoaHoc, maNganh))
                 .build();
     }
 
@@ -148,4 +159,13 @@ public class KeHoachHocTapController {
     }
 
 
+//    API For GIANGVIEN
+    @PostMapping("/statistic/{maLop}")
+    public ApiResponse<List<ThongKeTinChi>> thongKeKHHT(@PathVariable String maLop) {
+        return ApiResponse.<List<ThongKeTinChi>>builder()
+                .code(200)
+                .message("OK")
+                .data(keHoachHocTapService.thongKeKHHT(maLop))
+                .build();
+    }
 }

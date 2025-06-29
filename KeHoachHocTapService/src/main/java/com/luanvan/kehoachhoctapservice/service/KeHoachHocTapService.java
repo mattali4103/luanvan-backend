@@ -1,12 +1,11 @@
 package com.luanvan.kehoachhoctapservice.service;
 
 import com.luanvan.kehoachhoctapservice.entity.KeHoachHocTap;
+import com.luanvan.kehoachhoctapservice.entity.KeHoachHocTapMau;
 import com.luanvan.kehoachhoctapservice.exception.AppException;
 import com.luanvan.kehoachhoctapservice.exception.ErrorCode;
 
-import com.luanvan.kehoachhoctapservice.model.dto.HocKyDTO;
-import com.luanvan.kehoachhoctapservice.model.dto.HocPhanDTO;
-import com.luanvan.kehoachhoctapservice.model.dto.KeHoachHocTapDTO;
+import com.luanvan.kehoachhoctapservice.model.dto.*;
 import com.luanvan.kehoachhoctapservice.model.request.AddKHHTRequest;
 import com.luanvan.kehoachhoctapservice.model.request.HocPhanRequest;
 import com.luanvan.kehoachhoctapservice.model.request.KeHoachHocTapRequest;
@@ -14,8 +13,10 @@ import com.luanvan.kehoachhoctapservice.model.response.KeHoachHocTapDetail;
 import com.luanvan.kehoachhoctapservice.model.response.PageResponse;
 import com.luanvan.kehoachhoctapservice.model.response.ThongKeTinChi;
 import com.luanvan.kehoachhoctapservice.model.response.TinChiResponse;
+import com.luanvan.kehoachhoctapservice.repository.KeHoachHocTapMauRepository;
 import com.luanvan.kehoachhoctapservice.repository.KeHoachHocTapRepository;
 import com.luanvan.kehoachhoctapservice.repository.httpClient.HocPhanClient;
+import com.luanvan.kehoachhoctapservice.repository.httpClient.ProfileClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -36,12 +37,14 @@ import java.util.stream.Collectors;
 public class KeHoachHocTapService {
     private final ModelMapper modelMapper;
     private final KeHoachHocTapRepository keHoachHocTapRepository;
+    private final KeHoachHocTapMauRepository keHoachHocTapMauRepository;
     private final HocPhanClient hocPhanClient;
+    private final ProfileClient profileClient;
 
 
-    public List<HocKyDTO> geHocKyByMaSo(String maSo){
+    public List<HocKyDTO> geHocKyByMaSo(String maSo) {
         List<Long> hocKyList = keHoachHocTapRepository.findMaHocKyByMaSo(maSo);
-        if(hocKyList.isEmpty()){
+        if (hocKyList.isEmpty()) {
             return Collections.emptyList();
         }
         return hocPhanClient.getHocKyIn(hocKyList);
@@ -68,12 +71,12 @@ public class KeHoachHocTapService {
 
     public List<ThongKeTinChi> countKHHTGroupByHocKy(String maSo) {
         // Kiểm tra tham số đầu vào
-        if(maSo == null || maSo.isEmpty()) {
+        if (maSo == null || maSo.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
         // Lấy danh sách kế hoạch học tập của sinh viên từ database
         List<KeHoachHocTap> khhtList = keHoachHocTapRepository.findKeHoachHocTapsByMaSo(maSo);
-        if(khhtList == null || khhtList.isEmpty()) {
+        if (khhtList == null || khhtList.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -166,8 +169,7 @@ public class KeHoachHocTapService {
 
     @Transactional
     public KeHoachHocTapDTO create(AddKHHTRequest request) {
-        if(request == null)
-        {
+        if (request == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
         //        Kiểm tra học phần này con tồn tại trong hệ thống không
@@ -175,7 +177,7 @@ public class KeHoachHocTapService {
             throw new AppException(ErrorCode.HOCPHAN_NOTFOUND);
         }
 //      Kiểm tra học phần đang nhập có phải là học phần cải thiện không
-        if (request.isHocPhanCaiThien() && !isKeHoachHocTapExist(request.getMaSo(), request.getMaHocPhan())) {
+        if (request.isHocPhanCaiThien() && isKeHoachHocTapExist(request.getMaSo(), request.getMaHocPhan())) {
             throw new AppException(ErrorCode.KHHT_NOTFOUND);
         }
 
@@ -185,11 +187,12 @@ public class KeHoachHocTapService {
         return modelMapper.map(khht, KeHoachHocTapDTO.class);
     }
 
-    public List<HocPhanDTO> getHocPhanNotInCTDT(String maSo, String khoaHoc){
+    public List<HocPhanDTO> getHocPhanNotInCTDT(String maSo, String khoaHoc, Long maNganh) {
         List<String> maHpInKHHT = keHoachHocTapRepository.findMaHocPhanByMaSo(maSo);
-        return hocPhanClient.getHocPhanNotInCTDT(khoaHoc, maHpInKHHT);
+        return hocPhanClient.getHocPhanNotInCTDT(khoaHoc, maNganh, maHpInKHHT);
     }
-    public List<KeHoachHocTapDetail> getKHHTDetailByMaSoAndHocKy(String maSo, Long maHocKy){
+
+    public List<KeHoachHocTapDetail> getKHHTDetailByMaSoAndHocKy(String maSo, Long maHocKy) {
         if (maSo == null || maSo.isEmpty()) {
             throw new AppException(ErrorCode.USER_NOTFOUND);
         }
@@ -216,7 +219,7 @@ public class KeHoachHocTapService {
             throw new AppException(ErrorCode.USER_NOTFOUND);
         }
         Sort sort = Sort.by(Sort.Direction.ASC, "maHocKy", "maHocPhan");
-        Pageable pageable = PageRequest.of(page - 1,size, sort);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
         Page<KeHoachHocTap> khhtList = keHoachHocTapRepository.findKeHoachHocTapsByMaSo(maSo, pageable);
         if (khhtList.isEmpty()) {
             return PageResponse.<KeHoachHocTapDetail>builder()
@@ -246,10 +249,10 @@ public class KeHoachHocTapService {
     }
 
 
-//    Lấy học phần có trong khht
-    public List<KeHoachHocTapDetail> getKHHTDetailByLoaiHP(String maSo, String khoaHoc, Long maNganh ,String loaiHp){
+    //    Lấy học phần có trong khht
+    public List<KeHoachHocTapDetail> getKHHTDetailByLoaiHP(String maSo, String khoaHoc, Long maNganh, String loaiHp) {
         List<KeHoachHocTapDTO> khhtList = getKeHoachHocTapsByMaSo(maSo);
-        if(khhtList.isEmpty()) {
+        if (khhtList.isEmpty()) {
             return Collections.emptyList();
         }
         List<Long> maHocKyList = khhtList.stream()
@@ -311,6 +314,15 @@ public class KeHoachHocTapService {
         return modelMapper.map(existingKHHT, KeHoachHocTapDTO.class);
     }
 
+    public void creates(List<KeHoachHocTapRequest> request) {
+        if (request == null || request.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        List<KeHoachHocTap> khht = request.stream().map(
+                khhtRequest -> modelMapper.map(khhtRequest, KeHoachHocTap.class)).toList();
+        keHoachHocTapRepository.saveAll(khht);
+    }
+
     public void delete(Long id) {
         if (id == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
@@ -320,27 +332,82 @@ public class KeHoachHocTapService {
         keHoachHocTapRepository.delete(existingKHHT);
     }
 
+    public List<HocPhanDTO> getRecommendKHHT(String maSo, String khoaHoc, Long maNganh){
+//        HocKyDTO hocKyHienTai = hocPhanClient.getHocKyHienTai();
+//        log.info("Học kỳ hiện tại: {}", hocKyHienTai.getMaHocKy());
+        // Tìm kế hoạch học tập mẫu theo học kỳ gần nhất (bắt đầu từ học kỳ tiếp theo)
+//        Long hocKyTimKiem = hocKyHienTai.getMaHocKy() + 1;
+        Long hocKyGanNhat = keHoachHocTapRepository.findLatestMaHocKyByMaSo(maSo).orElse(0L);
+        List<KeHoachHocTapMau> khhtMauList = keHoachHocTapMauRepository.findByKhoaHocAndMaNganhAndNearestMaHocKy(
+                khoaHoc, maNganh, hocKyGanNhat + 1);
+
+        if (khhtMauList.isEmpty()) {
+            log.info("Không tìm thấy kế hoạch học tập mẫu cho khóa {} ngành {} từ học kỳ {} trở đi",
+                    khoaHoc, maNganh, hocKyGanNhat);
+            return Collections.emptyList();
+        }
+
+        log.info("Sử dụng kế hoạch học tập mẫu của học kỳ {} (gần nhất từ học kỳ {})",
+                hocKyGanNhat, hocKyGanNhat);
+
+        // Lọc ra những học phần chưa có trong kế hoạch học tập hiện tại và tồn tại
+        List<String> maHocPhanGoiY = khhtMauList.stream()
+                .map(KeHoachHocTapMau::getMaHocPhan)
+                .distinct() // Loại bỏ trùng lặp ngay từ đầu
+                .filter(maHocPhan -> !isKeHoachHocTapExist(maSo, maHocPhan)) // Sửa logic: chỉ lấy những HP chưa đăng ký
+                .collect(Collectors.toList());
+
+        if (maHocPhanGoiY.isEmpty()) {
+            log.info("Không có học phần nào để gợi ý cho sinh viên {}", maSo);
+            return Collections.emptyList();
+        }
+
+        log.info("Tìm thấy {} học phần gợi ý cho sinh viên {} từ học kỳ {}: {}",
+                maHocPhanGoiY.size(), maSo, hocKyGanNhat, maHocPhanGoiY);
+
+        return hocPhanClient.getHocPhanIn(maHocPhanGoiY);
+    }
+
+    public List<ThongKeTinChi> thongKeKHHT(String maLop) {
+        if(maLop == null || maLop.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        LopDTO lopDTO = profileClient.getLopByMaLop(maLop);
+        if (lopDTO == null) {
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+        List<String> maSoList = lopDTO.getDSSinhVien().stream().map(SinhVienDTO::getMaSo).toList();
+        List<ThongKeTinChi> thongKeTinChiList = new ArrayList<>();
+        maSoList.forEach(maSo ->{
+            ThongKeTinChi thongKeTinChi = new ThongKeTinChi();
+            thongKeTinChi.setMaSo(maSo);
+            thongKeTinChi.setSoTinChiDangKy(keHoachHocTapRepository.countKeHoachHocTapByMaSoAndHocPhanCaiThien(maSo, false));
+            thongKeTinChi.setSoTinChiCaiThien(keHoachHocTapRepository.countKeHoachHocTapByMaSoAndHocPhanCaiThien(maSo, true));
+            thongKeTinChiList.add(thongKeTinChi);
+        });
+        return thongKeTinChiList;
+    }
+
+    //    // Private methods
     private boolean isHocPhanExist(String maHocPhan) {
         try {
             hocPhanClient.getHocPhanById(maHocPhan);
             return true;
+        } catch (AppException e) {
+            log.warn("Học phần {} không tồn tại: {}", maHocPhan, e.getMessage());
+            return false;
         } catch (Exception e) {
+            log.error("Lỗi khi kiểm tra học phần {}: {}", maHocPhan, e.getMessage());
             return false;
         }
     }
+
     private boolean isKeHoachHocTapExist(String maSo, String maHocPhan) {
         return keHoachHocTapRepository.findByMaSoAndMaHocPhan(maSo, maHocPhan).isPresent();
     }
 
-    public void creates(List<KeHoachHocTapRequest> request) {
-        if(request == null || request.isEmpty()) {
-            throw new AppException(ErrorCode.INVALID_REQUEST);
-        }
-        List<KeHoachHocTap> khht = request.stream().map(
-                khhtRequest -> modelMapper.map(khhtRequest, KeHoachHocTap.class)).toList();
-        keHoachHocTapRepository.saveAll(khht);
-    }
-    private List<HocPhanDTO> getHocPhanFromKHHTList(List<KeHoachHocTapDTO>  khhtList) {
+
+    private List<HocPhanDTO> getHocPhanFromKHHTList(List<KeHoachHocTapDTO> khhtList) {
         List<String> maHocPhanList = khhtList.stream()
                 .map(KeHoachHocTapDTO::getMaHocPhan)
                 .toList();
@@ -366,8 +433,7 @@ public class KeHoachHocTapService {
     private List<KeHoachHocTapDetail> getKeHoachHocTapDetails(
             List<KeHoachHocTapDTO> khhtList,
             List<HocPhanDTO> hocPhanDTOList,
-            List<HocKyDTO> hocKyDTOList)
-    {
+            List<HocKyDTO> hocKyDTOList) {
         Map<String, HocPhanDTO> hocPhanMap = hocPhanDTOList.stream()
                 .collect(Collectors.toMap(HocPhanDTO::getMaHp, Function.identity()));
         Map<Long, HocKyDTO> hocKyMap = hocKyDTOList.stream()
@@ -390,4 +456,6 @@ public class KeHoachHocTapService {
         });
         return khhtDetailList;
     }
+
+
 }

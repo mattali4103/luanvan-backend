@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,7 +34,7 @@ public class UserService {
     private final ProfileClient profileClient;
 
     @Transactional
-    public UserDTO create(CreateSinhVienRequest request) {
+    public UserDTO createSinhVien(CreateSinhVienRequest request) {
         if (userRepository.existsById(request.getMaSo())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }

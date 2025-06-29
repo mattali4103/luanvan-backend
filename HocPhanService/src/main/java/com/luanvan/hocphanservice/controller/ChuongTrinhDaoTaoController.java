@@ -23,6 +23,7 @@ public class ChuongTrinhDaoTaoController {
         this.hocPhanService = hocPhanService;
     }
 
+
     @PostMapping("/hoc_phan_not_in/{khoaHoc}/{maNganh}")
     List<HocPhanDTO> getHocPhanNotInCTDT(@PathVariable String khoaHoc, @PathVariable Long maNganh, @RequestBody List<String> hocPhanList) {
         return chuongTrinhDaoTaoService.getHocPhanNotInCTDT(hocPhanList, khoaHoc, maNganh);
@@ -96,6 +97,18 @@ public class ChuongTrinhDaoTaoController {
                 .message("Deleted")
                 .build();
     }
+    // API FOR ADMIN
+    @GetMapping("")
+    public ApiResponse<ChuongTrinhDaoTaoDTO> getCTDTByKhoaHocAndMaNganh(
+            @RequestParam String khoaHoc,
+            @RequestParam Long maNganh) {
+        return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
+                .code(200)
+                .message("OK")
+                .data(chuongTrinhDaoTaoService.getByKhoaHocAndMaNganh(khoaHoc, maNganh))
+                .build();
+    }
+
 
 //    API for Service
     @PostMapping("/count/tinchi/{khoaHoc}/{maNganh}")

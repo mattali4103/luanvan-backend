@@ -61,5 +61,5 @@ public class SinhVienController {
                 .message("OK")
                 .build();
     }
-
+    //Lấy đầy đủ thông tin sinh viên bao gồm cả thông tin user
 }

@@ -3,10 +3,9 @@ package com.luanvan.kehoachhoctapservice.service;
 import com.luanvan.kehoachhoctapservice.entity.KeHoachHocTapMau;
 import com.luanvan.kehoachhoctapservice.exception.AppException;
 import com.luanvan.kehoachhoctapservice.exception.ErrorCode;
-import com.luanvan.kehoachhoctapservice.model.dto.HocKyDTO;
-import com.luanvan.kehoachhoctapservice.model.dto.HocPhanDTO;
-import com.luanvan.kehoachhoctapservice.model.dto.KeHoachHocTapMauDTO;
+import com.luanvan.kehoachhoctapservice.model.dto.*;
 import com.luanvan.kehoachhoctapservice.model.response.KeHoachHocTapDetail;
+import com.luanvan.kehoachhoctapservice.model.response.KeHoachHocTapGroup;
 import com.luanvan.kehoachhoctapservice.repository.KeHoachHocTapMauRepository;
 import com.luanvan.kehoachhoctapservice.repository.httpClient.HocPhanClient;
 import lombok.RequiredArgsConstructor;
@@ -108,6 +107,38 @@ public class KeHoachHocTapMauService {
         List<Long> hocKyList = list.stream().map(KeHoachHocTapMau::getMaHocKy).distinct().toList();
         return hocPhanClient.getHocKyIn(hocKyList);
     }
+    public List<KeHoachHocTapGroup> getKeHoachHocTapByMaNganh(Long maNganh) {
+        if (maNganh == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        List<String> list = keHoachHocTapMauRepository.findKhoaHocByMaNganh(maNganh);
+        if (list == null || list.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<KeHoachHocTapGroup> result = new ArrayList<>();
+
+        list.forEach(s -> {
+            KeHoachHocTapGroup group = new KeHoachHocTapGroup();
+            group.setKhoaHoc(s);
+            group.setNganhDTO(NganhDTO.builder().maNganh(maNganh).build());
+            result.add(group);
+        });
+        return result;
+    }
+
+    public List<KeHoachHocTapDetail> getKHHTMauByKhoaHocAndMaNganh(String khoaHoc, Long maNganh){
+        if (maNganh == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        List<KeHoachHocTapMau> list = keHoachHocTapMauRepository.findKeHoachHocTapMauByKhoaHocAndMaNganh(khoaHoc, maNganh);
+
+        if (list == null || list.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<HocPhanDTO> hocPhanDTOList = getHocPhanFromKHHTMau(list);
+        List<HocKyDTO> hocKyDTOList = getHocKyFromKHHTMau(list);
+        return getKeHoachHocTapDetail(list, hocPhanDTOList, hocKyDTOList);
+    }
 
 
 
@@ -120,24 +151,7 @@ public class KeHoachHocTapMauService {
         List<String> maHocPhanList = list.stream().map(KeHoachHocTapMau::getMaHocPhan).toList();
         List<HocPhanDTO> hocPhanDTOList = hocPhanClient.getHocPhanIn(maHocPhanList);
         List<HocKyDTO> hocKyDTOList = hocPhanClient.getHocKyIn(hocKyList);
-        List<KeHoachHocTapDetail> result = new LinkedList<>();
-        Map<String, HocPhanDTO> hocPhanMap = hocPhanDTOList.stream()
-                .collect(Collectors.toMap(HocPhanDTO::getMaHp, hp -> hp));
-        Map<Long, HocKyDTO> hocKyMap = hocKyDTOList.stream()
-                .collect(Collectors.toMap(HocKyDTO::getMaHocKy, hk -> hk));
-        list.forEach(keHoachHocTapMau -> {
-            HocPhanDTO hocPhanDTO = hocPhanMap.get(keHoachHocTapMau.getMaHocPhan());
-            HocKyDTO hocKyDTO = hocKyMap.get(keHoachHocTapMau.getMaHocKy());
-            if (hocPhanDTO != null && hocKyDTO != null) {
-                KeHoachHocTapDetail detail = KeHoachHocTapDetail.builder()
-                        .id(keHoachHocTapMau.getId())
-                        .hocPhan(hocPhanDTO)
-                        .hocKy(hocKyDTO)
-                        .build();
-                result.add(detail);
-            }
-        });
-        return result;
+        return getKeHoachHocTapDetail(list, hocPhanDTOList, hocKyDTOList);
     }
 
 
@@ -165,6 +179,42 @@ public class KeHoachHocTapMauService {
         } catch (Exception e) {
             return false;
         }
+    }
+    private List<KeHoachHocTapDetail> getKeHoachHocTapDetail(List<KeHoachHocTapMau> khhtList,
+                                                            List<HocPhanDTO> hocPhanDTOList,
+                                                            List<HocKyDTO> hocKyDTOList) {
+        List<KeHoachHocTapDetail> result = new LinkedList<>();
+        Map<String, HocPhanDTO> hocPhanMap = hocPhanDTOList.stream()
+                .collect(Collectors.toMap(HocPhanDTO::getMaHp, hp -> hp));
+        Map<Long, HocKyDTO> hocKyMap = hocKyDTOList.stream()
+                .collect(Collectors.toMap(HocKyDTO::getMaHocKy, hk -> hk));
+        khhtList.forEach(keHoachHocTapMau -> {
+            HocPhanDTO hocPhanDTO = hocPhanMap.get(keHoachHocTapMau.getMaHocPhan());
+            HocKyDTO hocKyDTO = hocKyMap.get(keHoachHocTapMau.getMaHocKy());
+            if (hocPhanDTO != null && hocKyDTO != null) {
+                KeHoachHocTapDetail detail = KeHoachHocTapDetail.builder()
+                        .id(keHoachHocTapMau.getId())
+                        .hocPhan(hocPhanDTO)
+                        .hocKy(hocKyDTO)
+                        .build();
+                result.add(detail);
+            }
+        });
+        return result;
+    }
+    private List<HocPhanDTO> getHocPhanFromKHHTMau(List<KeHoachHocTapMau> keHoachHocTapMauList) {
+        List<String> maHocPhanList = keHoachHocTapMauList.stream()
+                .map(KeHoachHocTapMau::getMaHocPhan)
+                .distinct()
+                .collect(Collectors.toList());
+        return hocPhanClient.getHocPhanIn(maHocPhanList);
+    }
+    private List<HocKyDTO> getHocKyFromKHHTMau(List<KeHoachHocTapMau> keHoachHocTapMauList) {
+        List<Long> maHocKyList = keHoachHocTapMauList.stream()
+                .map(KeHoachHocTapMau::getMaHocKy)
+                .distinct()
+                .collect(Collectors.toList());
+        return hocPhanClient.getHocKyIn(maHocKyList);
     }
 
 }

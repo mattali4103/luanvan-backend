@@ -24,8 +24,8 @@ public interface HocPhanClient {
     List<HocKyDTO> getHocKyIn(@RequestBody List<Long> hocKyList);
     @PostMapping(value = "/nam_hoc_in/list", produces = MediaType.APPLICATION_JSON_VALUE)
     List<NamHocDTO> getAllNamHoc(@RequestBody List<String> namHocList);
-    @PostMapping("/ctdt/hoc_phan_not_in/{khoaHoc}")
-    List<HocPhanDTO> getHocPhanNotInCTDT(@PathVariable String khoaHoc, @RequestBody List<String> hocPhanList);
+    @PostMapping("/ctdt/hoc_phan_not_in/{khoaHoc}/{maNganh}")
+    List<HocPhanDTO> getHocPhanNotInCTDT(@PathVariable String khoaHoc, @PathVariable Long maNganh, @RequestBody List<String> hocPhanList);
     @PostMapping("/ctdt/count/tinchi/{khoaHoc}/{maNganh}")
     TinChiResponse getCountTinChiByCTDT(@PathVariable String khoaHoc, @PathVariable Long maNganh , @RequestBody List<KeHoachHocTapRequest> hocPhanList);
     @PostMapping("/ctdt/hocphan/by_loai_hp")
@@ -36,6 +36,8 @@ public interface HocPhanClient {
             @RequestParam("namKetThuc") String namKetThuc,
             @RequestParam("tenHocKy") String tenHocKy
     );
+    @GetMapping("/hocky/current")
+    HocKyDTO getHocKyHienTai();
 }
 
 

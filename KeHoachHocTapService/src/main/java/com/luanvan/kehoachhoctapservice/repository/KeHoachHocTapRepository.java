@@ -15,6 +15,10 @@ import java.util.Optional;
 public interface KeHoachHocTapRepository extends JpaRepository<KeHoachHocTap, Long> {
     Optional<KeHoachHocTap> findByMaSoAndMaHocPhan(String maSo, String maHocPhan);
 
+    //Lấy mã học kỳ gần nhất theo mã số sinh viên
+    @Query("SELECT DISTINCT k.maHocKy FROM KeHoachHocTap k WHERE k.maSo = :maSo ORDER BY k.maHocKy DESC LIMIT 1")
+    Optional<Long> findLatestMaHocKyByMaSo(@Param("maSo") String maSo);
+
     @Query("SELECT DISTINCT k.maHocKy FROM KeHoachHocTap k WHERE k.maSo = :maSo")
     List<Long> findMaHocKyByMaSo(@Param("maSo") String maSo);
     //    Tìm khht theo mã số sv
@@ -25,6 +29,5 @@ public interface KeHoachHocTapRepository extends JpaRepository<KeHoachHocTap, Lo
     List<String> findMaHocPhanByMaSo(@Param("maSo") String maSo);
 
     Page<KeHoachHocTap> findKeHoachHocTapsByMaSo(String maSo, Pageable pageable);
-
-
+    Long countKeHoachHocTapByMaSoAndHocPhanCaiThien(String maSo, boolean hocPhanCaiThien);
 }

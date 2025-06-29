@@ -2,6 +2,7 @@ package com.luanvan.profileservice.controller;
 
 import com.luanvan.profileservice.dto.AdminDTO;
 import com.luanvan.profileservice.dto.response.ApiResponse;
+import com.luanvan.profileservice.dto.response.ProfileResponse;
 import com.luanvan.profileservice.services.AdminService;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,16 @@ public class AdminController {
     public AdminDTO getAdminByMaSo(@PathVariable String maSo){
         return adminService.findById(maSo);
     }
+
+    @GetMapping("/me/{maSo}")
+    public ApiResponse<ProfileResponse> getMyInfo(@PathVariable String maSo){
+        return ApiResponse.<ProfileResponse>builder()
+                .code(200)
+                .message("OK")
+                .data(adminService.getMyInfo(maSo))
+                .build();
+    }
+
 
     @PutMapping("/update")
     public ApiResponse<AdminDTO> updateAdmin(@RequestBody AdminDTO adminDTO){

@@ -90,4 +90,22 @@ public class KhoaService {
 
         khoaRepository.deleteById(maKhoa);
     }
+    public KhoaDTO getDSNganhByKhoa(Long maKhoa) {
+        Khoa khoa = khoaRepository.findById(maKhoa)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        if (khoa.getDSNganh() == null || khoa.getDSNganh().isEmpty()) {
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+        modelMapper.map(khoa, KhoaDTO.class);
+        return modelMapper.map(khoa, KhoaDTO.class);
+    }
+
+    public KhoaDTO getDSLop(Long maKhoa) {
+        Khoa khoa = khoaRepository.findById(maKhoa)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        if (khoa.getDSNganh() == null ) {
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+        return modelMapper.map(khoa, KhoaDTO.class);
+    }
 }

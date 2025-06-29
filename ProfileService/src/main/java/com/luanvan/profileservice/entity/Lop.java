@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,10 +19,16 @@ public class Lop {
     String maLop;
     String tenLop;
     String chuNhiem;
+    Long siSo;
+    Long siSoCon;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "maLop")
+    @JsonBackReference
+    List<SinhVien> DSSinhVien;
 
     @ManyToOne
     @JoinColumn(name = "maNganh")
     @JsonBackReference
     Nganh nganh;
-
 }

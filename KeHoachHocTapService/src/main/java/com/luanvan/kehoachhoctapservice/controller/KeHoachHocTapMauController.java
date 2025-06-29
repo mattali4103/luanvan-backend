@@ -1,8 +1,10 @@
 package com.luanvan.kehoachhoctapservice.controller;
 
+import com.luanvan.kehoachhoctapservice.entity.KeHoachHocTapMau;
 import com.luanvan.kehoachhoctapservice.model.dto.HocKyDTO;
 import com.luanvan.kehoachhoctapservice.model.response.ApiResponse;
 import com.luanvan.kehoachhoctapservice.model.response.KeHoachHocTapDetail;
+import com.luanvan.kehoachhoctapservice.model.response.KeHoachHocTapGroup;
 import com.luanvan.kehoachhoctapservice.service.KeHoachHocTapMauService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +19,28 @@ public class KeHoachHocTapMauController {
 
     public KeHoachHocTapMauController(KeHoachHocTapMauService keHoachHocTapMauService) {
         this.keHoachHocTapMauService = keHoachHocTapMauService;
+    }
+
+    @GetMapping("/by_ma_nganh")
+    public ApiResponse<List<KeHoachHocTapDetail>> getKeHoachHocTapMauByKhoaHocAndMaNganh(
+            @RequestParam("khoaHoc") String khoaHoc,
+            @RequestParam("maNganh") Long maNganh) {
+        List<KeHoachHocTapDetail> keHoachHocTapMauList = keHoachHocTapMauService.getKHHTMauByKhoaHocAndMaNganh(khoaHoc, maNganh);
+        return ApiResponse.<List<KeHoachHocTapDetail>>builder()
+                .code(200)
+                .message("OK")
+                .data(keHoachHocTapMauList)
+                .build();
+    }
+    @GetMapping("/group_by_khoa_hoc")
+    public ApiResponse<List<KeHoachHocTapGroup>> getKeHoachHocTapMauGroupByKhoaHoc(
+            @RequestParam("maNganh") Long maNganh) {
+        List<KeHoachHocTapGroup> keHoachHocTapMauList = keHoachHocTapMauService.getKeHoachHocTapByMaNganh(maNganh);
+        return ApiResponse.<List<KeHoachHocTapGroup>>builder()
+                .code(200)
+                .message("OK")
+                .data(keHoachHocTapMauList)
+                .build();
     }
 
     @PostMapping(value = "/import", consumes = "multipart/form-data")

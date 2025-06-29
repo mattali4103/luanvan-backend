@@ -1,7 +1,7 @@
 package com.luanvan.profileservice.services;
 
+import com.luanvan.profileservice.dto.LopDTO;
 import com.luanvan.profileservice.dto.NganhDTO;
-import com.luanvan.profileservice.entity.Khoa;
 import com.luanvan.profileservice.entity.Nganh;
 import com.luanvan.profileservice.exception.AppException;
 import com.luanvan.profileservice.exception.ErrorCode;
@@ -11,12 +11,13 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class NganhService {
 
     private final ModelMapper modelMapper;
-    private final KhoaRepository khoaRepository;
     private final NganhRepository nganhRepository;
 
     public NganhDTO createNganh(NganhDTO nganhDTO) {
@@ -28,9 +29,6 @@ public class NganhService {
                 .addMappings(mapper -> mapper.skip(Nganh::setMaNganh))
                 .addMappings(mapper -> mapper.skip(Nganh::setDsLop));
         Nganh nganh = modelMapper.map(nganhDTO, Nganh.class);
-        Khoa khoa = khoaRepository.findById(nganhDTO.getKhoa().getMaKhoa())
-                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
-        nganh.setKhoa(khoa);
         nganh = nganhRepository.save(nganh);
         return modelMapper.map(nganh, NganhDTO.class);
     }
@@ -58,6 +56,14 @@ public class NganhService {
 
     public boolean existByMaNganh(Long maNganh) {
         return nganhRepository.existsById(maNganh);
+    }
+
+    public List<LopDTO> getDanhSachLopByMaNganh(Long maNganh) {
+        Nganh nganh = nganhRepository.findById(maNganh)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        return nganh.getDsLop().stream()
+                .map(lop -> modelMapper.map(lop, LopDTO.class))
+                .toList();
     }
 
 

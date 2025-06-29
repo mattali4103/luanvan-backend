@@ -57,4 +57,13 @@ public class KhoaController {
                 .message("OK")
                 .build();
     }
+
+    @GetMapping("/get-lop/{maKhoa}")
+    public ApiResponse<KhoaDTO> getLopByMaKhoa(@PathVariable Long maKhoa) {
+        return ApiResponse.<KhoaDTO>builder()
+                .code(200)
+                .message("OK")
+                .data(khoaService.getDSLop(maKhoa))
+                .build();
+    }
 }

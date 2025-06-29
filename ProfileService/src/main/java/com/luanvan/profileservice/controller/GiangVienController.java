@@ -2,6 +2,7 @@ package com.luanvan.profileservice.controller;
 
 import com.luanvan.profileservice.dto.GiangVienDTO;
 import com.luanvan.profileservice.dto.response.ApiResponse;
+import com.luanvan.profileservice.dto.response.ProfileResponse;
 import com.luanvan.profileservice.services.GiangVienService;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,14 @@ public class GiangVienController {
                 .code(200)
                 .message("OK")
                 .data(giangVienService.createGiangVien(gv))
+                .build();
+    }
+    @GetMapping("/me/{maSo}")
+    public ApiResponse<ProfileResponse> getMyInfo(@PathVariable String maSo) {
+        return ApiResponse.<ProfileResponse>builder()
+                .code(200)
+                .message("OK")
+                .data(giangVienService.getMyInfo(maSo))
                 .build();
     }
 

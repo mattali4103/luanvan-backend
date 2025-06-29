@@ -61,4 +61,17 @@ public class HocKyController {
     ) {
         return hocKyService.findHocKyByName(namBatDau, namKetThuc, tenHocKy);
     }
+    @GetMapping("/current")
+    public HocKyDTO getCurrentHocKy() {
+        return hocKyService.getCurrentHocKy();
+    }
+    @PutMapping("/current/update/{maHocKy}")
+    public ApiResponse<Long> updateCurrentHocKy(@PathVariable Long maHocKy) {
+        return ApiResponse.<Long>builder()
+                .code(200)
+                .message("OK")
+                .data(hocKyService.updateCurrentHocKy(maHocKy))
+                .build();
+    }
+
 }

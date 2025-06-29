@@ -1,10 +1,9 @@
-package com.luanvan.profileservice.dto;
+package com.luanvan.kehoachhoctapservice.model.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
-
 
 @Data
 @Getter
@@ -13,8 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class KhoaDTO {
-    Long maKhoa;
-    String tenKhoa;
-    List<NganhDTO> DSNganh;
+public class LopDTO {
+    String maLop;
+    String tenLop;
+    String chuNhiem;
+    List<SinhVienDTO> DSSinhVien;
 }
