@@ -5,7 +5,7 @@ import com.luanvan.hocphanservice.entity.HocPhan;
 import com.luanvan.hocphanservice.entity.HocPhanTuChon;
 import com.luanvan.hocphanservice.exception.AppException;
 import com.luanvan.hocphanservice.exception.ErrorCode;
-import com.luanvan.hocphanservice.model.ChuongTrinhDaoTaoDTO;
+
 import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.HocPhanTuChonDTO;
 import com.luanvan.hocphanservice.repository.ChuongTrinhDaoTaoRepository;
