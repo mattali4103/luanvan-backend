@@ -36,4 +36,8 @@ public interface KeHoachHocTapMauRepository extends JpaRepository<KeHoachHocTapM
     List<KeHoachHocTapMau> findKeHoachHocTapMauByKhoaHocAndMaNganh(String khoaHoc, Long maNganh);
 
     boolean existsByKhoaHocAndMaNganhAndMaHocPhan(String khoaHoc, Long maNganh, String maHocPhan);
+
+    KeHoachHocTapMau findByKhoaHocAndMaNganhAndMaHocPhanAndMaHocKy(String khoaHoc, Long maNganh, String maHocPhan, Long maHocKy);
+
+    KeHoachHocTapMau findByKhoaHocAndMaNganhAndMaHocPhan(String khoaHoc, Long maNganh, String maHocPhan);
 }

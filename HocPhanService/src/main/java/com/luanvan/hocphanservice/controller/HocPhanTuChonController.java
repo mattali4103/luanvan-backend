@@ -1,5 +1,6 @@
 package com.luanvan.hocphanservice.controller;
 
+import com.luanvan.hocphanservice.entity.ChuongTrinhDaoTao;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.HocPhanTuChonDTO;
 import com.luanvan.hocphanservice.model.Request.HocPhanRequest;
@@ -69,6 +70,14 @@ public class HocPhanTuChonController {
                 .code(200)
                 .message("OK")
                 .data(hocPhanTuChonService.getAllByKhoaHocAndMaNganh(khoaHoc, maNganh))
+                .build();
+    }
+    @GetMapping("/the_chat")
+    public ApiResponse<List<HocPhanDTO>> getNhomHocPhanTheChat() {
+        return ApiResponse.<List<HocPhanDTO>>builder()
+                .code(200)
+                .message("OK")
+                .data(hocPhanTuChonService.getNhomHocPhanTheChat())
                 .build();
     }
 }

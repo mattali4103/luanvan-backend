@@ -1,9 +1,11 @@
 package com.luanvan.hocphanservice.services;
 
+import com.luanvan.hocphanservice.entity.ChuongTrinhDaoTao;
 import com.luanvan.hocphanservice.entity.HocPhan;
 import com.luanvan.hocphanservice.entity.HocPhanTuChon;
 import com.luanvan.hocphanservice.exception.AppException;
 import com.luanvan.hocphanservice.exception.ErrorCode;
+import com.luanvan.hocphanservice.model.ChuongTrinhDaoTaoDTO;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.HocPhanTuChonDTO;
 import com.luanvan.hocphanservice.repository.ChuongTrinhDaoTaoRepository;
@@ -111,4 +113,14 @@ public class HocPhanTuChonService {
     }
 
 
+    public List<HocPhanDTO> getNhomHocPhanTheChat() {
+        ChuongTrinhDaoTao ctdt = chuongTrinhDaoTaoRepository.findById(4L)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        if (ctdt.getHocPhanList() == null || ctdt.getHocPhanList().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return ctdt.getHocPhanList().stream()
+                .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
+                .toList();
+    }
 }

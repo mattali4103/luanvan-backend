@@ -1,6 +1,5 @@
 package com.luanvan.kehoachhoctapservice.controller;
 
-import com.luanvan.kehoachhoctapservice.entity.KeHoachHocTapMau;
 import com.luanvan.kehoachhoctapservice.model.dto.HocKyDTO;
 import com.luanvan.kehoachhoctapservice.model.dto.KeHoachHocTapMauDTO;
 import com.luanvan.kehoachhoctapservice.model.response.ApiResponse;
@@ -20,6 +19,33 @@ public class KeHoachHocTapMauController {
 
     public KeHoachHocTapMauController(KeHoachHocTapMauService keHoachHocTapMauService) {
         this.keHoachHocTapMauService = keHoachHocTapMauService;
+    }
+
+    @DeleteMapping("/delete")
+    public ApiResponse<Void> delete(@RequestBody KeHoachHocTapMauDTO chuongTrinhDaoTaoDTO) {
+        keHoachHocTapMauService.deleteKeHoachHocTapMau(chuongTrinhDaoTaoDTO);
+        return ApiResponse.<Void>builder()
+                .code(204)
+                .message("Xoá thành công!")
+                .build();
+    }
+    @DeleteMapping("/delete/by_khoa_hoc_and_ma_nganh")
+    public ApiResponse<Void> deleteByKhoaHocAndMaNganh(@RequestBody KeHoachHocTapMauDTO dto) {
+        keHoachHocTapMauService.deleteAllByKhoaHocAndMaNganh(dto.getKhoaHoc(), dto.getMaNganh());
+        return ApiResponse.<Void>builder()
+                .code(204)
+                .message("Đã xoá toàn bộ kế hoạch hc tập mẫu" + dto.getKhoaHoc())
+                .build();
+    }
+
+
+    @PutMapping("/updates")
+    public ApiResponse<List<KeHoachHocTapMauDTO>> updateKeHoachHocTapMau(@RequestBody List<KeHoachHocTapMauDTO> dtoList) {
+        return ApiResponse.<List<KeHoachHocTapMauDTO>>builder()
+                .code(200)
+                .message("OK")
+                .data(keHoachHocTapMauService.updateKHHT(dtoList))
+                .build();
     }
 
     @PostMapping("/creates") // Tạo mới danh sách kế hoạch học tập mẫu
@@ -88,4 +114,6 @@ public class KeHoachHocTapMauController {
                 .data(keHoachHocTapMauService.getHocKyInKHHTMau(khoaHoc, maNganh))
                 .build();
     }
+
+
 }

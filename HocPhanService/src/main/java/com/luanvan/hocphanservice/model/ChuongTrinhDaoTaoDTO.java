@@ -20,5 +20,4 @@ public class ChuongTrinhDaoTaoDTO {
     Long maNganh;
     String noiDung;
     List<HocPhanDTO> hocPhanList;
-
 }

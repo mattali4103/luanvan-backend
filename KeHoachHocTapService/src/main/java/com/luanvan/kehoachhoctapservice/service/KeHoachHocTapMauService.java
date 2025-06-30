@@ -101,12 +101,13 @@ public class KeHoachHocTapMauService {
 
     public List<HocKyDTO> getHocKyInKHHTMau(String khoaHoc, Long maNganh) {
         List<KeHoachHocTapMau> list = keHoachHocTapMauRepository.findByKhoaHocAndMaNganh(khoaHoc, maNganh);
-        if(list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty()) {
             return Collections.emptyList();
         }
         List<Long> hocKyList = list.stream().map(KeHoachHocTapMau::getMaHocKy).distinct().toList();
         return hocPhanClient.getHocKyIn(hocKyList);
     }
+
     public List<KeHoachHocTapGroup> getKeHoachHocTapByMaNganh(Long maNganh) {
         if (maNganh == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
@@ -126,7 +127,7 @@ public class KeHoachHocTapMauService {
         return result;
     }
 
-    public List<KeHoachHocTapDetail> getKHHTMauByKhoaHocAndMaNganh(String khoaHoc, Long maNganh){
+    public List<KeHoachHocTapDetail> getKHHTMauByKhoaHocAndMaNganh(String khoaHoc, Long maNganh) {
         if (maNganh == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
@@ -140,11 +141,9 @@ public class KeHoachHocTapMauService {
         return getKeHoachHocTapDetail(list, hocPhanDTOList, hocKyDTOList);
     }
 
-
-
     public List<KeHoachHocTapDetail> getKeHoachHocTapMau(String khoaHoc, Long maNganh, Long maHocKy) {
         List<KeHoachHocTapMau> list = keHoachHocTapMauRepository.findByKhoaHocAndMaNganhAndMaHocKy(khoaHoc, maNganh, maHocKy);
-        if(list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty()) {
             return Collections.emptyList();
         }
         List<Long> hocKyList = list.stream().map(KeHoachHocTapMau::getMaHocKy).toList();
@@ -152,6 +151,59 @@ public class KeHoachHocTapMauService {
         List<HocPhanDTO> hocPhanDTOList = hocPhanClient.getHocPhanIn(maHocPhanList);
         List<HocKyDTO> hocKyDTOList = hocPhanClient.getHocKyIn(hocKyList);
         return getKeHoachHocTapDetail(list, hocPhanDTOList, hocKyDTOList);
+    }
+
+    // Xoá 1 kế hoạch học tập mẫu theo khoa học, mã ngành và mã học phần và mã học kỳ
+    public void deleteKeHoachHocTapMau(KeHoachHocTapMauDTO dto) {
+        if(dto.getId() == null ) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        KeHoachHocTapMau keHoachHocTapMau = keHoachHocTapMauRepository.findById(dto.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        keHoachHocTapMauRepository.delete(keHoachHocTapMau);
+    }
+
+    @Transactional
+    public void deleteAllByKhoaHocAndMaNganh(String khoaHoc, Long maNganh) {
+        if (khoaHoc == null || maNganh == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        List<KeHoachHocTapMau> khhtMau = keHoachHocTapMauRepository.findByKhoaHocAndMaNganh(khoaHoc, maNganh);
+        if (khhtMau == null) {
+            log.warn("No Ke Hoach Hoc Tap Mau found for Khoa Hoc: {}, Ma Nganh: {}, Ma Hoc Phan: {}",
+                    khoaHoc, maNganh);
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+        keHoachHocTapMauRepository.deleteAll(khhtMau);
+    }
+
+    @Transactional
+    public List<KeHoachHocTapMauDTO> updateKHHT(List<KeHoachHocTapMauDTO> dtoList) {
+        if (dtoList == null || dtoList.isEmpty()) {
+            throw new AppException(ErrorCode.LIST_EMPTY);
+        }
+        List<KeHoachHocTapMauDTO> result = new ArrayList<>();
+        dtoList.forEach(dto -> {
+            if (dto.getKhoaHoc() == null || dto.getMaNganh() == null || dto.getMaHocPhan() == null) {
+                throw new AppException(ErrorCode.INVALID_REQUEST);
+            }
+
+
+            KeHoachHocTapMau existing = keHoachHocTapMauRepository.findByKhoaHocAndMaNganhAndMaHocPhan(
+                    dto.getKhoaHoc(), dto.getMaNganh(), dto.getMaHocPhan());
+            if (existing != null) {
+                if(existing.getMaHocKy().equals(dto.getMaHocKy())) {
+                    log.warn("Ke Hoach Hoc Tap Mau already exists for Khoa Hoc: {}, Ma Nganh: {}, Ma Hoc Phan: {}",
+                            dto.getKhoaHoc(), dto.getMaNganh(), dto.getMaHocPhan());
+                    return; // Skip if the record already exists with the same MaHocKy
+                }
+                keHoachHocTapMauRepository.delete(existing);
+            }
+            KeHoachHocTapMau keHoachHocTapMau = keHoachHocTapMauRepository.save(modelMapper.map(dto, KeHoachHocTapMau.class));
+            result.add(modelMapper.map(keHoachHocTapMau, KeHoachHocTapMauDTO.class))
+            ;
+        });
+        return result;
     }
 
 
@@ -180,9 +232,10 @@ public class KeHoachHocTapMauService {
             return false;
         }
     }
+
     private List<KeHoachHocTapDetail> getKeHoachHocTapDetail(List<KeHoachHocTapMau> khhtList,
-                                                            List<HocPhanDTO> hocPhanDTOList,
-                                                            List<HocKyDTO> hocKyDTOList) {
+                                                             List<HocPhanDTO> hocPhanDTOList,
+                                                             List<HocKyDTO> hocKyDTOList) {
         List<KeHoachHocTapDetail> result = new LinkedList<>();
         Map<String, HocPhanDTO> hocPhanMap = hocPhanDTOList.stream()
                 .collect(Collectors.toMap(HocPhanDTO::getMaHp, hp -> hp));
@@ -202,6 +255,7 @@ public class KeHoachHocTapMauService {
         });
         return result;
     }
+
     private List<HocPhanDTO> getHocPhanFromKHHTMau(List<KeHoachHocTapMau> keHoachHocTapMauList) {
         List<String> maHocPhanList = keHoachHocTapMauList.stream()
                 .map(KeHoachHocTapMau::getMaHocPhan)
@@ -209,6 +263,7 @@ public class KeHoachHocTapMauService {
                 .collect(Collectors.toList());
         return hocPhanClient.getHocPhanIn(maHocPhanList);
     }
+
     private List<HocKyDTO> getHocKyFromKHHTMau(List<KeHoachHocTapMau> keHoachHocTapMauList) {
         List<Long> maHocKyList = keHoachHocTapMauList.stream()
                 .map(KeHoachHocTapMau::getMaHocKy)
@@ -219,27 +274,27 @@ public class KeHoachHocTapMauService {
 
     @Transactional
     public void createKeHoachHocTapMau(List<KeHoachHocTapMauDTO> dtoList) {
-        if(dtoList == null || dtoList.isEmpty()) {
+        if (dtoList == null || dtoList.isEmpty()) {
             throw new AppException(ErrorCode.LIST_EMPTY);
         }
 
-        if(keHoachHocTapMauRepository.existsByKhoaHocAndMaNganh(dtoList.get(0).getKhoaHoc(), dtoList.get(0).getMaNganh())) {
+        if (keHoachHocTapMauRepository.existsByKhoaHocAndMaNganh(dtoList.get(0).getKhoaHoc(), dtoList.get(0).getMaNganh())) {
             log.warn("Ke Hoach Hoc Tap Mau already exists for Khoa Hoc: {}, Ma Nganh: {}",
                     dtoList.get(0).getKhoaHoc(), dtoList.get(0).getMaNganh());
             throw new AppException(ErrorCode.EXISTED);
         }
         List<KeHoachHocTapMau> result = new ArrayList<>();
         dtoList.forEach(dto -> {
-            if(dto.getKhoaHoc() == null || dto.getMaNganh() == null || dto.getMaHocPhan() == null) {
-                throw new AppException(ErrorCode.INVALID_REQUEST);
-            }
-            if(keHoachHocTapMauRepository.existsByKhoaHocAndMaNganhAndMaHocPhan(dto.getKhoaHoc(), dto.getMaNganh(), dto.getMaHocPhan())) {
-                log.warn("Ke Hoach Hoc Tap Mau already exists for Khoa Hoc: {}, Ma Nganh: {}, Ma Hoc Phan: {}",
-                        dto.getKhoaHoc(), dto.getMaNganh(), dto.getMaHocPhan());
-            }
-            KeHoachHocTapMau keHoachHocTapMau = modelMapper.map(dto, KeHoachHocTapMau.class);
-            result.add(keHoachHocTapMau);
-        }
+                    if (dto.getKhoaHoc() == null || dto.getMaNganh() == null || dto.getMaHocPhan() == null) {
+                        throw new AppException(ErrorCode.INVALID_REQUEST);
+                    }
+                    if (keHoachHocTapMauRepository.existsByKhoaHocAndMaNganhAndMaHocPhan(dto.getKhoaHoc(), dto.getMaNganh(), dto.getMaHocPhan())) {
+                        log.warn("Ke Hoach Hoc Tap Mau already exists for Khoa Hoc: {}, Ma Nganh: {}, Ma Hoc Phan: {}",
+                                dto.getKhoaHoc(), dto.getMaNganh(), dto.getMaHocPhan());
+                    }
+                    KeHoachHocTapMau keHoachHocTapMau = modelMapper.map(dto, KeHoachHocTapMau.class);
+                    result.add(keHoachHocTapMau);
+                }
         );
 
         keHoachHocTapMauRepository.saveAll(result);
