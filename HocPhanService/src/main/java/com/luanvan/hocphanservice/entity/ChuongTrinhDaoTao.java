@@ -20,6 +20,9 @@ public class ChuongTrinhDaoTao {
     Long id;
     String khoaHoc;
     Long maNganh;
+    Long tongSoTinChi;
+    Long tongSoTinChiTuChon;
+
     @ManyToMany
     @JoinTable(
             name = "ctdt_hp",

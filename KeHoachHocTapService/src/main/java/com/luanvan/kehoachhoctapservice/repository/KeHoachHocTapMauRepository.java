@@ -33,11 +33,11 @@ public interface KeHoachHocTapMauRepository extends JpaRepository<KeHoachHocTapM
     @Query("SELECT DISTINCT k.khoaHoc FROM KeHoachHocTapMau k WHERE k.maNganh = :maNganh")
     List<String> findKhoaHocByMaNganh(Long maNganh);
 
-    List<KeHoachHocTapMau> findKeHoachHocTapMauByKhoaHocAndMaNganh(String khoaHoc, Long maNganh);
+    List<KeHoachHocTapMau> findKeHoachHocTapMauByKhoaHocAndMaNganhOrderByMaHocKy(String khoaHoc, Long maNganh);
 
     boolean existsByKhoaHocAndMaNganhAndMaHocPhan(String khoaHoc, Long maNganh, String maHocPhan);
 
     KeHoachHocTapMau findByKhoaHocAndMaNganhAndMaHocPhanAndMaHocKy(String khoaHoc, Long maNganh, String maHocPhan, Long maHocKy);
 
-    KeHoachHocTapMau findByKhoaHocAndMaNganhAndMaHocPhan(String khoaHoc, Long maNganh, String maHocPhan);
+    KeHoachHocTapMau findByKhoaHocAndMaNganhAndMaHocPhanOrderByMaHocKy(String khoaHoc, Long maNganh, String maHocPhan);
 }

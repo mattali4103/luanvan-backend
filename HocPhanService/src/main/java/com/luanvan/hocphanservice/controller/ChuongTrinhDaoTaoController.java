@@ -1,4 +1,5 @@
 package com.luanvan.hocphanservice.controller;
+
 import com.luanvan.hocphanservice.entity.ChuongTrinhDaoTao;
 import com.luanvan.hocphanservice.model.ChuongTrinhDaoTaoDTO;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
@@ -6,11 +7,13 @@ import com.luanvan.hocphanservice.model.Request.CTDTDescriptionRequest;
 import com.luanvan.hocphanservice.model.Request.HocPhanRequest;
 import com.luanvan.hocphanservice.model.Request.KeHoachHocTapRequest;
 import com.luanvan.hocphanservice.model.Response.ApiResponse;
+import com.luanvan.hocphanservice.model.Response.ThongKeCTDT;
 import com.luanvan.hocphanservice.model.Response.TinChiResponse;
 import com.luanvan.hocphanservice.services.ChuongTrinhDaoTaoService;
 import com.luanvan.hocphanservice.services.HocPhanService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @RestController
@@ -22,6 +25,17 @@ public class ChuongTrinhDaoTaoController {
     public ChuongTrinhDaoTaoController(ChuongTrinhDaoTaoService chuongTrinhDaoTaoService, HocPhanService hocPhanService) {
         this.chuongTrinhDaoTaoService = chuongTrinhDaoTaoService;
         this.hocPhanService = hocPhanService;
+    }
+
+    @GetMapping("/thongke")
+    public ApiResponse<ThongKeCTDT> getThongKeCTDT(
+            @RequestParam("id") Long id
+    ) {
+        return ApiResponse.<ThongKeCTDT>builder()
+                .code(200)
+                .message("OK")
+                .data(chuongTrinhDaoTaoService.getThongKeCTDT(id))
+                .build();
     }
 
     @GetMapping("/get_by_ma_nganh/{maNganh}")
@@ -58,6 +72,7 @@ public class ChuongTrinhDaoTaoController {
                 .data(chuongTrinhDaoTaoService.getByKhoaHocAndMaNganh(khoaHoc, maNganh))
                 .build();
     }
+
     @GetMapping("/get/{khoaHoc}/{maNganh}")
     public ApiResponse<ChuongTrinhDaoTaoDTO> getChuongTrinhDaoTaoByNganh(@PathVariable String khoaHoc, @PathVariable Long maNganh) {
         return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
@@ -66,6 +81,7 @@ public class ChuongTrinhDaoTaoController {
                 .data(chuongTrinhDaoTaoService.getCTDT(khoaHoc, maNganh))
                 .build();
     }
+
     @PostMapping("/create")
     public ApiResponse<ChuongTrinhDaoTaoDTO> createChuongTrinhDaoTao(@RequestBody ChuongTrinhDaoTaoDTO chuongTrinhDaoTaoDTO) {
         return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
@@ -86,12 +102,13 @@ public class ChuongTrinhDaoTaoController {
                 .noiDung(noiDung)
                 .khoaHoc(khoaHoc)
                 .build();
-        chuongTrinhDaoTaoService.createDSHocPhanFromFile(request,file);
+        chuongTrinhDaoTaoService.createDSHocPhanFromFile(request, file);
         return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
                 .code(201)
                 .message("Created OK")
                 .build();
     }
+
     @PutMapping("/update")
     public ApiResponse<ChuongTrinhDaoTaoDTO> updateChuongTrinhDaoTao(@RequestBody ChuongTrinhDaoTaoDTO chuongTrinhDaoTaoDTO) {
         return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
@@ -100,6 +117,7 @@ public class ChuongTrinhDaoTaoController {
                 .data(chuongTrinhDaoTaoService.update(chuongTrinhDaoTaoDTO))
                 .build();
     }
+
     @DeleteMapping("/delete/{id}")
     public ApiResponse<Void> deleteChuongTrinhDaoTao(@PathVariable Long id) {
         chuongTrinhDaoTaoService.deleteById(id);
@@ -108,6 +126,7 @@ public class ChuongTrinhDaoTaoController {
                 .message("Deleted")
                 .build();
     }
+
     // API FOR ADMIN
     @GetMapping("")
     public ApiResponse<ChuongTrinhDaoTaoDTO> getCTDTByKhoaHocAndMaNganh(
@@ -121,13 +140,14 @@ public class ChuongTrinhDaoTaoController {
     }
 
 
-//    API for Service
+    //    API for Service
     @PostMapping("/count/tinchi/{khoaHoc}/{maNganh}")
-    public TinChiResponse getTongTinchi(@PathVariable String khoaHoc,@PathVariable Long maNganh, @RequestBody List<KeHoachHocTapRequest> request) {
+    public TinChiResponse getTongTinchi(@PathVariable String khoaHoc, @PathVariable Long maNganh, @RequestBody List<KeHoachHocTapRequest> request) {
         return chuongTrinhDaoTaoService.getCountTinChiByCTDT(khoaHoc, maNganh, request);
     }
+
     @PostMapping("/hocphan/by_loai_hp")
     public List<HocPhanDTO> getHocPhanInCTDTByLoaiHp(@RequestBody HocPhanRequest request) {
-       return hocPhanService.getHocPhanInCTDTByLoaiHp(request.getLoaiHp(), request.getKhoaHoc(), request.getMaNganh());
+        return hocPhanService.getHocPhanInCTDTByLoaiHp(request.getLoaiHp(), request.getKhoaHoc(), request.getMaNganh());
     }
 }

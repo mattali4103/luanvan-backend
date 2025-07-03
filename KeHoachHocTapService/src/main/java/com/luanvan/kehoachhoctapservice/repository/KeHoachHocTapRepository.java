@@ -19,7 +19,7 @@ public interface KeHoachHocTapRepository extends JpaRepository<KeHoachHocTap, Lo
     @Query("SELECT DISTINCT k.maHocKy FROM KeHoachHocTap k WHERE k.maSo = :maSo ORDER BY k.maHocKy DESC LIMIT 1")
     Optional<Long> findLatestMaHocKyByMaSo(@Param("maSo") String maSo);
 
-    @Query("SELECT DISTINCT k.maHocKy FROM KeHoachHocTap k WHERE k.maSo = :maSo")
+    @Query("SELECT DISTINCT k.maHocKy FROM KeHoachHocTap k WHERE k.maSo = :maSo ORDER BY k.maHocKy")
     List<Long> findMaHocKyByMaSo(@Param("maSo") String maSo);
     //    Tìm khht theo mã số sv
     List<KeHoachHocTap> findKeHoachHocTapsByMaSo(String maSo);

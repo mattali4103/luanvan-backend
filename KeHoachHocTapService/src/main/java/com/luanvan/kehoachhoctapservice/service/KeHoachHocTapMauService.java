@@ -131,7 +131,7 @@ public class KeHoachHocTapMauService {
         if (maNganh == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        List<KeHoachHocTapMau> list = keHoachHocTapMauRepository.findKeHoachHocTapMauByKhoaHocAndMaNganh(khoaHoc, maNganh);
+        List<KeHoachHocTapMau> list = keHoachHocTapMauRepository.findKeHoachHocTapMauByKhoaHocAndMaNganhOrderByMaHocKy(khoaHoc, maNganh);
 
         if (list == null || list.isEmpty()) {
             return Collections.emptyList();
@@ -187,21 +187,17 @@ public class KeHoachHocTapMauService {
             if (dto.getKhoaHoc() == null || dto.getMaNganh() == null || dto.getMaHocPhan() == null) {
                 throw new AppException(ErrorCode.INVALID_REQUEST);
             }
-
-
-            KeHoachHocTapMau existing = keHoachHocTapMauRepository.findByKhoaHocAndMaNganhAndMaHocPhan(
+            KeHoachHocTapMau existing = keHoachHocTapMauRepository.findByKhoaHocAndMaNganhAndMaHocPhanOrderByMaHocKy(
                     dto.getKhoaHoc(), dto.getMaNganh(), dto.getMaHocPhan());
             if (existing != null) {
-                if(existing.getMaHocKy().equals(dto.getMaHocKy())) {
-                    log.warn("Ke Hoach Hoc Tap Mau already exists for Khoa Hoc: {}, Ma Nganh: {}, Ma Hoc Phan: {}",
-                            dto.getKhoaHoc(), dto.getMaNganh(), dto.getMaHocPhan());
-                    return; // Skip if the record already exists with the same MaHocKy
-                }
-                keHoachHocTapMauRepository.delete(existing);
+                // Update fields instead of deleting and re-inserting
+                modelMapper.map(dto, existing);
+                KeHoachHocTapMau updated = keHoachHocTapMauRepository.save(existing);
+                result.add(modelMapper.map(updated, KeHoachHocTapMauDTO.class));
+            } else {
+                KeHoachHocTapMau keHoachHocTapMau = keHoachHocTapMauRepository.save(modelMapper.map(dto, KeHoachHocTapMau.class));
+                result.add(modelMapper.map(keHoachHocTapMau, KeHoachHocTapMauDTO.class));
             }
-            KeHoachHocTapMau keHoachHocTapMau = keHoachHocTapMauRepository.save(modelMapper.map(dto, KeHoachHocTapMau.class));
-            result.add(modelMapper.map(keHoachHocTapMau, KeHoachHocTapMauDTO.class))
-            ;
         });
         return result;
     }
@@ -279,9 +275,8 @@ public class KeHoachHocTapMauService {
         }
 
         if (keHoachHocTapMauRepository.existsByKhoaHocAndMaNganh(dtoList.get(0).getKhoaHoc(), dtoList.get(0).getMaNganh())) {
-            log.warn("Ke Hoach Hoc Tap Mau already exists for Khoa Hoc: {}, Ma Nganh: {}",
+            log.warn("Founded Ke Hoach Hoc Tap Mau for Khoa Hoc: {}, Ma Nganh: {}",
                     dtoList.get(0).getKhoaHoc(), dtoList.get(0).getMaNganh());
-            throw new AppException(ErrorCode.EXISTED);
         }
         List<KeHoachHocTapMau> result = new ArrayList<>();
         dtoList.forEach(dto -> {
@@ -291,7 +286,11 @@ public class KeHoachHocTapMauService {
                     if (keHoachHocTapMauRepository.existsByKhoaHocAndMaNganhAndMaHocPhan(dto.getKhoaHoc(), dto.getMaNganh(), dto.getMaHocPhan())) {
                         log.warn("Ke Hoach Hoc Tap Mau already exists for Khoa Hoc: {}, Ma Nganh: {}, Ma Hoc Phan: {}",
                                 dto.getKhoaHoc(), dto.getMaNganh(), dto.getMaHocPhan());
+                        return; // Skip this entry if it already exists
                     }
+                    // Mapping bỏ qua id
+                    modelMapper.typeMap(KeHoachHocTapMauDTO.class, KeHoachHocTapMau.class)
+                            .addMappings(mapper -> mapper.skip(KeHoachHocTapMau::setId));
                     KeHoachHocTapMau keHoachHocTapMau = modelMapper.map(dto, KeHoachHocTapMau.class);
                     result.add(keHoachHocTapMau);
                 }

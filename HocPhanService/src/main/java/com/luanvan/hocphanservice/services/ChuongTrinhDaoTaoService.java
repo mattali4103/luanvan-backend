@@ -9,6 +9,7 @@ import com.luanvan.hocphanservice.model.ChuongTrinhDaoTaoDTO;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.Request.CTDTDescriptionRequest;
 import com.luanvan.hocphanservice.model.Request.KeHoachHocTapRequest;
+import com.luanvan.hocphanservice.model.Response.ThongKeCTDT;
 import com.luanvan.hocphanservice.model.Response.TinChiResponse;
 import com.luanvan.hocphanservice.repository.ChuongTrinhDaoTaoRepository;
 import com.luanvan.hocphanservice.repository.HocPhanRepository;
@@ -41,6 +42,29 @@ public class ChuongTrinhDaoTaoService {
     private final NganhClient nganhClient;
     private final HocPhanService hocPhanService;
 
+    public ThongKeCTDT getThongKeCTDT(Long id) {
+        if(id == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        // Nếu không có chương trình đào tạo với id này thì trả về ThongKeCTDT rỗng
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        ThongKeCTDT thongKeCTDT = new ThongKeCTDT();
+        thongKeCTDT.setKhoaHoc(chuongTrinhDaoTao.getKhoaHoc());
+        thongKeCTDT.setMaNganh(chuongTrinhDaoTao.getMaNganh());
+        thongKeCTDT.setTongSoHocPhan(
+                chuongTrinhDaoTao.getHocPhanList() != null
+                        ? chuongTrinhDaoTao.getHocPhanList().size()
+                        : 0L
+        );
+        thongKeCTDT.setTongSoTinChi(chuongTrinhDaoTaoRepository.tongTinChi(chuongTrinhDaoTao.getKhoaHoc(), chuongTrinhDaoTao.getMaNganh()));
+        thongKeCTDT.setTongSoNhomTuChon(
+                chuongTrinhDaoTao.getNhomHocPhanTuChon() != null
+                        ? chuongTrinhDaoTao.getNhomHocPhanTuChon().size()
+                        : 0L
+        );
+        return thongKeCTDT;
+    }
 
     public ChuongTrinhDaoTaoDTO getCTDT(String khoaHoc, Long maNganh) {
         if (maNganh == null && khoaHoc == null) {
@@ -198,11 +222,26 @@ public class ChuongTrinhDaoTaoService {
         ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findByKhoaHocAndMaNganh(khoaHoc, maNganh).orElseThrow(
                 () -> new AppException(ErrorCode.NOTFOUND)
         );
+        List<HocPhanTuChon> nhomHocPhanTuChon = chuongTrinhDaoTao.getNhomHocPhanTuChon();
+        //Lấy danh sách mã học phần trong nhóm học phần tự chọn
+        if (nhomHocPhanTuChon != null && !nhomHocPhanTuChon.isEmpty()) {
+            nhomHocPhanTuChon.forEach(hocPhanTuChon -> {
+                if (hocPhanTuChon.getHocPhanTuChonList() != null) {
+                    hocPhanTuChon.getHocPhanTuChonList().forEach(hocPhan -> {
+                        if (!hocPhanList.contains(hocPhan.getMaHp())) {
+                            hocPhanList.add(hocPhan.getMaHp());
+                        }
+                    });
+                }
+            });
+        }
 
 //      DS mã học phần trong CTDT
         List<String> maHocPhanInCTDT = chuongTrinhDaoTao.getHocPhanList().stream()
                 .map(HocPhan::getMaHp)
                 .toList();
+
+
         if (hocPhanList == null || hocPhanList.isEmpty()) {
             return chuongTrinhDaoTao.getHocPhanList().stream()
                     .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))

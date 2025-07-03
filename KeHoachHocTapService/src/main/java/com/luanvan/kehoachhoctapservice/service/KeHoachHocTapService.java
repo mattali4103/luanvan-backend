@@ -104,18 +104,15 @@ public class KeHoachHocTapService {
         for (Map.Entry<Long, List<KeHoachHocTap>> entry : nhomTheoHocKy.entrySet()) {
             Long maHocKy = entry.getKey();
             List<KeHoachHocTap> keHoachTrongHocKy = entry.getValue();
-
             // Lấy thông tin học kỳ
             HocKyDTO hocKy = mapHocKy.get(maHocKy);
             if (hocKy == null) {
                 log.warn("Không tìm thấy thông tin học kỳ có mã: {}", maHocKy);
                 continue;
             }
-
             // Khởi tạo biến đếm tín chỉ cho học kỳ hiện tại
             long tinChiDangKyHocKyHienTai = 0;
             long tinChiCaiThienHocKyHienTai = 0;
-
             // Duyệt qua từng kế hoạch học tập trong học kỳ để tính tín chỉ
             for (KeHoachHocTap keHoach : keHoachTrongHocKy) {
                 HocPhanDTO hocPhan = mapHocPhan.get(keHoach.getMaHocPhan());
@@ -136,9 +133,6 @@ public class KeHoachHocTapService {
             thongKe.setHocKy(hocKy);
             thongKe.setSoTinChiDangKy(tinChiDangKyHocKyHienTai);
             thongKe.setSoTinChiCaiThien(tinChiCaiThienHocKyHienTai);
-            // Lưu giữ số tín chỉ của học kỳ hiện tại (không tích lũy) để tính toán bên ngoài
-            thongKe.setSoTinChiDangKy(tinChiDangKyHocKyHienTai);
-            thongKe.setSoTinChiCaiThien(tinChiCaiThienHocKyHienTai);
             result.add(thongKe);
         }
 
@@ -149,21 +143,6 @@ public class KeHoachHocTapService {
             }
             return a.getHocKy().getTenHocKy().compareTo(b.getHocKy().getTenHocKy());
         });
-
-        // Tính tổng tín chỉ tích lũy
-        long tinChiDangKyTichLuy = 0;
-        long tinChiCaiThienTichLuy = 0;
-
-        for (ThongKeTinChi thongKe : result) {
-            // Cộng dồn tín chỉ tích lũy từ học kỳ hiện tại
-            tinChiDangKyTichLuy += thongKe.getSoTinChiDangKy();
-            tinChiCaiThienTichLuy += thongKe.getSoTinChiCaiThien();
-
-            // Cập nhật giá trị tín chỉ tích lũy cho học kỳ
-            thongKe.setSoTinChiDangKy(tinChiDangKyTichLuy);
-            thongKe.setSoTinChiCaiThien(tinChiCaiThienTichLuy);
-        }
-
         return result;
     }
 

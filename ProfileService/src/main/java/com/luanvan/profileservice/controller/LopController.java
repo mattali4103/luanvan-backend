@@ -1,13 +1,12 @@
 package com.luanvan.profileservice.controller;
 
 import com.luanvan.profileservice.dto.LopDTO;
+import com.luanvan.profileservice.dto.response.ApiResponse;
 import com.luanvan.profileservice.dto.response.ProfileResponse;
+import com.luanvan.profileservice.dto.response.StatisticsLopResponse;
 import com.luanvan.profileservice.services.LopService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -16,6 +15,15 @@ import java.util.List;
 @RequestMapping("/api/profile/lop")
 public class LopController {
     private final LopService lopService;
+    //Thong ke lop
+    @GetMapping("/thongke")
+    public ApiResponse<StatisticsLopResponse> getStatisticsLop(@RequestParam("maNganh") Long maNganh) {
+        return ApiResponse.<StatisticsLopResponse>builder()
+                .code(200)
+                .message("OK")
+                .data(lopService.getStatistics(maNganh))
+                .build();
+    }
 
     //   API PRIVATE
     @GetMapping("/get_by_ma_lop/{maLop}")

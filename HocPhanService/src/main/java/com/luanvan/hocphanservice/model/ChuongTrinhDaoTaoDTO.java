@@ -14,10 +14,14 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChuongTrinhDaoTaoDTO {
+    Long id;
     @NotBlank(message = "Mã ngành không được null")
     String khoaHoc;
     @NotBlank(message = "Mã ngành không được null")
     Long maNganh;
     String noiDung;
     List<HocPhanDTO> hocPhanList;
+    List<HocPhanTuChonDTO> nhomHocPhanTuChon;
+    Long tongSoTinChi;
+    Long tongSoTinChiTuChon;
 }

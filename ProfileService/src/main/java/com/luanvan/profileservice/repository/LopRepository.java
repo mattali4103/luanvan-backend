@@ -29,4 +29,6 @@ public interface LopRepository extends JpaRepository<Lop, String> {
            "(SELECT COUNT(sv) FROM SinhVien sv WHERE sv.lop.maLop = l.maLop) " +
            "WHERE l.maLop IN (SELECT DISTINCT sv2.lop.maLop FROM SinhVien sv2)")
     void updateAllSiSoConBatch();
+
+    List<Lop> findByNganhMaNganh(Long maNganh);
 }

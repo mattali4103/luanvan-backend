@@ -2,6 +2,7 @@ package com.luanvan.profileservice.services;
 
 import com.luanvan.profileservice.dto.LopDTO;
 import com.luanvan.profileservice.dto.response.ProfileResponse;
+import com.luanvan.profileservice.dto.response.StatisticsLopResponse;
 import com.luanvan.profileservice.entity.Lop;
 import com.luanvan.profileservice.entity.Nganh;
 import com.luanvan.profileservice.exception.AppException;
@@ -9,12 +10,14 @@ import com.luanvan.profileservice.exception.ErrorCode;
 import com.luanvan.profileservice.repository.LopRepository;
 import com.luanvan.profileservice.repository.NganhRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class LopService {
@@ -22,6 +25,27 @@ public class LopService {
     private final ModelMapper modelMapper;
     private final SinhVienService sinhVienService;
     private final NganhRepository nganhRepository;
+
+    public StatisticsLopResponse getStatistics(Long maNganh) {
+        List<Lop> danhSachLop = lopRepository.findByNganhMaNganh(maNganh);
+        if(danhSachLop.isEmpty()) {
+            return new StatisticsLopResponse(0L, 0L);
+        }
+        StatisticsLopResponse result = new StatisticsLopResponse();
+
+        // Tính tổng số lớp
+        for(Lop lop : danhSachLop) {
+            Long siSo = lopRepository.countSinhVienByMaLop(lop.getMaLop());
+            log.info("Lớp: {}, Sĩ số: {}", lop.getMaLop(), siSo);
+            result.setTongSoSinhVien(result.getTongSoSinhVien() + siSo);
+
+
+        }
+        log.info("Tổng số sinh viên trong ngành {}: {}", maNganh, result.getTongSoSinhVien());
+
+        result.setSoLopHoc((long) danhSachLop.size());
+        return result;
+    }
 
     public List<LopDTO> getDSLopByMaKhoa(String maKhoa) {
         List<Nganh> nganhs = nganhRepository.findNganhsByMaKhoa(maKhoa);
