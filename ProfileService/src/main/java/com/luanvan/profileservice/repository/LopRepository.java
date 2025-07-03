@@ -22,13 +22,5 @@ public interface LopRepository extends JpaRepository<Lop, String> {
     @Transactional
     @Query("UPDATE Lop l SET l.siSoCon = :siSoCon WHERE l.maLop = :maLop")
     void updateSiSoCon(@Param("maLop") String maLop, @Param("siSoCon") Long siSoCon);
-
-    @Modifying
-    @Transactional
-    @Query("UPDATE Lop l SET l.siSoCon = " +
-           "(SELECT COUNT(sv) FROM SinhVien sv WHERE sv.lop.maLop = l.maLop) " +
-           "WHERE l.maLop IN (SELECT DISTINCT sv2.lop.maLop FROM SinhVien sv2)")
-    void updateAllSiSoConBatch();
-
     List<Lop> findByNganhMaNganh(Long maNganh);
 }

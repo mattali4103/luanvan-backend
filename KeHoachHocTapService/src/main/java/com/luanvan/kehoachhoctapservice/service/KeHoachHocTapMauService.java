@@ -170,7 +170,7 @@ public class KeHoachHocTapMauService {
         }
         List<KeHoachHocTapMau> khhtMau = keHoachHocTapMauRepository.findByKhoaHocAndMaNganh(khoaHoc, maNganh);
         if (khhtMau == null) {
-            log.warn("No Ke Hoach Hoc Tap Mau found for Khoa Hoc: {}, Ma Nganh: {}, Ma Hoc Phan: {}",
+            log.warn("No Ke Hoach Hoc Tap Mau found for Khoa Hoc: {}, Ma Nganh: {}",
                     khoaHoc, maNganh);
             throw new AppException(ErrorCode.NOTFOUND);
         }
@@ -202,7 +202,7 @@ public class KeHoachHocTapMauService {
         return result;
     }
 
-
+    @SuppressWarnings("unused")
     @Transactional
     public KeHoachHocTapMauDTO create(KeHoachHocTapMau keHoachHocTapMau) {
         if (keHoachHocTapMau.getKhoaHoc() == null || keHoachHocTapMau.getMaNganh() == null) {

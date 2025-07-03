@@ -1,6 +1,4 @@
 package com.luanvan.hocphanservice.controller;
-
-import com.luanvan.hocphanservice.entity.ChuongTrinhDaoTao;
 import com.luanvan.hocphanservice.model.ChuongTrinhDaoTaoDTO;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.Request.CTDTDescriptionRequest;
