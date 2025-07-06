@@ -33,6 +33,8 @@ public class HocPhanController {
                 .build();
     }
 
+
+
     @GetMapping("/id/{maHp}")
     public ApiResponse<HocPhanDTO> getHocPhanById(@PathVariable String maHp) {
         return ApiResponse.<HocPhanDTO>builder()

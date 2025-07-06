@@ -8,6 +8,7 @@ import com.luanvan.ketquahoctapservice.exception.ErrorCode;
 import com.luanvan.ketquahoctapservice.model.Response.DiemTrungBinh;
 import com.luanvan.ketquahoctapservice.model.Response.KetQuaHocTapByHocKy;
 import com.luanvan.ketquahoctapservice.model.Response.PageResponse;
+import com.luanvan.ketquahoctapservice.model.Response.ThongKeKetQuaSinhVien;
 import com.luanvan.ketquahoctapservice.model.dto.HocKyDTO;
 import com.luanvan.ketquahoctapservice.model.dto.HocPhanDTO;
 import com.luanvan.ketquahoctapservice.model.dto.KetQuaHocTapDTO;
@@ -96,66 +97,63 @@ public class KetQuaHocTapService {
         result.setDiemTrungBinhTichLuy(diemTrungBinhTichLuy);
         return result;
     }
+    public List<KetQuaHocTapDTO> getKetQuaHocTapCaiThien(String maSo){
+        // Kiểm tra mã số sinh viên không null và không rỗng
+        if (maSo == null || maSo.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        // Lấy ra danh sách kết quả học tập có mã số bị trùng
+        List<KetQuaHocTap> ketQuaHocTapList = ketQuaHocTapRepository.findDuplicateKetQuaHocTapByMaSo(maSo);
+        if (ketQuaHocTapList == null || ketQuaHocTapList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return ketQuaHocTapList.stream().map(k -> modelMapper.map(k, KetQuaHocTapDTO.class)).toList();
+    }
 
-    //    public List<KetQuaHocTapByHocKy> getKetQuaHocTapGroupByHocKy(String maSo){
-//        // Kiểm tra mã số sinh viên không null và không rỗng
-//        if(maSo == null || maSo.isEmpty()){
-//            throw new AppException(ErrorCode.INVALID_REQUEST);
-//        }
-//
-//        // Lấy danh sách kết quả học tập theo mã số sinh viên
-//        List<KetQuaHocTap> ketQuaHocTapList = ketQuaHocTapRepository.findByMaSo(maSo);
-//        if(ketQuaHocTapList == null || ketQuaHocTapList.isEmpty()){
-//            return Collections.emptyList();
-//        }
-//
-//        // Lấy danh sách mã học phần từ kết quả học tập
-//        List<String> maHocPhanList = ketQuaHocTapList.stream()
-//                .map(KetQuaHocTap::getMaHp)
-//                .distinct()
-//                .toList();
-//
-//        // Lấy danh sách học phần từ mã học phần
-//        List<HocPhanDTO> hocPhanDTOList = hocPhanClient.getHocPhanIn(maHocPhanList);
-//        if(hocPhanDTOList == null || hocPhanDTOList.isEmpty()){
-//            return Collections.emptyList();
-//        }
-//
-//        // Lấy danh sách mã học kỳ từ kết quả học tập
-//        List<Long> maHocKyList = ketQuaHocTapRepository.findMaHocKyByMaSo(maSo);
-//        if(maHocKyList == null || maHocKyList.isEmpty()){
-//            return Collections.emptyList();
-//        }
-//        // Lấy danh sách học kỳ từ mã học kỳ
-//        List<HocKyDTO> hocKyDTOList = hocPhanClient.getHocKyIn(maHocKyList);
-//        if(hocKyDTOList == null || hocKyDTOList.isEmpty()){
-//            return Collections.emptyList();
-//        }
-//        List<KetQuaHocTapByHocKy> ketQuaHocTapByHocKyList = new ArrayList<>();
-//        hocKyDTOList.forEach(hocKyDTO -> {
-//            List<KetQuaHocTap> kqhtByHocKy = ketQuaHocTapList.stream()
-//                    .filter(k -> k.getMaHocKy().equals(hocKyDTO.getMaHocKy()))
-//                    .toList();
-//            if (kqhtByHocKy.isEmpty()) {
-//                return;
-//            }
-//            List<KetQuaHocTapDetail> kqhtDetailList = getKetQuaHocTapDetailList(
-//                    kqhtByHocKy.stream().map(k -> modelMapper.map(k, KetQuaHocTapDTO.class)).toList(),
-//                    hocPhanDTOList,
-//                    hocKyDTOList
-//            );
-//
-//            Double diemTrungBinhHocKy = calculateDiemTrungBinh(kqhtByHocKy);
-//            Double diemTrungBinhTichLuy = getDiemTrungBinhTichLuy(maSo, hocKyDTO.getMaHocKy());
-//            KetQuaHocTapByHocKy result = new KetQuaHocTapByHocKy();
-//            result.setHocKy(hocKyDTO);
-//            result.setKetQuaHocTapList(kqhtDetailList);
-//            result.setDiemTrungBinhHocKy(diemTrungBinhHocKy);
-//            result.setDiemTrungBinhTichLuy(diemTrungBinhTichLuy);
-//            ketQuaHocTapByHocKyList.add(result);
-//        });
-//        return ketQuaHocTapByHocKyList;
-//    }
+    public ThongKeKetQuaSinhVien getThongKeByMaSo(String maSo) {
+        if (maSo == null || maSo.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        // Lấy danh sách kết quả học tập theo mã số sinh viên
+        List<KetQuaHocTap> ketQuaHocTapList = ketQuaHocTapRepository.findByMaSo(maSo);
+        if (ketQuaHocTapList == null || ketQuaHocTapList.isEmpty()) {
+            return new ThongKeKetQuaSinhVien();
+        }
+
+        //Lấy mã học kỳ gần nhất từ kết quả học tập
+        Long maHocKy = ketQuaHocTapList.stream()
+                .map(KetQuaHocTap::getMaHocKy)
+                .max(Long::compareTo)
+                .orElse(null);
+
+
+
+        //Tính tổng số tín chỉ tích lũy
+        Long soTinChiTichLuy = ketQuaHocTapList.stream()
+                .filter(k -> k.getDiemSo() != null)
+                .mapToLong(KetQuaHocTap::getSoTinChi)
+                .sum();
+
+        //Lấy tổng số tín chỉ cải thiện
+        long soTinChicaiThien;
+        List<KetQuaHocTapDTO> kqhtCaiThien = getKetQuaHocTapCaiThien(maSo);
+        soTinChicaiThien = kqhtCaiThien.stream()
+                .mapToLong(KetQuaHocTapDTO::getSoTinChi)
+                .sum();
+
+        double diemTrungBinhTichLuy = getDiemTrungBinhTichLuy(maSo, maHocKy);
+        String xepLoai = xepLoaiSinhVien(diemTrungBinhTichLuy);
+
+
+        return ThongKeKetQuaSinhVien.builder()
+                .maSo(maSo)
+                .xepLoai(xepLoai)
+                .soTinChiTichLuy(soTinChiTichLuy)
+                .soTinChiCaiThien(soTinChicaiThien)
+                .diemTBTichLuy(diemTrungBinhTichLuy)
+                .build();
+    }
+
     //Tìm mã học kỳ theo mã số sinh viên (No pagination - legacy method)
     public List<HocKyDTO> getMaHocKyByMaSo(String maSo) {
         List<Long> maHocKyList = ketQuaHocTapRepository.findMaHocKyByMaSo(maSo);
@@ -167,7 +165,8 @@ public class KetQuaHocTapService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
-    public List<KetQuaHocTapDetail> getHocPhanFailed(String maSo){
+
+    public List<KetQuaHocTapDetail> getHocPhanFailed(String maSo) {
         if (maSo == null || maSo.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
@@ -416,6 +415,22 @@ public class KetQuaHocTapService {
             throw new AppException(ErrorCode.NOTFOUND);
         }
         return hocKyDTOList;
+    }
+
+    private String xepLoaiSinhVien(double diemTrungBinhTichLuy){
+        if (diemTrungBinhTichLuy >= 3.6) {
+            return "Xuất sắc";
+        } else if (diemTrungBinhTichLuy >= 3.2) {
+            return "Giỏi";
+        } else if (diemTrungBinhTichLuy >= 2.5) {
+            return "Khá";
+        } else if (diemTrungBinhTichLuy >= 2.0) {
+            return "Trung bình";
+        } else if (diemTrungBinhTichLuy >= 1.0) {
+            return "Yếu";
+        } else {
+            return "Kém";
+        }
     }
 
     private boolean getBooleanCellValue(Cell cell) {

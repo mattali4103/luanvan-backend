@@ -1,9 +1,6 @@
 package com.luanvan.ketquahoctapservice.controller;
 
-import com.luanvan.ketquahoctapservice.model.Response.ApiResponse;
-import com.luanvan.ketquahoctapservice.model.Response.DiemTrungBinh;
-import com.luanvan.ketquahoctapservice.model.Response.KetQuaHocTapByHocKy;
-import com.luanvan.ketquahoctapservice.model.Response.PageResponse;
+import com.luanvan.ketquahoctapservice.model.Response.*;
 import com.luanvan.ketquahoctapservice.model.dto.HocKyDTO;
 import com.luanvan.ketquahoctapservice.model.dto.KetQuaHocTapDTO;
 import com.luanvan.ketquahoctapservice.model.dto.KetQuaHocTapDetail;
@@ -108,5 +105,10 @@ public class KetQuaHocTapController {
                 .message("OK")
                 .data(ketQuaHocTapService.getHocPhanFailed(maSo))
                 .build();
+    }
+
+    @GetMapping("private/thongke/{maSo}")
+    public ThongKeKetQuaSinhVien getThongKeByMaSo(@PathVariable String maSo) {
+        return ketQuaHocTapService.getThongKeByMaSo(maSo);
     }
 }

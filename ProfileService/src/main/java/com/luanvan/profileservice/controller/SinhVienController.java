@@ -4,6 +4,8 @@ import com.luanvan.profileservice.dto.SinhVienDTO;
 import com.luanvan.profileservice.dto.request.CreateSinhVienRequest;
 import com.luanvan.profileservice.dto.response.ApiResponse;
 import com.luanvan.profileservice.dto.response.ProfileResponse;
+import com.luanvan.profileservice.dto.response.SinhVienPreviewProfile;
+import com.luanvan.profileservice.dto.response.ThongKeKetQuaSinhVien;
 import com.luanvan.profileservice.services.SinhVienService;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,6 +61,14 @@ public class SinhVienController {
         return ApiResponse.<Void>builder()
                 .code(200)
                 .message("OK")
+                .build();
+    }
+    @GetMapping("/thongke/{maSo}")
+    public ApiResponse<SinhVienPreviewProfile> getThongKeByMaSo(@PathVariable String maSo) {
+        return ApiResponse.<SinhVienPreviewProfile>builder()
+                .code(200)
+                .message("OK")
+                .data(sinhVienService.getSinhVienPreviewProfile(maSo))
                 .build();
     }
     //Lấy đầy đủ thông tin sinh viên bao gồm cả thông tin user

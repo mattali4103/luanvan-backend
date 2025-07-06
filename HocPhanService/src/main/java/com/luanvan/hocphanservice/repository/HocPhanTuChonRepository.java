@@ -15,10 +15,11 @@ import java.util.Optional;
 public interface HocPhanTuChonRepository extends JpaRepository<HocPhanTuChon, Long> {
     @Query("SELECT hptc FROM HocPhanTuChon hptc " +
             "WHERE LOWER(hptc.tenNhom) LIKE LOWER(:tenNhom) " +
-            "AND hptc.chuongTrinhDaoTao.khoaHoc = :khoaHoc")
-    Optional<HocPhanTuChon> findByTenNhomLikeAndChuongTrinhDaoTao_KhoaHoc(
+            "AND hptc.chuongTrinhDaoTao.khoaHoc = :khoaHoc AND hptc.chuongTrinhDaoTao.maNganh = :maNganh")
+    List<HocPhanTuChon> findByTenNhomLikeAndChuongTrinhDaoTaoAndKhoaHocAndMaNganh(
             @Param("tenNhom") String tenNhom,
-            @Param("khoaHoc") String khoaHoc);
+            @Param("khoaHoc") String khoaHoc,
+            @Param("maNganh") Long maNganh);
     @Query("SELECT hptc FROM HocPhanTuChon hptc " +
             "WHERE hptc.chuongTrinhDaoTao.khoaHoc = :khoaHoc " +
             "AND hptc.chuongTrinhDaoTao.maNganh = :maNganh")

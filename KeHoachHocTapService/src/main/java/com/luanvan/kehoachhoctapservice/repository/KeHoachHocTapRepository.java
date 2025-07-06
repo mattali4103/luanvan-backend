@@ -25,6 +25,10 @@ public interface KeHoachHocTapRepository extends JpaRepository<KeHoachHocTap, Lo
     List<KeHoachHocTap> findKeHoachHocTapsByMaSo(String maSo);
     List<KeHoachHocTap> findKeHoachHocTapsByMaSoAndMaHocKy(String maSo, Long maHocKy);
 
+    //Tìm kế hoạch học tập theo mã số và học kỳ gần nhất
+    @Query("SELECT k FROM KeHoachHocTap k WHERE k.maSo = :maSo AND k.maHocKy = (SELECT MAX(kh.maHocKy) FROM KeHoachHocTap kh WHERE kh.maSo = :maSo)")
+    List<KeHoachHocTap> findLatestKeHoachHocTapByMaSo(@Param("maSo") String maSo);
+
     @Query("SELECT k.maHocPhan FROM KeHoachHocTap k WHERE k.maSo = :maSo")
     List<String> findMaHocPhanByMaSo(@Param("maSo") String maSo);
 

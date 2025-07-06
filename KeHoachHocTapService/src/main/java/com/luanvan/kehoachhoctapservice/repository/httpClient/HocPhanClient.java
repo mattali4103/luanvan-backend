@@ -36,8 +36,11 @@ public interface HocPhanClient {
             @RequestParam("namKetThuc") String namKetThuc,
             @RequestParam("tenHocKy") String tenHocKy
     );
+    // Lấy học kỳ hiện tại
     @GetMapping("/hocky/current")
     HocKyDTO getHocKyHienTai();
+    @PostMapping("/hocphan/count/tin_chi")
+    Long countTinChiIn(@RequestBody List<String> maHocPhanList);
 }
 
 

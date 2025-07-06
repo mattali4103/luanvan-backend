@@ -138,6 +138,7 @@ public class ChuongTrinhDaoTaoController {
     }
 
 
+
     //    API for Service
     @PostMapping("/count/tinchi/{khoaHoc}/{maNganh}")
     public TinChiResponse getTongTinchi(@PathVariable String khoaHoc, @PathVariable Long maNganh, @RequestBody List<KeHoachHocTapRequest> request) {

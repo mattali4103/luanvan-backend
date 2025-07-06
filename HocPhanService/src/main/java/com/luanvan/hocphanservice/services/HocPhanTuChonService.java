@@ -1,6 +1,4 @@
 package com.luanvan.hocphanservice.services;
-
-import com.luanvan.hocphanservice.entity.ChuongTrinhDaoTao;
 import com.luanvan.hocphanservice.entity.HocPhan;
 import com.luanvan.hocphanservice.entity.HocPhanTuChon;
 import com.luanvan.hocphanservice.exception.AppException;
@@ -27,11 +25,12 @@ public class HocPhanTuChonService {
     private final HocPhanRepository hocPhanRepository;
     private final ChuongTrinhDaoTaoRepository chuongTrinhDaoTaoRepository;
 
-    public HocPhanTuChonDTO getHocPhanTuChonByNameAndKhoaHoc(String tenNhom, String khoaHoc) {
-        HocPhanTuChon hptc = hocPhanTuChonRepository.findByTenNhomLikeAndChuongTrinhDaoTao_KhoaHoc("%" + tenNhom + "%", khoaHoc)
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST));
-
-        return modelMapper.map(hptc, HocPhanTuChonDTO.class);
+    public List<HocPhanTuChonDTO> getHocPhanTuChonByNameAndKhoaHoc(String tenNhom, String khoaHoc, Long maNganh) {
+        List<HocPhanTuChon> hptcList = hocPhanTuChonRepository.findByTenNhomLikeAndChuongTrinhDaoTaoAndKhoaHocAndMaNganh("%" + tenNhom + "%", khoaHoc, maNganh);
+        if (hptcList.isEmpty()) {
+           return Collections.emptyList();
+        }
+        return hptcList.stream().map(hocPhanTuChon -> modelMapper.map(hocPhanTuChon, HocPhanTuChonDTO.class)).toList();
     }
 
     public HocPhanTuChonDTO create(HocPhanTuChonDTO dto) {
@@ -111,15 +110,13 @@ public class HocPhanTuChonService {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
     }
-
-
     public List<HocPhanDTO> getNhomHocPhanTheChat() {
-        ChuongTrinhDaoTao ctdt = chuongTrinhDaoTaoRepository.findById(4L)
+        HocPhanTuChon hptc = hocPhanTuChonRepository.findById(4L)
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
-        if (ctdt.getHocPhanList() == null || ctdt.getHocPhanList().isEmpty()) {
+        if(hptc.getHocPhanTuChonList().isEmpty()) {
             return Collections.emptyList();
         }
-        return ctdt.getHocPhanList().stream()
+        return hptc.getHocPhanTuChonList().stream()
                 .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
                 .toList();
     }

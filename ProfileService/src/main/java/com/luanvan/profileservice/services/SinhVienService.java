@@ -4,12 +4,16 @@ import com.luanvan.profileservice.dto.SinhVienDTO;
 import com.luanvan.profileservice.dto.UserDTO;
 import com.luanvan.profileservice.dto.request.CreateSinhVienRequest;
 import com.luanvan.profileservice.dto.response.ProfileResponse;
+import com.luanvan.profileservice.dto.response.SinhVienPreviewProfile;
+import com.luanvan.profileservice.dto.response.ThongKeKetQuaSinhVien;
 import com.luanvan.profileservice.entity.Lop;
 import com.luanvan.profileservice.entity.SinhVien;
 import com.luanvan.profileservice.exception.AppException;
 import com.luanvan.profileservice.exception.ErrorCode;
 import com.luanvan.profileservice.repository.LopRepository;
 import com.luanvan.profileservice.repository.SinhVienRepository;
+import com.luanvan.profileservice.repository.httpClient.KHHTClient;
+import com.luanvan.profileservice.repository.httpClient.KQHTClient;
 import com.luanvan.profileservice.repository.httpClient.UserClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +32,9 @@ public class SinhVienService {
     private final LopRepository lopRepository;
     private final ModelMapper sinhVienToDTOMapper;
     private final UserClient userClient;
+    private final KHHTClient kHHTClient;
+    private final KQHTClient kQHTClient;
+
     public void deleteSinhVien(String maSo) {
         if (maSo == null || maSo.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
@@ -88,6 +95,32 @@ public class SinhVienService {
         return getProfileResponse(sinhVien);
     }
 
+    public SinhVienPreviewProfile getSinhVienPreviewProfile(String maSo) {
+        SinhVien sinhVien = sinhVienRepository.findById(maSo)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+        UserDTO userDTO = userClient.getUserById(sinhVien.getMaSo());
+        Long countTinChiDangKy = kHHTClient.getCountTinChiDangKyByMaSo(maSo);
+        if (countTinChiDangKy == null) {
+            countTinChiDangKy = 0L;
+        }
+        ThongKeKetQuaSinhVien kqht =  kQHTClient.getThongKeByMaSo(maSo);
+        if(kqht == null) {
+            kqht = new ThongKeKetQuaSinhVien();
+        }
+
+        return SinhVienPreviewProfile.builder()
+                .maSo(sinhVien.getMaSo())
+                .ten(userDTO.getHoTen())
+                .maLop(sinhVien.getLop().getMaLop())
+                .tenNganh(sinhVien.getLop().getNganh().getTenNganh())
+                .xepLoaiHocLuc(kqht.getXepLoai())
+                .diemTrungBinhTichLuy(kqht.getDiemTBTichLuy())
+                .soTinChiTichLuy(kqht.getSoTinChiTichLuy())
+                .soTinChiCaiThien(kqht.getSoTinChiCaiThien())
+                .soTinChiDangKyHienTai(countTinChiDangKy)
+                .build();
+    }
+
     private ProfileResponse getProfileResponse(SinhVien sinhVien) {
         UserDTO userDTO = userClient.getUserById(sinhVien.getMaSo());
         return ProfileResponse.builder()
@@ -101,4 +134,7 @@ public class SinhVienService {
                 .tenNganh(sinhVien.getLop().getNganh().getTenNganh())
                 .build();
     }
+
+
+
 }

@@ -308,4 +308,14 @@ public class ChuongTrinhDaoTaoService {
     }
 
 
+    public List<HocPhanDTO> getNhomHocPhanTheChat() {
+        ChuongTrinhDaoTao ctdt = chuongTrinhDaoTaoRepository.findById(4L)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        if(ctdt == null ){
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+        return ctdt.getHocPhanList().stream()
+                .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
+                .collect(Collectors.toList());
+    }
 }

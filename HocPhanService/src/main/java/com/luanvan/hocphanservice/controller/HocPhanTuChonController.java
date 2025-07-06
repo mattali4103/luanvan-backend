@@ -53,11 +53,11 @@ public class HocPhanTuChonController {
                 .build();
     }
     @PostMapping("/by_loai_hp")
-    public ApiResponse<HocPhanTuChonDTO> getHocPhanByKhoaHocAndTenNhom(@RequestBody HocPhanRequest request) {
-        return ApiResponse.<HocPhanTuChonDTO>builder()
+    public ApiResponse<List<HocPhanTuChonDTO>> getHocPhanByKhoaHocAndTenNhom(@RequestBody HocPhanRequest request) {
+        return ApiResponse.<List<HocPhanTuChonDTO>>builder()
                 .code(200)
                 .message("OK")
-                .data(hocPhanTuChonService.getHocPhanTuChonByNameAndKhoaHoc(request.getLoaiHp(), request.getKhoaHoc()))
+                .data(hocPhanTuChonService.getHocPhanTuChonByNameAndKhoaHoc(request.getLoaiHp(), request.getKhoaHoc(), request.getMaNganh()))
                 .build();
     }
     @GetMapping("/list")

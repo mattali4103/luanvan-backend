@@ -3,6 +3,7 @@ package com.luanvan.profileservice.controller;
 import com.luanvan.profileservice.dto.LopDTO;
 import com.luanvan.profileservice.dto.response.ApiResponse;
 import com.luanvan.profileservice.dto.response.ProfileResponse;
+import com.luanvan.profileservice.dto.response.SinhVienPreviewProfile;
 import com.luanvan.profileservice.dto.response.StatisticsLopResponse;
 import com.luanvan.profileservice.services.LopService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,15 @@ public class LopController {
                 .code(200)
                 .message("OK")
                 .data(lopService.getStatistics(maNganh))
+                .build();
+    }
+
+    @GetMapping("/preview/{maLop}")
+    public ApiResponse<List<SinhVienPreviewProfile>> getSinhVienPreviewProfileByMaLop(@PathVariable String maLop) {
+        return ApiResponse.<List<SinhVienPreviewProfile>>builder()
+                .code(200)
+                .message("OK")
+                .data(lopService.getPreviewProfileByMaLop(maLop))
                 .build();
     }
 

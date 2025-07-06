@@ -27,10 +27,6 @@ public class HocKyController {
     public List<HocKyResponse> getHocKyIn(@RequestBody List<Long> hocKyList){
         return hocKyService.findHocKyIn(hocKyList);
     }
-
-
-
-
     @GetMapping("/id/{id}")
     public ResponseEntity<HocKyDTO> getHocKyById(@PathVariable("id") Long id) {
         HocKyDTO hocKyDTO = hocKyService.getHocKyById(id);

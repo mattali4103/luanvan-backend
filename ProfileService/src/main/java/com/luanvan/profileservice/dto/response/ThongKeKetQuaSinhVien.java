@@ -1,4 +1,5 @@
-package com.luanvan.kehoachhoctapservice.model.response;
+package com.luanvan.profileservice.dto.response;
+
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,9 +9,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TinChiResponse {
-    Long tongSoTinChi;
+@Builder
+public class ThongKeKetQuaSinhVien {
+    String maSo;
     Long soTinChiTichLuy;
     Long soTinChiCaiThien;
-    Long soTinChiDangKyHienTai;
+    Double diemTBTichLuy;
+    String xepLoai;
 }

@@ -161,11 +161,17 @@ public class KeHoachHocTapController {
 
 //    API For GIANGVIEN
     @PostMapping("/statistic/{maLop}")
-    public ApiResponse<List<ThongKeTinChi>> thongKeKHHT(@PathVariable String maLop) {
-        return ApiResponse.<List<ThongKeTinChi>>builder()
+    public ApiResponse<List<ThongKeTinChiBySinhVien>> thongKeKHHT(@PathVariable String maLop) {
+        return ApiResponse.<List<ThongKeTinChiBySinhVien>>builder()
                 .code(200)
                 .message("OK")
                 .data(keHoachHocTapService.thongKeKHHT(maLop))
                 .build();
+    }
+    // Lấy số tín chỉ đăng ký của sinh viên theo mã số sinh viên trong học kỳ hiện tại
+    // Từ HocPhanClient
+    @GetMapping("/statistic/sinhvien/count/hoc_ky_hien_tai/{maSo}")
+    public Long getCountTinChiDangKyByMaSo(@PathVariable String maSo) {
+        return keHoachHocTapService.getCountTinChiDangKyByMaSo(maSo);
     }
 }

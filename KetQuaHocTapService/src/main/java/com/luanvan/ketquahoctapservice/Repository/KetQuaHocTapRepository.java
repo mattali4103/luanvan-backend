@@ -26,4 +26,6 @@ public interface KetQuaHocTapRepository extends JpaRepository<KetQuaHocTap, Long
             "WHERE k.maSo = :maSo AND k.diemChu = 'F'"
     )
     List<KetQuaHocTap> findKetQuaHocTapsByDiemChuEqualsIgnoreCase(@Param("maSo") String maSo);
+    @Query("SELECT k FROM KetQuaHocTap k WHERE (k.maSo, k.maHocKy, k.maHp) IN (SELECT k2.maSo, k2.maHocKy, k2.maHp FROM KetQuaHocTap k2 WHERE k2.maSo = :maSo GROUP BY k2.maSo, k2.maHocKy, k2.maHp HAVING COUNT(k2) > 1)")
+    List<KetQuaHocTap> findDuplicateKetQuaHocTapByMaSo(@Param("maSo") String maSo);
 }

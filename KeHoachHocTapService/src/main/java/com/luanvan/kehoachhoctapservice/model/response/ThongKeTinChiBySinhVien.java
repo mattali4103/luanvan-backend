@@ -1,16 +1,17 @@
 package com.luanvan.kehoachhoctapservice.model.response;
 
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TinChiResponse {
-    Long tongSoTinChi;
-    Long soTinChiTichLuy;
-    Long soTinChiCaiThien;
-    Long soTinChiDangKyHienTai;
+public class ThongKeTinChiBySinhVien {
+    String maSo;
+    List<ThongKeTinChi> thongKeTinChiList;
 }

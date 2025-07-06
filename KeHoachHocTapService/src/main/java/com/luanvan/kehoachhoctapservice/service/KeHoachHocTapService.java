@@ -9,10 +9,7 @@ import com.luanvan.kehoachhoctapservice.model.dto.*;
 import com.luanvan.kehoachhoctapservice.model.request.AddKHHTRequest;
 import com.luanvan.kehoachhoctapservice.model.request.HocPhanRequest;
 import com.luanvan.kehoachhoctapservice.model.request.KeHoachHocTapRequest;
-import com.luanvan.kehoachhoctapservice.model.response.KeHoachHocTapDetail;
-import com.luanvan.kehoachhoctapservice.model.response.PageResponse;
-import com.luanvan.kehoachhoctapservice.model.response.ThongKeTinChi;
-import com.luanvan.kehoachhoctapservice.model.response.TinChiResponse;
+import com.luanvan.kehoachhoctapservice.model.response.*;
 import com.luanvan.kehoachhoctapservice.repository.KeHoachHocTapMauRepository;
 import com.luanvan.kehoachhoctapservice.repository.KeHoachHocTapRepository;
 import com.luanvan.kehoachhoctapservice.repository.httpClient.HocPhanClient;
@@ -50,6 +47,24 @@ public class KeHoachHocTapService {
         return hocPhanClient.getHocKyIn(hocKyList);
     }
 
+    //Số tín chỉ đăng ký gần nhất của sinh viên theo mã số
+    public Long getCountTinChiDangKyByMaSo(String maSo) {
+        if (maSo == null || maSo.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        // Lấy kế hoạch học tập gần nhất của sinh viên theo mã số
+        List<KeHoachHocTap> khhtNearestHocKy = keHoachHocTapRepository.findLatestKeHoachHocTapByMaSo(maSo);
+
+
+        if( khhtNearestHocKy.isEmpty()) {
+            return 0L;
+        }
+        List<String> maHocPhanList = khhtNearestHocKy.stream()
+                .map(KeHoachHocTap::getMaHocPhan)
+                .toList();
+        return hocPhanClient.countTinChiIn(maHocPhanList);
+    }
+
     public TinChiResponse countKeHoachHocTapsByMaSo(String maSo, String khoaHoc, Long maNganh) {
         if (maSo == null || maSo.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
@@ -60,7 +75,7 @@ public class KeHoachHocTapService {
 
         List<KeHoachHocTap> khhtList = keHoachHocTapRepository.findKeHoachHocTapsByMaSo(maSo);
         if (khhtList == null || khhtList.isEmpty()) {
-            return new TinChiResponse(0L, 0L, 0L);
+            return new TinChiResponse(0L, 0L, 0L, 0L);
         }
 
         modelMapper.typeMap(KeHoachHocTap.class, KeHoachHocTapRequest.class)
@@ -347,7 +362,8 @@ public class KeHoachHocTapService {
         return hocPhanClient.getHocPhanIn(maHocPhanGoiY);
     }
 
-    public List<ThongKeTinChi> thongKeKHHT(String maLop) {
+    // Thống kê số tín chỉ đăng ký và cải thiện theo lớp
+    public List<ThongKeTinChiBySinhVien> thongKeKHHT(String maLop) {
         if(maLop == null || maLop.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
@@ -356,15 +372,26 @@ public class KeHoachHocTapService {
             throw new AppException(ErrorCode.NOTFOUND);
         }
         List<String> maSoList = lopDTO.getDSSinhVien().stream().map(SinhVienDTO::getMaSo).toList();
-        List<ThongKeTinChi> thongKeTinChiList = new ArrayList<>();
+
+        List<ThongKeTinChiBySinhVien> result = new ArrayList<>();
+
         maSoList.forEach(maSo ->{
-            ThongKeTinChi thongKeTinChi = new ThongKeTinChi();
-            thongKeTinChi.setMaSo(maSo);
-            thongKeTinChi.setSoTinChiDangKy(keHoachHocTapRepository.countKeHoachHocTapByMaSoAndHocPhanCaiThien(maSo, false));
-            thongKeTinChi.setSoTinChiCaiThien(keHoachHocTapRepository.countKeHoachHocTapByMaSoAndHocPhanCaiThien(maSo, true));
-            thongKeTinChiList.add(thongKeTinChi);
+            if (maSo == null || maSo.isEmpty()) {
+                log.info("Mã số sinh viên không hợp lệ: {}", maSo);
+            }
+            else{
+                ThongKeTinChiBySinhVien thongKe = new ThongKeTinChiBySinhVien();
+                List<ThongKeTinChi> list = countKHHTGroupByHocKy(maSo);
+                thongKe.setMaSo(maSo);
+                thongKe.setThongKeTinChiList(list);
+                if (!list.isEmpty()) {
+                    result.add(thongKe);
+                } else {
+                    log.info("Không có kế hoạch học tập cho sinh viên: {}", maSo);
+                }
+            }
         });
-        return thongKeTinChiList;
+        return result;
     }
 
     //    // Private methods

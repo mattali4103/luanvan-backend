@@ -2,6 +2,7 @@ package com.luanvan.profileservice.services;
 
 import com.luanvan.profileservice.dto.LopDTO;
 import com.luanvan.profileservice.dto.response.ProfileResponse;
+import com.luanvan.profileservice.dto.response.SinhVienPreviewProfile;
 import com.luanvan.profileservice.dto.response.StatisticsLopResponse;
 import com.luanvan.profileservice.entity.Lop;
 import com.luanvan.profileservice.entity.Nganh;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -76,6 +78,22 @@ public class LopService {
         Lop lop = lopRepository.findById(maLop)
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
         List<ProfileResponse> list = sinhVienService.getAllSinhVienByLop(lop);
+        if (list.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list;
+    }
+
+    public List<SinhVienPreviewProfile> getPreviewProfileByMaLop(String maLop) {
+        Lop lop = lopRepository.findById(maLop)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        List<SinhVienPreviewProfile> list = new ArrayList<>();
+        lop.getDSSinhVien().forEach(sinhVien -> {
+            SinhVienPreviewProfile previewProfile = sinhVienService.getSinhVienPreviewProfile(sinhVien.getMaSo());
+            if (previewProfile != null) {
+                list.add(previewProfile);
+            }
+        });
         if (list.isEmpty()) {
             return Collections.emptyList();
         }
