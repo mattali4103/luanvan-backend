@@ -10,7 +10,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
       </profile>
-      <profile name="Annotation profile for KeHoachHocTapService" enabled="true">
+      <profile name="Annotation profile for ProfileService" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -20,8 +20,8 @@
         <module name="KetQuaHocTapService" />
         <module name="HocPhanService" />
         <module name="KeHoachHocTapService" />
-        <module name="user-service" />
         <module name="ProfileService" />
+        <module name="user-service" />
       </profile>
     </annotationProcessing>
   </component>

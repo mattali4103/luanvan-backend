@@ -58,9 +58,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOriginPatterns(Collections.singletonList("*"));
-        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        corsConfiguration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization"));
+        corsConfiguration.addAllowedOrigin("*"); // Frontend URL
+        corsConfiguration.addAllowedMethod("*"); // Cho phép tất cả các HTTP methods
+        corsConfiguration.addAllowedHeader("*"); // Cho phép tất cả các headers
         corsConfiguration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);

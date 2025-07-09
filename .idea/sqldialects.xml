@@ -2,6 +2,7 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/a39808ad-8502-4d83-a9ec-42ee9245b911/console.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/ProfileService/src/main/resources/db/migration/V2__Add_SinhVien_Additional_Fields.sql" dialect="MySQL" />
     <file url="PROJECT" dialect="MySQL" />
   </component>
 </project>

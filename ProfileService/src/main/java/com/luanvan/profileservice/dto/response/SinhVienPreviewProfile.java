@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SinhVienPreviewProfile {
+    String avatarUrl;
     String maSo;
     String ten;
     String maLop;

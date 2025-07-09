@@ -25,4 +25,14 @@ public class ProfileResponse {
     Long maSoThue;
     Long soTk;
     Long maKhoa;
+    String soDienThoai;
+    String email;
+    String diaChi;
+    String queQuan;
+    String avatarUrl;
+    String danToc;
+    String tonGiao;
+    String cccd;
+    String ngayCapCCCD;
+    String noiCapCCCD;
 }

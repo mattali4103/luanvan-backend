@@ -8,6 +8,7 @@ import com.luanvan.profileservice.dto.response.SinhVienPreviewProfile;
 import com.luanvan.profileservice.dto.response.ThongKeKetQuaSinhVien;
 import com.luanvan.profileservice.services.SinhVienService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/profile/sinhvien")
@@ -45,6 +46,14 @@ public class SinhVienController {
                 .build();
     }
 
+    @PutMapping(value = "update/avatar", consumes = "multipart/form-data")
+    public ApiResponse<String> updateAvatar(@RequestParam("file") MultipartFile file, @RequestParam("maSo") String maSo) {
+        return ApiResponse.<String>builder()
+                .code(200)
+                .message("OK")
+                .data(sinhVienService.uploadAvatar(file, maSo))
+                .build();
+    }
 
     @PutMapping("/update")
     public ApiResponse<SinhVienDTO> updateSinhVien(@RequestBody SinhVienDTO sv) {

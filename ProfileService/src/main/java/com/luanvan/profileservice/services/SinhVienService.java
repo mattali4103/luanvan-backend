@@ -20,7 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -34,7 +37,8 @@ public class SinhVienService {
     private final UserClient userClient;
     private final KHHTClient kHHTClient;
     private final KQHTClient kQHTClient;
-
+    private final CloudinaryService cloudinaryService;
+    @Transactional
     public void deleteSinhVien(String maSo) {
         if (maSo == null || maSo.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
@@ -46,18 +50,40 @@ public class SinhVienService {
     }
 
 
-
+    @Transactional
     public SinhVienDTO updateSinhVien(SinhVienDTO sinhvienDTO) {
-
         if(sinhvienDTO == null || sinhvienDTO.getMaSo() == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
 
         ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+
+        // Cấu hình mapping cho ngayCapCCCD từ String sang LocalDate
+        modelMapper.createTypeMap(String.class, LocalDate.class)
+            .setConverter(context -> {
+                String source = context.getSource();
+                if (source == null || source.trim().isEmpty()) {
+                    return null;
+                }
+                try {
+                    return LocalDate.parse(source);
+                } catch (Exception e) {
+                    throw new AppException(ErrorCode.INVALID_REQUEST);
+                }
+            });
+
+        modelMapper.typeMap(SinhVienDTO.class, SinhVien.class)
+                .addMappings(mapper -> {
+                    mapper.skip(SinhVien::setLop);
+                    mapper.skip(SinhVien::setKhoaHoc);
+                    mapper.skip(SinhVien::setMaSo);
+                });
+
         SinhVien sv = sinhVienRepository.findById(sinhvienDTO.getMaSo())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
-        modelMapper.map(sinhvienDTO, sv);
 
+        modelMapper.map(sinhvienDTO, sv);
         sinhVienRepository.save(sv);
         return sinhVienToDTOMapper.map(sv, SinhVienDTO.class);
     }
@@ -66,6 +92,9 @@ public class SinhVienService {
     public SinhVienDTO createSinhVien(CreateSinhVienRequest request){
         Lop lop = lopRepository.findById(request.getMaLop())
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        //ModelMapper skip nullable field
+        // to prevent overwriting the Lop field in SinhVien entity
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.typeMap(SinhVienDTO.class, SinhVien.class)
                 .addMappings(mapper ->
                         mapper.skip(SinhVien::setLop));
@@ -74,6 +103,21 @@ public class SinhVienService {
         sv.setLop(lop);
         sinhVienRepository.save(sv);
         return sinhVienToDTOMapper.map(sv, SinhVienDTO.class);
+    }
+
+    public String uploadAvatar(MultipartFile file, String maSo) {
+        SinhVien sinhVien = sinhVienRepository.findById(maSo)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+
+        // Xóa avatar cũ nếu có
+        if (sinhVien.getAvatarUrl() != null && !sinhVien.getAvatarUrl().isEmpty()) {
+            cloudinaryService.deleteFile(sinhVien.getAvatarUrl());
+        }
+
+        String avatarUrl = cloudinaryService.uploadFile(file, "avatars/" + maSo);
+        sinhVien.setAvatarUrl(avatarUrl);
+        sinhVienRepository.save(sinhVien);
+        return avatarUrl;
     }
 
     public SinhVienDTO findById(String maSo) {
@@ -109,6 +153,7 @@ public class SinhVienService {
         }
 
         return SinhVienPreviewProfile.builder()
+                .avatarUrl(sinhVien.getAvatarUrl())
                 .maSo(sinhVien.getMaSo())
                 .ten(userDTO.getHoTen())
                 .maLop(sinhVien.getLop().getMaLop())
@@ -121,18 +166,18 @@ public class SinhVienService {
                 .build();
     }
 
+
+
     private ProfileResponse getProfileResponse(SinhVien sinhVien) {
         UserDTO userDTO = userClient.getUserById(sinhVien.getMaSo());
-        return ProfileResponse.builder()
-                .hoTen(userDTO.getHoTen())
-                .gioiTinh(userDTO.isGioiTinh())
-                .ngaySinh(userDTO.getNgaySinh())
-                .maSo(sinhVien.getMaSo())
-                .maLop(sinhVien.getLop().getMaLop())
-                .khoaHoc(sinhVien.getKhoaHoc())
-                .maNganh(sinhVien.getLop().getNganh().getMaNganh())
-                .tenNganh(sinhVien.getLop().getNganh().getTenNganh())
-                .build();
+        ProfileResponse response = modelMapper.map(sinhVien, ProfileResponse.class);
+        response.setMaNganh(sinhVien.getLop().getNganh().getMaNganh());
+        response.setTenNganh(sinhVien.getLop().getNganh().getTenNganh());
+        response.setMaSo(userDTO.getMaSo());
+        response.setHoTen(userDTO.getHoTen());
+        response.setNgaySinh(userDTO.getNgaySinh());
+        response.setGioiTinh(userDTO.isGioiTinh());
+        return response;
     }
 
 
