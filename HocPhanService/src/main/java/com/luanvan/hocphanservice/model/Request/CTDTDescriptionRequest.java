@@ -10,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CTDTDescriptionRequest {
+    String tenChuongTrinhDaoTao;
     Long id;
     Long maNganh;
     String noiDung;

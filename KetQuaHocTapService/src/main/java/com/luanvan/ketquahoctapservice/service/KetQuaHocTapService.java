@@ -5,14 +5,8 @@ import com.luanvan.ketquahoctapservice.Repository.httpClient.HocPhanClient;
 import com.luanvan.ketquahoctapservice.entity.KetQuaHocTap;
 import com.luanvan.ketquahoctapservice.exception.AppException;
 import com.luanvan.ketquahoctapservice.exception.ErrorCode;
-import com.luanvan.ketquahoctapservice.model.Response.DiemTrungBinh;
-import com.luanvan.ketquahoctapservice.model.Response.KetQuaHocTapByHocKy;
-import com.luanvan.ketquahoctapservice.model.Response.PageResponse;
-import com.luanvan.ketquahoctapservice.model.Response.ThongKeKetQuaSinhVien;
-import com.luanvan.ketquahoctapservice.model.dto.HocKyDTO;
-import com.luanvan.ketquahoctapservice.model.dto.HocPhanDTO;
-import com.luanvan.ketquahoctapservice.model.dto.KetQuaHocTapDTO;
-import com.luanvan.ketquahoctapservice.model.dto.KetQuaHocTapDetail;
+import com.luanvan.ketquahoctapservice.model.Response.*;
+import com.luanvan.ketquahoctapservice.model.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -37,6 +31,80 @@ public class KetQuaHocTapService {
     private final KetQuaHocTapRepository ketQuaHocTapRepository;
     private final ModelMapper modelMapper;
     private final HocPhanClient hocPhanClient;
+
+
+    public CanhBaoHocVu isCanhBaoHocVu(String maSo){
+        List<Long> maHocKyList = ketQuaHocTapRepository.findMaHocKyByMaSo(maSo);
+        if (maHocKyList == null || maHocKyList.isEmpty()) {
+            return new CanhBaoHocVu(); // Không có học kỳ nào, không cần cảnh báo
+        }
+        CanhBaoHocVu result = new CanhBaoHocVu();
+        result.setMaSo(maSo);
+        result.setLyDo("Bạn không có cảnh báo học vụ nào.");
+        List<HocKyDTO> hocKyDTOList = hocPhanClient.getHocKyIn(maHocKyList);
+        // Lấy năm học duy nhất
+        List<Long> maNamHocList = hocKyDTOList.stream()
+                .map(hocKyDTO ->
+                        hocKyDTO.getNamHoc() != null ? hocKyDTO.getNamHoc().getId() : null)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        List<NamHocDTO> namHocDTOList = hocPhanClient.getNamHocByMaNamHocIn(maNamHocList);
+        //Nếu năm học đầu điểm dưới <= 1.2 thì cảnh báo
+        //Nếu năm học thứ hai điểm dưới <= 1.4 thì cảnh báo
+        // Nếu năm học thứ ba điểm dưới <= 1.6 thì cảnh báo
+        // Các năm sau <= 1.8 thì cảnh báo
+        if(namHocDTOList.size() == 1){
+            namHocDTOList.get(0).getHocKyList().forEach(
+                    hocKy -> {
+                        Double diemTrungBinhTichLuy = getDiemTrungBinhTichLuy(maSo, hocKy.getMaHocKy());
+                        if (diemTrungBinhTichLuy <= 1.2) {
+                            result.setLyDo("Điểm trung bình tích lũy của bạn trong học kỳ " + hocKy.getTenHocKy() + " là " + diemTrungBinhTichLuy + ", dưới mức cảnh báo 1.2.");
+                        }
+                    }
+            );
+        }
+        else if(namHocDTOList.size() == 2){
+            namHocDTOList.get(1).getHocKyList().forEach(
+                    hocKy -> {
+                        Double diemTrungBinhTichLuy = getDiemTrungBinhTichLuy(maSo, hocKy.getMaHocKy());
+                        if (diemTrungBinhTichLuy <= 1.4) {
+                            result.setLyDo("Điểm trung bình tích lũy của bạn trong học kỳ " + hocKy.getTenHocKy() + " là " + diemTrungBinhTichLuy + ", dưới mức cảnh báo 1.4.");
+                        }
+                    }
+            );
+        }
+        else if(namHocDTOList.size() == 3){
+            namHocDTOList.get(2).getHocKyList().forEach(
+                    hocKy -> {
+                        Double diemTrungBinhTichLuy = getDiemTrungBinhTichLuy(maSo, hocKy.getMaHocKy());
+                        if (diemTrungBinhTichLuy <= 1.6) {
+                            result.setLyDo("Điểm trung bình tích lũy của bạn trong học kỳ " + hocKy.getTenHocKy() + " là " + diemTrungBinhTichLuy + ", dưới mức cảnh báo 1.6.");
+                        }
+                    }
+            );
+        }
+        else{
+            namHocDTOList.forEach(
+                    namHoc -> namHoc.getHocKyList().forEach(
+                            hocKy -> {
+                                Double diemTrungBinhTichLuy = getDiemTrungBinhTichLuy(maSo, hocKy.getMaHocKy());
+                                if (diemTrungBinhTichLuy <= 1.8) {
+                                    result.setLyDo("Điểm trung bình tích lũy của bạn trong học kỳ " + hocKy.getTenHocKy() + " là " + diemTrungBinhTichLuy + ", dưới mức cảnh báo 1.8.");
+                                }
+                            }
+                    )
+            );
+        }
+        //Kiểm tra tín chỉ tích luỹ
+        ThongKeKetQuaSinhVien thongKe = getThongKeByMaSo(maSo);
+        long trungBinhSoTinChi = thongKe.getSoTinChiTichLuy() / namHocDTOList.size();
+        if(trungBinhSoTinChi <= 30){
+            result.setLyDo("Số tín chỉ tích lũy của bạn là " + thongKe.getSoTinChiTichLuy() + ", dưới mức cảnh báo 30 tín chỉ.");
+        }
+
+        return result;
+    }
 
     public KetQuaHocTapByHocKy getKetQuaHocTapByHocKy(String maSo, Long maHocKy) {
         //Config laị modelMapper bỏ qua hocKy
@@ -209,6 +277,8 @@ public class KetQuaHocTapService {
                 Collections.emptyList() // HocKyDTO không cần thiết trong trường hợp này
         );
     }
+
+
 
 
     // Lấy điểm trung bình theo mã số sinh viên

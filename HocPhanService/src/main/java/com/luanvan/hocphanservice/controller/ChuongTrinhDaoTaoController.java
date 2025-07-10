@@ -1,5 +1,5 @@
 package com.luanvan.hocphanservice.controller;
-import com.luanvan.hocphanservice.model.ChuongTrinhDaoTaoDTO;
+import com.luanvan.hocphanservice.model.Request.ChuongTrinhDaoTaoRequest;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.Request.CTDTDescriptionRequest;
 import com.luanvan.hocphanservice.model.Request.HocPhanRequest;
@@ -37,9 +37,9 @@ public class ChuongTrinhDaoTaoController {
     }
 
     @GetMapping("/get_by_ma_nganh/{maNganh}")
-    public ApiResponse<List<ChuongTrinhDaoTaoDTO>> getCTDTByMaNganh(
+    public ApiResponse<List<ChuongTrinhDaoTaoRequest>> getCTDTByMaNganh(
             @PathVariable Long maNganh) {
-        return ApiResponse.<List<ChuongTrinhDaoTaoDTO>>builder()
+        return ApiResponse.<List<ChuongTrinhDaoTaoRequest>>builder()
                 .code(200)
                 .message("OK")
                 .data(chuongTrinhDaoTaoService.getCTDTByMaNganh(maNganh))
@@ -63,8 +63,8 @@ public class ChuongTrinhDaoTaoController {
     }
 
     @GetMapping("/id/{khoaHoc}/{maNganh}")
-    public ApiResponse<ChuongTrinhDaoTaoDTO> getChuongTrinhDaoTaoByKhoaHoc(@PathVariable String khoaHoc, @PathVariable Long maNganh) {
-        return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
+    public ApiResponse<ChuongTrinhDaoTaoRequest> getChuongTrinhDaoTaoByKhoaHoc(@PathVariable String khoaHoc, @PathVariable Long maNganh) {
+        return ApiResponse.<ChuongTrinhDaoTaoRequest>builder()
                 .code(200)
                 .message("OK")
                 .data(chuongTrinhDaoTaoService.getByKhoaHocAndMaNganh(khoaHoc, maNganh))
@@ -72,8 +72,8 @@ public class ChuongTrinhDaoTaoController {
     }
 
     @GetMapping("/get/{khoaHoc}/{maNganh}")
-    public ApiResponse<ChuongTrinhDaoTaoDTO> getChuongTrinhDaoTaoByNganh(@PathVariable String khoaHoc, @PathVariable Long maNganh) {
-        return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
+    public ApiResponse<ChuongTrinhDaoTaoRequest> getChuongTrinhDaoTaoByNganh(@PathVariable String khoaHoc, @PathVariable Long maNganh) {
+        return ApiResponse.<ChuongTrinhDaoTaoRequest>builder()
                 .code(200)
                 .message("OK")
                 .data(chuongTrinhDaoTaoService.getCTDT(khoaHoc, maNganh))
@@ -81,38 +81,40 @@ public class ChuongTrinhDaoTaoController {
     }
 
     @PostMapping("/create")
-    public ApiResponse<ChuongTrinhDaoTaoDTO> createChuongTrinhDaoTao(@RequestBody ChuongTrinhDaoTaoDTO chuongTrinhDaoTaoDTO) {
-        return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
+    public ApiResponse<ChuongTrinhDaoTaoRequest> createChuongTrinhDaoTao(@RequestBody ChuongTrinhDaoTaoRequest chuongTrinhDaoTaoRequest) {
+        return ApiResponse.<ChuongTrinhDaoTaoRequest>builder()
                 .code(201)
                 .message("Created")
-                .data(chuongTrinhDaoTaoService.create(chuongTrinhDaoTaoDTO))
+                .data(chuongTrinhDaoTaoService.create(chuongTrinhDaoTaoRequest))
                 .build();
     }
 
     @PostMapping("/create/upload")
-    public ApiResponse<ChuongTrinhDaoTaoDTO> createChuongTrinhDaoTaoFromFile(
+    public ApiResponse<ChuongTrinhDaoTaoRequest> createChuongTrinhDaoTaoFromFile(
+            @RequestParam("ten") String ten,
             @RequestParam("maNganh") Long maNganh,
             @RequestParam("noiDung") String noiDung,
             @RequestParam("khoaHoc") String khoaHoc,
             @RequestParam("file") MultipartFile file) {
         CTDTDescriptionRequest request = CTDTDescriptionRequest.builder()
+                .tenChuongTrinhDaoTao(ten)
                 .maNganh(maNganh)
                 .noiDung(noiDung)
                 .khoaHoc(khoaHoc)
                 .build();
         chuongTrinhDaoTaoService.createDSHocPhanFromFile(request, file);
-        return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
+        return ApiResponse.<ChuongTrinhDaoTaoRequest>builder()
                 .code(201)
                 .message("Created OK")
                 .build();
     }
 
     @PutMapping("/update")
-    public ApiResponse<ChuongTrinhDaoTaoDTO> updateChuongTrinhDaoTao(@RequestBody ChuongTrinhDaoTaoDTO chuongTrinhDaoTaoDTO) {
-        return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
+    public ApiResponse<ChuongTrinhDaoTaoRequest> updateChuongTrinhDaoTao(@RequestBody ChuongTrinhDaoTaoRequest chuongTrinhDaoTaoRequest) {
+        return ApiResponse.<ChuongTrinhDaoTaoRequest>builder()
                 .code(200)
                 .message("Updated")
-                .data(chuongTrinhDaoTaoService.update(chuongTrinhDaoTaoDTO))
+                .data(chuongTrinhDaoTaoService.update(chuongTrinhDaoTaoRequest))
                 .build();
     }
 
@@ -127,10 +129,10 @@ public class ChuongTrinhDaoTaoController {
 
     // API FOR ADMIN
     @GetMapping("")
-    public ApiResponse<ChuongTrinhDaoTaoDTO> getCTDTByKhoaHocAndMaNganh(
+    public ApiResponse<ChuongTrinhDaoTaoRequest> getCTDTByKhoaHocAndMaNganh(
             @RequestParam String khoaHoc,
             @RequestParam Long maNganh) {
-        return ApiResponse.<ChuongTrinhDaoTaoDTO>builder()
+        return ApiResponse.<ChuongTrinhDaoTaoRequest>builder()
                 .code(200)
                 .message("OK")
                 .data(chuongTrinhDaoTaoService.getByKhoaHocAndMaNganh(khoaHoc, maNganh))

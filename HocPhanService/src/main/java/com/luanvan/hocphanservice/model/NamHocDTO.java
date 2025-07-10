@@ -1,5 +1,6 @@
 package com.luanvan.hocphanservice.model;
 
+import com.luanvan.hocphanservice.entity.HocKy;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,6 +16,7 @@ public class NamHocDTO {
     Long id;
     String namBatDau;
     String namKetThuc;
+    List<HocKyDTO> hocKyList;
     @Override
     public String toString() {
         return namBatDau + "-" + namKetThuc;

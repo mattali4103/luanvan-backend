@@ -15,4 +15,5 @@ public class ThongKeKetQuaSinhVien {
     Long soTinChiCaiThien;
     Double diemTBTichLuy;
     String xepLoai;
+    CanhBaoHocVu canhBaoHocVu;
 }

@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -154,8 +154,11 @@ public class SinhVienService {
 
         return SinhVienPreviewProfile.builder()
                 .avatarUrl(sinhVien.getAvatarUrl())
+                .gioiTinh(userDTO.isGioiTinh())
                 .maSo(sinhVien.getMaSo())
-                .ten(userDTO.getHoTen())
+                .hoTen(userDTO.getHoTen())
+                .khoaHoc(sinhVien.getKhoaHoc())
+                .ngaySinh(userDTO.getNgaySinh().format(DateTimeFormatter.ISO_DATE))
                 .maLop(sinhVien.getLop().getMaLop())
                 .tenNganh(sinhVien.getLop().getNganh().getTenNganh())
                 .xepLoaiHocLuc(kqht.getXepLoai())

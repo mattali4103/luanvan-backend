@@ -3,6 +3,5 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/frontend/learning-management" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/frontend/learning-management/gemini-cli" vcs="Git" />
   </component>
 </project>

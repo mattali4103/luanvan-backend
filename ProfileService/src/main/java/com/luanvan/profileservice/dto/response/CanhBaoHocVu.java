@@ -1,7 +1,7 @@
 package com.luanvan.profileservice.dto.response;
 
-
 import lombok.*;
+
 import lombok.experimental.FieldDefaults;
 
 @Getter
@@ -10,11 +10,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class ThongKeKetQuaSinhVien {
+public class CanhBaoHocVu {
     String maSo;
-    Long soTinChiTichLuy;
-    Long soTinChiCaiThien;
-    Double diemTBTichLuy;
-    String xepLoai;
-    CanhBaoHocVu canhBaoHocVu;
+    String lyDo;
 }

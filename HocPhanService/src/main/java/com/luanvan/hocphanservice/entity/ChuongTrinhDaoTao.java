@@ -18,6 +18,7 @@ public class ChuongTrinhDaoTao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+    String tenChuongTrinhDaoTao;
     String khoaHoc;
     Long maNganh;
     Long tongSoTinChi;

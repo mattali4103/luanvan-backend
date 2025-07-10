@@ -1,5 +1,7 @@
-package com.luanvan.hocphanservice.model;
+package com.luanvan.hocphanservice.model.Request;
 
+import com.luanvan.hocphanservice.model.HocPhanDTO;
+import com.luanvan.hocphanservice.model.HocPhanTuChonDTO;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,8 +15,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ChuongTrinhDaoTaoDTO {
+public class ChuongTrinhDaoTaoRequest {
     Long id;
+    String tenChuongTrinhDaoTao;
+
     @NotBlank(message = "Mã ngành không được null")
     String khoaHoc;
     @NotBlank(message = "Mã ngành không được null")

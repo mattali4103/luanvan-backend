@@ -24,7 +24,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class SinhVienPreviewProfile {
     String avatarUrl;
     String maSo;
-    String ten;
+    String hoTen;
+    String ngaySinh;
+    boolean gioiTinh;
+    String khoaHoc;
     String maLop;
     String tenNganh;
     String xepLoaiHocLuc;
