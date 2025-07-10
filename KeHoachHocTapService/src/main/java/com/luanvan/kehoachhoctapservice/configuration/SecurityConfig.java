@@ -17,6 +17,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 
 @Configuration
@@ -58,7 +59,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.addAllowedOrigin("*"); // Frontend URL
+        corsConfiguration.setAllowedOriginPatterns(Collections.singletonList("*")); // Cho phép tất cả các origin
         corsConfiguration.addAllowedMethod("*"); // Cho phép tất cả các HTTP methods
         corsConfiguration.addAllowedHeader("*"); // Cho phép tất cả các headers
         corsConfiguration.setAllowCredentials(true);

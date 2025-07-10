@@ -1,6 +1,7 @@
 package com.luanvan.profileservice.controller;
 
 import com.luanvan.profileservice.dto.CertificateDTO;
+import com.luanvan.profileservice.dto.SinhVienDTO;
 import com.luanvan.profileservice.dto.response.ApiResponse;
 import com.luanvan.profileservice.services.CertificateService;
 import org.springframework.web.bind.annotation.*;
@@ -8,7 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
-
 @RestController
 @RequestMapping("/api/profile/sinhvien/certificate")
 public class CertificateController {
@@ -36,6 +36,7 @@ public class CertificateController {
     ) {
         CertificateDTO certificateDTO = new CertificateDTO();
         certificateDTO.setTenChungChi(tenChungChi);
+        certificateDTO.setSinhVien(new SinhVienDTO());
         certificateDTO.getSinhVien().setMaSo(maSo);
         certificateDTO.setNgayCap(LocalDate.parse(ngayCap));
 
@@ -63,6 +64,14 @@ public class CertificateController {
                 .code(200)
                 .message("Certificate updated successfully")
                 .data(certificateService.updateCertificate(file, certificateDTO))
+                .build();
+    }
+    @DeleteMapping("/delete/{id}")
+    public ApiResponse<CertificateDTO> deleteCertificate(@PathVariable Long id) {
+        certificateService.deleteCertificate(id);
+        return ApiResponse.<CertificateDTO>builder()
+                .code(200)
+                .message("Certificate deleted successfully")
                 .build();
     }
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -28,11 +29,15 @@ public class CertificateService {
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
         return modelMapper.map(certificate, CertificateDTO.class);
     }
+
     public List<CertificateDTO> getCertificatesByMaSo(String maSo) {
         if (maSo == null || maSo.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
         List<Certificate> certificates = certificateRepository.findBySinhVienMaSo(maSo);
+        if (certificates.isEmpty()) {
+            return Collections.emptyList();
+        }
         return certificates.stream()
                 .map(certificate -> modelMapper.map(certificate, CertificateDTO.class))
                 .toList();
@@ -43,11 +48,27 @@ public class CertificateService {
         if (dto == null || dto.getSinhVien().getMaSo() == null || dto.getSinhVien().getMaSo().isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        String imageUrl = cloudinaryService.uploadChungChi(file, dto.getSinhVien().getMaSo());
-        dto.setImageUrl(imageUrl);
         Certificate certificate = modelMapper.map(dto, Certificate.class);
-        certificateRepository.save(certificate);
+        certificate.setId(null);
+        Certificate result = certificateRepository.save(certificate);
+        String imageUrl = cloudinaryService.uploadChungChi(file, dto.getSinhVien().getMaSo());
+        result.setImageUrl(imageUrl);
+        certificateRepository.save(result);
         return modelMapper.map(certificate, CertificateDTO.class);
+    }
+
+    @Transactional
+    public void deleteCertificate(Long id) {
+        if (id == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        Certificate certificate = certificateRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        // Xóa ảnh nếu có
+        if (certificate.getImageUrl() != null && !certificate.getImageUrl().isEmpty()) {
+            cloudinaryService.deleteFile(certificate.getImageUrl());
+        }
+        certificateRepository.delete(certificate);
     }
 
     @Transactional
