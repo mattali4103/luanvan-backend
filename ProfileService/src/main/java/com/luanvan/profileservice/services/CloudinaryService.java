@@ -13,7 +13,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CloudinaryService {
     private final Cloudinary cloudinary;
-
     public String uploadFile(MultipartFile file, String folder) {
         try {
             Map uploadResult = cloudinary.uploader()

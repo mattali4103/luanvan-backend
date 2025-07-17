@@ -33,78 +33,7 @@ public class KetQuaHocTapService {
     private final HocPhanClient hocPhanClient;
 
 
-    public CanhBaoHocVu isCanhBaoHocVu(String maSo){
-        List<Long> maHocKyList = ketQuaHocTapRepository.findMaHocKyByMaSo(maSo);
-        if (maHocKyList == null || maHocKyList.isEmpty()) {
-            return new CanhBaoHocVu(); // Không có học kỳ nào, không cần cảnh báo
-        }
-        CanhBaoHocVu result = new CanhBaoHocVu();
-        result.setMaSo(maSo);
-        result.setLyDo("Bạn không có cảnh báo học vụ nào.");
-        List<HocKyDTO> hocKyDTOList = hocPhanClient.getHocKyIn(maHocKyList);
-        // Lấy năm học duy nhất
-        List<Long> maNamHocList = hocKyDTOList.stream()
-                .map(hocKyDTO ->
-                        hocKyDTO.getNamHoc() != null ? hocKyDTO.getNamHoc().getId() : null)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
-        List<NamHocDTO> namHocDTOList = hocPhanClient.getNamHocByMaNamHocIn(maNamHocList);
-        //Nếu năm học đầu điểm dưới <= 1.2 thì cảnh báo
-        //Nếu năm học thứ hai điểm dưới <= 1.4 thì cảnh báo
-        // Nếu năm học thứ ba điểm dưới <= 1.6 thì cảnh báo
-        // Các năm sau <= 1.8 thì cảnh báo
-        if(namHocDTOList.size() == 1){
-            namHocDTOList.get(0).getHocKyList().forEach(
-                    hocKy -> {
-                        Double diemTrungBinhTichLuy = getDiemTrungBinhTichLuy(maSo, hocKy.getMaHocKy());
-                        if (diemTrungBinhTichLuy <= 1.2) {
-                            result.setLyDo("Điểm trung bình tích lũy của bạn trong học kỳ " + hocKy.getTenHocKy() + " là " + diemTrungBinhTichLuy + ", dưới mức cảnh báo 1.2.");
-                        }
-                    }
-            );
-        }
-        else if(namHocDTOList.size() == 2){
-            namHocDTOList.get(1).getHocKyList().forEach(
-                    hocKy -> {
-                        Double diemTrungBinhTichLuy = getDiemTrungBinhTichLuy(maSo, hocKy.getMaHocKy());
-                        if (diemTrungBinhTichLuy <= 1.4) {
-                            result.setLyDo("Điểm trung bình tích lũy của bạn trong học kỳ " + hocKy.getTenHocKy() + " là " + diemTrungBinhTichLuy + ", dưới mức cảnh báo 1.4.");
-                        }
-                    }
-            );
-        }
-        else if(namHocDTOList.size() == 3){
-            namHocDTOList.get(2).getHocKyList().forEach(
-                    hocKy -> {
-                        Double diemTrungBinhTichLuy = getDiemTrungBinhTichLuy(maSo, hocKy.getMaHocKy());
-                        if (diemTrungBinhTichLuy <= 1.6) {
-                            result.setLyDo("Điểm trung bình tích lũy của bạn trong học kỳ " + hocKy.getTenHocKy() + " là " + diemTrungBinhTichLuy + ", dưới mức cảnh báo 1.6.");
-                        }
-                    }
-            );
-        }
-        else{
-            namHocDTOList.forEach(
-                    namHoc -> namHoc.getHocKyList().forEach(
-                            hocKy -> {
-                                Double diemTrungBinhTichLuy = getDiemTrungBinhTichLuy(maSo, hocKy.getMaHocKy());
-                                if (diemTrungBinhTichLuy <= 1.8) {
-                                    result.setLyDo("Điểm trung bình tích lũy của bạn trong học kỳ " + hocKy.getTenHocKy() + " là " + diemTrungBinhTichLuy + ", dưới mức cảnh báo 1.8.");
-                                }
-                            }
-                    )
-            );
-        }
-        //Kiểm tra tín chỉ tích luỹ
-        ThongKeKetQuaSinhVien thongKe = getThongKeByMaSo(maSo);
-        long trungBinhSoTinChi = thongKe.getSoTinChiTichLuy() / namHocDTOList.size();
-        if(trungBinhSoTinChi <= 30){
-            result.setLyDo("Số tín chỉ tích lũy của bạn là " + thongKe.getSoTinChiTichLuy() + ", dưới mức cảnh báo 30 tín chỉ.");
-        }
 
-        return result;
-    }
 
     public KetQuaHocTapByHocKy getKetQuaHocTapByHocKy(String maSo, Long maHocKy) {
         //Config laị modelMapper bỏ qua hocKy
@@ -187,14 +116,15 @@ public class KetQuaHocTapService {
         if (ketQuaHocTapList == null || ketQuaHocTapList.isEmpty()) {
             return new ThongKeKetQuaSinhVien();
         }
+        List<HocKyDTO> hocKyDTOList = getMaHocKyByMaSo(maSo);
+        //Lấy học kỳ hiện tại
+        HocKyDTO hocKyHienTai = hocPhanClient.getCurrentHocKy();
 
         //Lấy mã học kỳ gần nhất từ kết quả học tập
         Long maHocKy = ketQuaHocTapList.stream()
                 .map(KetQuaHocTap::getMaHocKy)
                 .max(Long::compareTo)
                 .orElse(null);
-
-
 
         //Tính tổng số tín chỉ tích lũy
         Long soTinChiTichLuy = ketQuaHocTapList.stream()
@@ -212,6 +142,7 @@ public class KetQuaHocTapService {
         double diemTrungBinhTichLuy = getDiemTrungBinhTichLuy(maSo, maHocKy);
         String xepLoai = xepLoaiSinhVien(diemTrungBinhTichLuy);
 
+        CanhBaoHocVu canhBaoHocVu = getCanhBaoHocVu(hocKyHienTai, hocKyDTOList,  soTinChiTichLuy, diemTrungBinhTichLuy);
 
         return ThongKeKetQuaSinhVien.builder()
                 .maSo(maSo)
@@ -219,7 +150,39 @@ public class KetQuaHocTapService {
                 .soTinChiTichLuy(soTinChiTichLuy)
                 .soTinChiCaiThien(soTinChicaiThien)
                 .diemTBTichLuy(diemTrungBinhTichLuy)
+                .canhBaoHocVu(canhBaoHocVu)
                 .build();
+    }
+
+    private static CanhBaoHocVu getCanhBaoHocVu(HocKyDTO hocKyHienTai, List<HocKyDTO> hocKyDTOList, Long soTinChiTichLuy, double diemTrungBinhTichLuy) {
+        CanhBaoHocVu canhBaoHocVu = new CanhBaoHocVu();
+        double soTinChiTrungBinh = soTinChiTichLuy / (double) hocKyDTOList.size();
+
+        // Lấy học kỳ gần nhất từ danh sách học kỳ
+        Long hocKyGanNhat = hocKyDTOList.stream()
+                .map(HocKyDTO::getMaHocKy)
+                .max(Long::compareTo)
+                .orElse(0L);
+
+        //Nếu sinh viên có trên 1 học kỳ so với học kỳ hiện tại có tín chỉ tích luỹ thì cảnh báo học vụ
+//        if(hocKyHienTai.getMaHocKy() - hocKyGanNhat > 1) {
+//            canhBaoHocVu.setLyDo("Bạn đã không đăng ký học phần trong " + (hocKyHienTai.getMaHocKy() - hocKyGanNhat - 1) + " học kỳ gần nhất.");
+//        }
+         if(soTinChiTrungBinh < 15) {
+            canhBaoHocVu.setLyDo("Trễ tiến độ học tập");
+        }
+        else if(hocKyDTOList.size() == 1 && diemTrungBinhTichLuy <= 1.2) {
+            canhBaoHocVu.setLyDo("Điểm trung bình tích lũy của bạn dưới 2.5, bạn cần cải thiện kết quả học tập.");
+        } else if (hocKyDTOList.size() == 2 && diemTrungBinhTichLuy <= 1.4) {
+            canhBaoHocVu.setLyDo("Điểm trung bình tích lũy của bạn dưới 2.0, bạn cần cải thiện kết quả học tập.");
+        } else if (hocKyDTOList.size() == 3 && diemTrungBinhTichLuy < 1.6) {
+            canhBaoHocVu.setLyDo("Điểm trung bình tích lũy của bạn dưới 1.0, bạn cần cải thiện kết quả học tập.");
+        }
+        else if(hocKyDTOList.size() >= 4 && diemTrungBinhTichLuy <= 1.8) {
+            canhBaoHocVu.setLyDo("Điểm trung bình tích lũy của bạn dưới 1.8, bạn cần cải thiện kết quả học tập.");
+         }
+
+        return canhBaoHocVu;
     }
 
     //Tìm mã học kỳ theo mã số sinh viên (No pagination - legacy method)

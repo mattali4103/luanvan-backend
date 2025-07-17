@@ -2,6 +2,7 @@ package com.luanvan.hocphanservice.controller;
 
 import com.luanvan.hocphanservice.model.NamHocDTO;
 import com.luanvan.hocphanservice.model.Response.ApiResponse;
+import com.luanvan.hocphanservice.model.Response.NamHocResponse;
 import com.luanvan.hocphanservice.services.NamHocService;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class NamHocController {
     }
 
     @PostMapping(value = "nam_hoc_in/list")
-    List<NamHocDTO> getAllNamHoc(@RequestBody List<Long> namHocList){
+    List<NamHocResponse> getAllNamHoc(@RequestBody List<Long> namHocList){
         return namHocService.getNamHocByMaNamHocIn(namHocList);
     }
 

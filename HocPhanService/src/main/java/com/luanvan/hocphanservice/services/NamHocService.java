@@ -4,6 +4,7 @@ import com.luanvan.hocphanservice.entity.NamHoc;
 import com.luanvan.hocphanservice.exception.AppException;
 import com.luanvan.hocphanservice.exception.ErrorCode;
 import com.luanvan.hocphanservice.model.NamHocDTO;
+import com.luanvan.hocphanservice.model.Response.NamHocResponse;
 import com.luanvan.hocphanservice.repository.NamHocRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -49,12 +50,12 @@ public class NamHocService {
         return modelMapper.map(namHoc, NamHocDTO.class);
     }
 
-    public List<NamHocDTO> getNamHocByMaNamHocIn(List<Long> maNamHocList) {
+    public List<NamHocResponse> getNamHocByMaNamHocIn(List<Long> maNamHocList) {
         if(maNamHocList.isEmpty()){
             throw new AppException(ErrorCode.NOTFOUND);
         }
         List<NamHoc> namHocList = namHocRepository.findByIdIn(maNamHocList);
-        return namHocList.stream().map(mapper -> modelMapper.map(mapper, NamHocDTO.class)).toList();
+        return namHocList.stream().map(mapper -> modelMapper.map(mapper, NamHocResponse.class)).toList();
     }
 
     public List<NamHocDTO> getAllNamHoc() {

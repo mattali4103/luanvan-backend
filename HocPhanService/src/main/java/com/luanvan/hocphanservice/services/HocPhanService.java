@@ -4,7 +4,7 @@ import com.luanvan.hocphanservice.entity.HocPhan;
 import com.luanvan.hocphanservice.exception.AppException;
 import com.luanvan.hocphanservice.exception.ErrorCode;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
-
+import com.luanvan.hocphanservice.repository.ChuongTrinhDaoTaoRepository;
 import com.luanvan.hocphanservice.repository.HocPhanRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +26,9 @@ import java.util.stream.Collectors;
 public class HocPhanService {
     private final HocPhanRepository hocPhanRepository;
     private final ModelMapper modelMapper;
+
+    private final HocPhanTuChonService hocPhanTuChonService;
+
     public List<HocPhanDTO> getDSHocPhanIn(List<String> maHocPhanList) {
         if (maHocPhanList.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
@@ -102,14 +105,25 @@ public class HocPhanService {
 
 //    Thấy học phần nằm trong CTDT dựa theo loại học phần và  khoá học
     public List<HocPhanDTO> getHocPhanInCTDTByLoaiHp(String loaiHp, String khoaHoc, Long maNganh) {
-        if(loaiHp == null || khoaHoc == null){
+        if(loaiHp == null || khoaHoc == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
+
         List<HocPhan> hocPhanList = hocPhanRepository.findHocPhanByLoaiHpInChuongTrinhDaoTao(loaiHp, khoaHoc, maNganh);
         if(hocPhanList.isEmpty()){
             return new ArrayList<>();
         }
-        return hocPhanList.stream().map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class)).toList();
+
+        List<HocPhanDTO> result = hocPhanList.stream()
+                .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
+                .collect(Collectors.toList());
+
+        if(loaiHp.equals("Cơ sở Ngành")){
+            List<HocPhanDTO> dtoList = hocPhanTuChonService.getNhomHocPhanTheChat();
+            result.addAll(dtoList);
+        }
+
+        return result;
     }
 
 

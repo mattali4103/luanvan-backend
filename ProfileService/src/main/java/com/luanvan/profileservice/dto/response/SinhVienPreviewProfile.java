@@ -34,6 +34,7 @@ public class SinhVienPreviewProfile {
     Double diemTrungBinhTichLuy;
     Long soTinChiTichLuy;
     Long soTinChiCaiThien;
+    CanhBaoHocVu canhBaoHocVu;
     // Số tín chỉ đăng ký ở học kỳ hiện tại
     Long soTinChiDangKyHienTai;
 }

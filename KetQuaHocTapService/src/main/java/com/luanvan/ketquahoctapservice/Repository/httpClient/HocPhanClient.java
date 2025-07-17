@@ -30,4 +30,6 @@ public interface HocPhanClient {
     TinChiResponse getCountTinChiByCTDT(@PathVariable String khoaHoc, @RequestBody List<KetQuaHocTapDTO> hocPhanList);
     @PostMapping(value = "/namhoc/nam_hoc_in/list")
     List<NamHocDTO> getNamHocByMaNamHocIn(@RequestBody List<Long> namHocList);
+    @GetMapping("/hocky/current")
+    HocKyDTO getCurrentHocKy();
 }

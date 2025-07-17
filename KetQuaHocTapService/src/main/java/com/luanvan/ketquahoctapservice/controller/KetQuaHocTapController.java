@@ -17,15 +17,15 @@ import java.util.List;
 public class KetQuaHocTapController {
     private final KetQuaHocTapService ketQuaHocTapService;
 
-    @GetMapping("/canh-bao/{maSo}")
-    public ApiResponse<CanhBaoHocVu> getCanhBaoHocVu(@PathVariable String maSo) {
-        CanhBaoHocVu canhBaoHocVu = ketQuaHocTapService.isCanhBaoHocVu(maSo);
-        return ApiResponse.<CanhBaoHocVu>builder()
-                .code(200)
-                .message("OK")
-                .data(canhBaoHocVu)
-                .build();
-    }
+//    @GetMapping("/canh-bao/{maSo}")
+//    public ApiResponse<CanhBaoHocVu> getCanhBaoHocVu(@PathVariable String maSo) {
+//        CanhBaoHocVu canhBaoHocVu = ketQuaHocTapService.isCanhBaoHocVu(maSo);
+//        return ApiResponse.<CanhBaoHocVu>builder()
+//                .code(200)
+//                .message("OK")
+//                .data(canhBaoHocVu)
+//                .build();
+//    }
 
     @PostMapping("/import")
     public ApiResponse<Void> importKetQuaHocTap(@RequestParam("file") MultipartFile file) {

@@ -15,4 +15,8 @@ public class HocKyDTO {
     LocalDate ngayBatDau;
     LocalDate ngayKetThuc;
     NamHocDTO namHoc;
+    @Override
+    public String toString() {
+        return tenHocKy + ": " + namHoc.getNamBatDau() + "-" + namHoc.getNamKetThuc();
+    }
 }

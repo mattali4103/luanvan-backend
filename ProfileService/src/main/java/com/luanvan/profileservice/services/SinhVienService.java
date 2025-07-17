@@ -152,6 +152,7 @@ public class SinhVienService {
             kqht = new ThongKeKetQuaSinhVien();
         }
 
+
         return SinhVienPreviewProfile.builder()
                 .avatarUrl(sinhVien.getAvatarUrl())
                 .gioiTinh(userDTO.isGioiTinh())
@@ -166,6 +167,7 @@ public class SinhVienService {
                 .soTinChiTichLuy(kqht.getSoTinChiTichLuy())
                 .soTinChiCaiThien(kqht.getSoTinChiCaiThien())
                 .soTinChiDangKyHienTai(countTinChiDangKy)
+                .canhBaoHocVu(kqht.getCanhBaoHocVu())
                 .build();
     }
 
