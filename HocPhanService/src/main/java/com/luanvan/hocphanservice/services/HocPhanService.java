@@ -4,7 +4,7 @@ import com.luanvan.hocphanservice.entity.HocPhan;
 import com.luanvan.hocphanservice.exception.AppException;
 import com.luanvan.hocphanservice.exception.ErrorCode;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
-import com.luanvan.hocphanservice.repository.ChuongTrinhDaoTaoRepository;
+
 import com.luanvan.hocphanservice.repository.HocPhanRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
