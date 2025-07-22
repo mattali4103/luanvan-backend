@@ -70,6 +70,15 @@ public class HocPhanController {
                 .build();
     }
 
+    @GetMapping("/quoc-phong")
+    public ApiResponse<List<HocPhanDTO>> getHocPhanQuocPhong() {
+        return ApiResponse.<List<HocPhanDTO>>builder()
+                .code(200)
+                .message("success")
+                .data(hocPhanService.getHocPhanQuocPhong())
+                .build();
+    }
+
 //    API for Service
     @PostMapping("/count/tin_chi")
     public Long countTinChiIn(@RequestBody List<String> maHocPhanList) {

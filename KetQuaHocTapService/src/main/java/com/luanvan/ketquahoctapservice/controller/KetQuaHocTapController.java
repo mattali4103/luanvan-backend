@@ -17,6 +17,16 @@ import java.util.List;
 public class KetQuaHocTapController {
     private final KetQuaHocTapService ketQuaHocTapService;
 
+
+    @GetMapping("/thong-ke/{maSo}")
+    public ApiResponse<List<ThongKeTinChi>> getTinChiTichLuyByMaSo(@PathVariable String maSo) {
+
+        return ApiResponse.<List<ThongKeTinChi>>builder()
+                .code(200)
+                .message("OK")
+                .data(ketQuaHocTapService.getTinChiTichLuyByMaSo(maSo))
+                .build();
+    }
 //    @GetMapping("/canh-bao/{maSo}")
 //    public ApiResponse<CanhBaoHocVu> getCanhBaoHocVu(@PathVariable String maSo) {
 //        CanhBaoHocVu canhBaoHocVu = ketQuaHocTapService.isCanhBaoHocVu(maSo);

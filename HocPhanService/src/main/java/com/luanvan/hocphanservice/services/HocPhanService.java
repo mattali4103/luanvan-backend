@@ -29,6 +29,7 @@ public class HocPhanService {
 
     private final HocPhanTuChonService hocPhanTuChonService;
 
+
     public List<HocPhanDTO> getDSHocPhanIn(List<String> maHocPhanList) {
         if (maHocPhanList.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
@@ -162,5 +163,15 @@ public class HocPhanService {
         if(list.isEmpty()){
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
+    }
+
+    public List<HocPhanDTO> getHocPhanQuocPhong() {
+        List<HocPhan> hocPhanList = hocPhanRepository.findByTenHpLike(("Quốc phòng"));
+        if (hocPhanList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return hocPhanList.stream()
+                .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
+                .collect(Collectors.toList());
     }
 }

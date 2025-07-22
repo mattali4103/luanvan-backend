@@ -9,9 +9,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TinChiResponse {
-    Long tongSoTinChi;
+public class ThongKeTinChi {
+    HocKyDTO hocKy;
     Long soTinChiTichLuy;
-    Long soTinChiCaiThien;
+    Long soTinChiRot;
 }
-

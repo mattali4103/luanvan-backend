@@ -25,7 +25,7 @@ public class KeHoachHocTapMauController {
     public ApiResponse<Void> delete(@RequestBody KeHoachHocTapMauDTO chuongTrinhDaoTaoDTO) {
         keHoachHocTapMauService.deleteKeHoachHocTapMau(chuongTrinhDaoTaoDTO);
         return ApiResponse.<Void>builder()
-                .code(204)
+                .code(200)
                 .message("Xoá thành công!")
                 .build();
     }
@@ -33,7 +33,7 @@ public class KeHoachHocTapMauController {
     public ApiResponse<Void> deleteByKhoaHocAndMaNganh(@RequestBody KeHoachHocTapMauDTO dto) {
         keHoachHocTapMauService.deleteAllByKhoaHocAndMaNganh(dto.getKhoaHoc(), dto.getMaNganh());
         return ApiResponse.<Void>builder()
-                .code(204)
+                .code(200)
                 .message("Đã xoá toàn bộ kế hoạch hc tập mẫu" + dto.getKhoaHoc())
                 .build();
     }

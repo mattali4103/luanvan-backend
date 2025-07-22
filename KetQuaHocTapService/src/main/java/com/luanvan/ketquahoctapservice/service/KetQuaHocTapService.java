@@ -412,6 +412,43 @@ public class KetQuaHocTapService {
         }
     }
 
+    public List<ThongKeTinChi> getTinChiTichLuyByMaSo(String maSo) {
+        List<KetQuaHocTap> kqhtList = ketQuaHocTapRepository.findByMaSo(maSo);
+        List<KetQuaHocTapDTO> kqhtDTOList = kqhtList.stream()
+                .map(k -> modelMapper.map(k, KetQuaHocTapDTO.class))
+                .toList();
+        if(kqhtList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        //Map kết quả học tập theo mã học kỳ
+        Map<Long, List<KetQuaHocTapDTO>> kqhtInHocKy = kqhtDTOList.stream()
+                .collect(Collectors.groupingBy(KetQuaHocTapDTO::getMaHocKy));
+        //Lấy danh sách học kỳ
+        List<HocKyDTO> hocKyDTOList = getHocKyFromKQHT(kqhtDTOList);
+        List<ThongKeTinChi> result = new ArrayList<>();
+        for (HocKyDTO hocKyDTO : hocKyDTOList) {
+            ThongKeTinChi thongKeTinChi = new ThongKeTinChi();
+            thongKeTinChi.setHocKy(hocKyDTO);
+            List<KetQuaHocTapDTO> kqhtInHocKyList = kqhtInHocKy.get(hocKyDTO.getMaHocKy());
+            long soTinChiTichLuy = kqhtInHocKyList.stream()
+                    .mapToLong(KetQuaHocTapDTO::getSoTinChi)
+                    .sum();
+            thongKeTinChi.setSoTinChiTichLuy(soTinChiTichLuy);
+            // Điểm W và điểm I không tính là rớt tín chỉ
+            long soTinChiRot = kqhtInHocKyList.stream()
+                    .filter(k -> k.getDiemChu().equalsIgnoreCase("F"))
+                    .mapToLong(KetQuaHocTapDTO::getSoTinChi)
+                    .sum();
+            if (soTinChiRot > 0) {
+                thongKeTinChi.setSoTinChiRot(soTinChiRot);
+            } else {
+                thongKeTinChi.setSoTinChiRot(0L);
+            }
+            result.add(thongKeTinChi);
+        }
+        return result;
+    }
+
     private List<KetQuaHocTapDetail> getKetQuaHocTapDetailList(List<KetQuaHocTapDTO> kqhtList, List<HocPhanDTO> hocPhanDTOList, List<HocKyDTO> hocKyDTOList) {
         Map<String, HocPhanDTO> hocPhanMap = hocPhanDTOList.stream()
                 .collect(Collectors.toMap(HocPhanDTO::getMaHp, Function.identity()));
@@ -521,4 +558,5 @@ public class KetQuaHocTapService {
             default -> "";
         };
     }
+
 }

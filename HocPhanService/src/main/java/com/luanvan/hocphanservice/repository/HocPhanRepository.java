@@ -24,10 +24,11 @@ public interface HocPhanRepository extends JpaRepository<HocPhan, String> {
     @Query("SELECT hp from HocPhan hp JOIN hp.chuongTrinhDaoTaoList")
     List<HocPhan> findHocPhanInChuongTrinhDaoTao();
 
-    @Query("SELECT hp FROM HocPhan hp JOIN hp.chuongTrinhDaoTaoList ctdt WHERE hp.loaiHp = :loaiHp AND ctdt.khoaHoc = :khoaHoc AND ctdt.maNganh = :maNganh")
+    @Query("SELECT hp FROM HocPhan hp JOIN hp.chuongTrinhDaoTaoList ctdt WHERE hp.loaiHp LIKE :loaiHp AND ctdt.khoaHoc = :khoaHoc AND ctdt.maNganh = :maNganh")
     List<HocPhan> findHocPhanByLoaiHpInChuongTrinhDaoTao(@Param("loaiHp") String loaiHp, @Param("khoaHoc") String khoaHoc, @Param("maNganh") Long maNganh);
 
 
+    List<HocPhan> findByTenHpLike(String tenHp);
 }
 
 
