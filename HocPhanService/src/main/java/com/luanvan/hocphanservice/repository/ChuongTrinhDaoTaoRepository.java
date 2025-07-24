@@ -16,4 +16,6 @@ public interface ChuongTrinhDaoTaoRepository extends JpaRepository<ChuongTrinhDa
     Optional<ChuongTrinhDaoTao> findByKhoaHocAndMaNganh(String khoaHoc, Long maNganh);
 
     Boolean existsChuongTrinhDaoTaoByKhoaHocAndMaNganh(String khoaHoc, Long maNganh);
+
+    ChuongTrinhDaoTao findChuongTrinhDaoTaoByKhoaHocAndMaNganh(String khoaHoc, Long maNganh);
 }

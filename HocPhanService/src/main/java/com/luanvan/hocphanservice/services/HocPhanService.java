@@ -174,4 +174,18 @@ public class HocPhanService {
                 .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
                 .collect(Collectors.toList());
     }
+
+    public List<HocPhanDTO> getHocPhanByLoaiHp(String loaiHocPhan) {
+        if (loaiHocPhan == null || loaiHocPhan.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        List<HocPhan> hocPhanList = hocPhanRepository.findByLoaiHpLike(loaiHocPhan);
+
+        if (hocPhanList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return hocPhanList.stream()
+                .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
+                .collect(Collectors.toList());
+    }
 }

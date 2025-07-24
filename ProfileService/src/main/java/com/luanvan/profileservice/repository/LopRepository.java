@@ -23,4 +23,7 @@ public interface LopRepository extends JpaRepository<Lop, String> {
     @Query("UPDATE Lop l SET l.siSoCon = :siSoCon WHERE l.maLop = :maLop")
     void updateSiSoCon(@Param("maLop") String maLop, @Param("siSoCon") Long siSoCon);
     List<Lop> findByNganhMaNganh(Long maNganh);
+
+    List<Lop> findByChuNhiem(String maGiangVien);
+
 }

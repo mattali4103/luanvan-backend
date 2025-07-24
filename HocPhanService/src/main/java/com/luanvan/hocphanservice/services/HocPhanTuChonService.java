@@ -88,6 +88,27 @@ public class HocPhanTuChonService {
                 .toList();
     }
 
+
+    // Tạo từ danh sách các nhóm học phần tự chọn method cho ChuongTrinhDaoTaoService
+    public void creates(List<HocPhanTuChon> nhomHocPhanTuChon, String khoaHoc, Long maNganh) {
+        if (nhomHocPhanTuChon == null || nhomHocPhanTuChon.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        for(HocPhanTuChon hocPhanTuChon : nhomHocPhanTuChon) {
+            validate(hocPhanTuChon);
+            hocPhanTuChon.setChuongTrinhDaoTao(chuongTrinhDaoTaoRepository.findByKhoaHocAndMaNganh(khoaHoc, maNganh)
+                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST)));
+            if (hocPhanTuChon.getHocPhanTuChonList() != null && !hocPhanTuChon.getHocPhanTuChonList().isEmpty()) {
+                List<HocPhan> hocPhanList = new LinkedList<>();
+                hocPhanTuChon.getHocPhanTuChonList().forEach(hocPhan -> {
+                    HocPhan hp = hocPhanRepository.findById(hocPhan.getMaHp()).orElse(new HocPhan());
+                    hocPhanList.add(hp);
+                });
+                hocPhanTuChon.setHocPhanTuChonList(hocPhanList);
+            }
+        }
+    }
+
     public void deleteHocPhanTuChon(Long id) {
         validate(id);
         hocPhanTuChonRepository.deleteById(id);
@@ -119,5 +140,13 @@ public class HocPhanTuChonService {
         return hptc.getHocPhanTuChonList().stream()
                 .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
                 .toList();
+    }
+
+    public void deleteById(Long id) {
+        validate(id);
+        if (!hocPhanTuChonRepository.existsById(id)) {
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+        hocPhanTuChonRepository.deleteById(id);
     }
 }
