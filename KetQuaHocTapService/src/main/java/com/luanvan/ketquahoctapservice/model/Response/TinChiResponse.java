@@ -8,10 +8,14 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TinChiResponse {
     Long tongSoTinChi;
     Long soTinChiTichLuy;
     Long soTinChiCaiThien;
+
+    public TinChiResponse(long l, long l1, long l2, long l3) {
+    }
 }
 

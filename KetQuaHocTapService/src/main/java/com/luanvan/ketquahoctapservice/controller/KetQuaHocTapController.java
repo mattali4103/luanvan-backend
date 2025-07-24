@@ -125,6 +125,14 @@ public class KetQuaHocTapController {
                 .data(ketQuaHocTapService.getHocPhanFailed(maSo))
                 .build();
     }
+    @GetMapping("/get-count-tin-chi/{maSo}")
+    public ApiResponse<TinChiResponse> getCountTinChiByMaSo(@PathVariable String maSo) {
+        return ApiResponse.<TinChiResponse>builder()
+                .code(200)
+                .message("OK")
+                .data(ketQuaHocTapService.getCountTinChiByMaSo(maSo))
+                .build();
+    }
 
     @GetMapping("private/thongke/{maSo}")
     public ThongKeKetQuaSinhVien getThongKeByMaSo(@PathVariable String maSo) {

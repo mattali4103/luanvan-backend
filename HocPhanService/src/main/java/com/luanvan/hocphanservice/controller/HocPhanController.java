@@ -22,6 +22,14 @@ public class HocPhanController {
     List<HocPhanDTO> getHocPhanIn(@RequestBody List<String> hocPhanList) {
         return hocPhanService.getDSHocPhanIn(hocPhanList);
     }
+    @PostMapping("/by_loai_hp")
+    public ApiResponse<List<HocPhanDTO>> getHocPhanByLoaiHocPhan(@RequestBody HocPhanDTO dto) {
+        return ApiResponse.<List<HocPhanDTO>>builder()
+                .code(200)
+                .message("success")
+                .data(hocPhanService.getHocPhanByLoaiHp(dto.getLoaiHp()))
+                .build();
+    }
 
     //    API doc file excel
     @PostMapping(value = "/upload", consumes = "multipart/form-data")

@@ -28,6 +28,18 @@ public class LopService {
     private final SinhVienService sinhVienService;
     private final NganhRepository nganhRepository;
 
+    public List<LopDTO> getDSLopByChuNhiem(String maGiangVien) {
+        List<Lop> lops = lopRepository.findByChuNhiem(maGiangVien);
+        if (lops.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return lops.stream().map(lop -> {
+            LopDTO lopDTO = modelMapper.map(lop, LopDTO.class);
+            lopDTO.setDSSinhVien(null);
+            return lopDTO;
+        }).toList();
+    }
+
     public StatisticsLopResponse getStatistics(Long maNganh) {
         List<Lop> danhSachLop = lopRepository.findByNganhMaNganh(maNganh);
         if(danhSachLop.isEmpty()) {

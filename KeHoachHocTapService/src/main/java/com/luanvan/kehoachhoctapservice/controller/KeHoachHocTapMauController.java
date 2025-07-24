@@ -91,7 +91,6 @@ public class KeHoachHocTapMauController {
                 .message("Import successful")
                 .build();
     }
-
     @GetMapping("/detail")
     public ApiResponse<List<KeHoachHocTapDetail>> getKeHoachHocTapMau(
             @RequestParam("khoaHoc") String khoaHoc,
@@ -114,6 +113,8 @@ public class KeHoachHocTapMauController {
                 .data(keHoachHocTapMauService.getHocKyInKHHTMau(khoaHoc, maNganh))
                 .build();
     }
+
+
 
 
 }

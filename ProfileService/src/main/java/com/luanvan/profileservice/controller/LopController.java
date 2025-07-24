@@ -25,6 +25,14 @@ public class LopController {
                 .data(lopService.getStatistics(maNganh))
                 .build();
     }
+    @GetMapping("/get_by_chu_nhiem/{maGiangVien}")
+    public ApiResponse<List<LopDTO>> getLopByChuNhiem(@PathVariable String maGiangVien) {
+        return ApiResponse.<List<LopDTO>>builder()
+                .code(200)
+                .message("OK")
+                .data(lopService.getDSLopByChuNhiem(maGiangVien))
+                .build();
+    }
 
     @GetMapping("/preview/{maLop}")
     public ApiResponse<List<SinhVienPreviewProfile>> getSinhVienPreviewProfileByMaLop(@PathVariable String maLop) {

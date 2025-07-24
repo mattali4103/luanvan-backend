@@ -35,6 +35,34 @@ public class KetQuaHocTapService {
 
 
 
+    public TinChiResponse getCountTinChiByMaSo(String maSo) {
+        if (maSo == null || maSo.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        List<KetQuaHocTap> khhtList = ketQuaHocTapRepository.findByMaSo(maSo);
+        if (khhtList == null || khhtList.isEmpty()) {
+            return new TinChiResponse(0L, 0L, 0L, 0L);
+        }
+        //Lấy tổng số tín chỉ cải thiện
+        long soTinChicaiThien;
+        List<KetQuaHocTapDTO> kqhtCaiThien = getKetQuaHocTapCaiThien(maSo);
+        soTinChicaiThien = kqhtCaiThien.stream()
+                .mapToLong(KetQuaHocTapDTO::getSoTinChi)
+                .sum();
+        // Tính tổng số tín chỉ tích lũy từ kết quả học tập
+        // Không tính các học phần thuộc kqhtCaiThien
+        // Không tinh các học phần có điểm null hoặc điểm F
+        Long soTinChiTichLuy = khhtList.stream()
+                .filter(k -> k.getDiemSo() != null  && kqhtCaiThien.stream().noneMatch(c -> c.getMaHp().equals(k.getMaHp())))
+                .mapToLong(KetQuaHocTap::getSoTinChi)
+                .sum();
+        return TinChiResponse.builder()
+                .soTinChiTichLuy(soTinChiTichLuy)
+                .soTinChiCaiThien(soTinChicaiThien)
+                .tongSoTinChi(156L)
+                .build();
+    }
     public KetQuaHocTapByHocKy getKetQuaHocTapByHocKy(String maSo, Long maHocKy) {
         //Config laị modelMapper bỏ qua hocKy
         modelMapper.typeMap(KetQuaHocTap.class, KetQuaHocTapDetail.class)
@@ -127,10 +155,7 @@ public class KetQuaHocTapService {
                 .orElse(null);
 
         //Tính tổng số tín chỉ tích lũy
-        Long soTinChiTichLuy = ketQuaHocTapList.stream()
-                .filter(k -> k.getDiemSo() != null)
-                .mapToLong(KetQuaHocTap::getSoTinChi)
-                .sum();
+
 
         //Lấy tổng số tín chỉ cải thiện
         long soTinChicaiThien;
@@ -138,7 +163,13 @@ public class KetQuaHocTapService {
         soTinChicaiThien = kqhtCaiThien.stream()
                 .mapToLong(KetQuaHocTapDTO::getSoTinChi)
                 .sum();
-
+        // Tính tổng số tín chỉ tích lũy từ kết quả học tập
+        // Không tính các học phần thuộc kqhtCaiThien
+        // Không tinh các học phần có điểm null hoặc điểm F
+        Long soTinChiTichLuy = ketQuaHocTapList.stream()
+                .filter(k -> k.getDiemSo() != null && kqhtCaiThien.stream().noneMatch(c -> c.getMaHp().equals(k.getMaHp())))
+                .mapToLong(KetQuaHocTap::getSoTinChi)
+                .sum();
         double diemTrungBinhTichLuy = getDiemTrungBinhTichLuy(maSo, maHocKy);
         String xepLoai = xepLoaiSinhVien(diemTrungBinhTichLuy);
 
