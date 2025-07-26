@@ -71,12 +71,20 @@ public class ChuongTrinhDaoTaoController {
                 .build();
     }
 
-    @GetMapping("/get/{khoaHoc}/{maNganh}")
-    public ApiResponse<ChuongTrinhDaoTaoRequest> getChuongTrinhDaoTaoByNganh(@PathVariable String khoaHoc, @PathVariable Long maNganh) {
+    @GetMapping("/get/{maNganh}/{khoaHoc}")
+    public ApiResponse<ChuongTrinhDaoTaoRequest> getChuongTrinhDaoTaoByNganh(@PathVariable Long maNganh, @PathVariable String khoaHoc) {
+        ChuongTrinhDaoTaoRequest response = chuongTrinhDaoTaoService.getCTDT(khoaHoc, maNganh);
+        if(response.getId() == null) {
+            return ApiResponse.<ChuongTrinhDaoTaoRequest>builder()
+                    .code(200)
+                    .message("Chương trình đào tạo không tồn tại")
+                    .data(null)
+                    .build();
+        }
         return ApiResponse.<ChuongTrinhDaoTaoRequest>builder()
                 .code(200)
                 .message("OK")
-                .data(chuongTrinhDaoTaoService.getCTDT(khoaHoc, maNganh))
+                .data(response)
                 .build();
     }
 
@@ -109,6 +117,7 @@ public class ChuongTrinhDaoTaoController {
                 .build();
     }
 
+
     @PutMapping("/update")
     public ApiResponse<ChuongTrinhDaoTaoRequest> updateChuongTrinhDaoTao(@RequestBody ChuongTrinhDaoTaoRequest chuongTrinhDaoTaoRequest) {
         return ApiResponse.<ChuongTrinhDaoTaoRequest>builder()
@@ -126,6 +135,30 @@ public class ChuongTrinhDaoTaoController {
                 .message("Deleted")
                 .build();
     }
+    @DeleteMapping("/delete/hocphan")
+    public ApiResponse<Void> deleteHocPhanInCTDT(@RequestBody ChuongTrinhDaoTaoRequest request) {
+        chuongTrinhDaoTaoService.deleteHocPhanInCTDT(request);
+        return ApiResponse.<Void>builder()
+                .code(204)
+                .message("Deleted")
+                .build();
+    }
+    @DeleteMapping("/delete/hoc_phan_tu_chon")
+    public ApiResponse<Void> deleteHocPhanTuChonInCTDT(@RequestBody ChuongTrinhDaoTaoRequest request) {
+        chuongTrinhDaoTaoService.deleteHocPhanTuChonInCTDT(request);
+        return ApiResponse.<Void>builder()
+                .code(204)
+                .message("Deleted")
+                .build();
+    }
+    @DeleteMapping("/delete/hoc_phan_in_hptc")
+    public ApiResponse<Void> deleteHocPhanInHPTC(@RequestBody ChuongTrinhDaoTaoRequest request) {
+        chuongTrinhDaoTaoService.deleteHocPhanInHocPhanTuChon(request);
+        return ApiResponse.<Void>builder()
+                .code(204)
+                .message("Deleted")
+                .build();
+    }
 
     // API FOR ADMIN
     @GetMapping("")
@@ -138,6 +171,15 @@ public class ChuongTrinhDaoTaoController {
                 .data(chuongTrinhDaoTaoService.getByKhoaHocAndMaNganh(khoaHoc, maNganh))
                 .build();
     }
+    @PostMapping("/add_hoc_phan_tu_chon")
+    public ApiResponse<ChuongTrinhDaoTaoRequest> addHocPhanTuChonInCTDT(@RequestBody ChuongTrinhDaoTaoRequest request) {
+        return ApiResponse.<ChuongTrinhDaoTaoRequest>builder()
+                .code(200)
+                .message("OK")
+                .data(chuongTrinhDaoTaoService.addHocPhanTuChon(request))
+                .build();
+    }
+
 
 
 

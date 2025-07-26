@@ -589,5 +589,24 @@ public class KetQuaHocTapService {
             default -> "";
         };
     }
-
+    // Lấy danh sách học phần đã hoàn thành theo mã số sinh viên
+    public List<String> getHocPhanByMaSo(String maSo) {
+        if (maSo == null || maSo.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        // Lấy danh sách kết quả học tập theo mã số sinh viên
+        List<KetQuaHocTap> ketQuaHocTapList = ketQuaHocTapRepository.findByMaSo(maSo);
+        if (ketQuaHocTapList == null || ketQuaHocTapList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // Không lấy học phần điểm I, điểm F
+        ketQuaHocTapList = ketQuaHocTapList.stream()
+                .filter(k -> k.getDiemChu() != null && !k.getDiemChu().equalsIgnoreCase("I") && !k.getDiemChu().equalsIgnoreCase("F"))
+                .toList();
+        // Lấy danh sách mã học phần từ kết quả học tập
+        return ketQuaHocTapList.stream()
+                .map(KetQuaHocTap::getMaHp)
+                .distinct()
+                .toList();
+    }
 }

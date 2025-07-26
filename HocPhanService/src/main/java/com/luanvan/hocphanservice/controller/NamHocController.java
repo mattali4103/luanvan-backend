@@ -31,7 +31,6 @@ public class NamHocController {
         return namHocService.getNamHocByMaNamHocIn(namHocList);
     }
 
-
     @GetMapping("/list")
     public ApiResponse<List<NamHocDTO>> getAllNamHoc() {
         return ApiResponse.<List<NamHocDTO>>builder()

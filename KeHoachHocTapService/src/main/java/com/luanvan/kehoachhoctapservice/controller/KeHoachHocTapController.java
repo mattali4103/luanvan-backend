@@ -23,7 +23,7 @@ public class KeHoachHocTapController {
 
 
 
-    @PostMapping("/sinhvien/goi_y")
+    @PostMapping("/recommend")
     public ApiResponse<List<HocPhanDTO>> getRecommendKHHT(@RequestBody HocPhanRequest request) {
         return ApiResponse.<List<HocPhanDTO>>builder()
                 .code(200)

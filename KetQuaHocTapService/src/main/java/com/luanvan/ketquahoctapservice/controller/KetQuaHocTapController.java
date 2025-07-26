@@ -138,4 +138,8 @@ public class KetQuaHocTapController {
     public ThongKeKetQuaSinhVien getThongKeByMaSo(@PathVariable String maSo) {
         return ketQuaHocTapService.getThongKeByMaSo(maSo);
     }
+    @GetMapping("/private/hoc-phan/{maSo}")
+    public List<String> getHocPhanByMaSo(@PathVariable String maSo) {
+        return ketQuaHocTapService.getHocPhanByMaSo(maSo);
+    }
 }

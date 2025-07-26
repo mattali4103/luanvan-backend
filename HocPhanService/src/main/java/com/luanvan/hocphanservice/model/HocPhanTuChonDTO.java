@@ -1,6 +1,8 @@
 package com.luanvan.hocphanservice.model;
 
 
+import com.luanvan.hocphanservice.entity.ChuongTrinhDaoTao;
+import com.luanvan.hocphanservice.model.Request.ChuongTrinhDaoTaoRequest;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

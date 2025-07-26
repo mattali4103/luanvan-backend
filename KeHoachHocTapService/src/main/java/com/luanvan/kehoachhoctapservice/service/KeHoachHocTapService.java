@@ -13,6 +13,7 @@ import com.luanvan.kehoachhoctapservice.model.response.*;
 import com.luanvan.kehoachhoctapservice.repository.KeHoachHocTapMauRepository;
 import com.luanvan.kehoachhoctapservice.repository.KeHoachHocTapRepository;
 import com.luanvan.kehoachhoctapservice.repository.httpClient.HocPhanClient;
+import com.luanvan.kehoachhoctapservice.repository.httpClient.KQHTClient;
 import com.luanvan.kehoachhoctapservice.repository.httpClient.ProfileClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ public class KeHoachHocTapService {
     private final KeHoachHocTapMauRepository keHoachHocTapMauRepository;
     private final HocPhanClient hocPhanClient;
     private final ProfileClient profileClient;
+    private final KQHTClient kQHTClient;
 
 
     public List<HocKyDTO> geHocKyByMaSo(String maSo) {
@@ -331,24 +333,73 @@ public class KeHoachHocTapService {
 //        log.info("Học kỳ hiện tại: {}", hocKyHienTai.getMaHocKy());
         // Tìm kế hoạch học tập mẫu theo học kỳ gần nhất (bắt đầu từ học kỳ tiếp theo)
 //        Long hocKyTimKiem = hocKyHienTai.getMaHocKy() + 1;
-        Long hocKyGanNhat = keHoachHocTapRepository.findLatestMaHocKyByMaSo(maSo).orElse(0L);
-        List<KeHoachHocTapMau> khhtMauList = keHoachHocTapMauRepository.findByKhoaHocAndMaNganhAndNearestMaHocKy(
-                khoaHoc, maNganh, hocKyGanNhat + 1);
-
-        if (khhtMauList.isEmpty()) {
-            log.info("Không tìm thấy kế hoạch học tập mẫu cho khóa {} ngành {} từ học kỳ {} trở đi",
-                    khoaHoc, maNganh, hocKyGanNhat);
+        // Kiểm tra sinh viên đã học đên học kỳ nào
+//        Long hocKyGanNhat = keHoachHocTapRepository.findLatestMaHocKyByMaSo(maSo).orElse(0L);
+        List<KeHoachHocTap> khhtList = keHoachHocTapRepository.findKeHoachHocTapsByMaSo(maSo);
+        if( khhtList.isEmpty()) {
+            log.info("Sinh viên {} chưa có kế hoạch học tập nào", maSo);
             return Collections.emptyList();
         }
 
-        log.info("Sử dụng kế hoạch học tập mẫu của học kỳ {} (gần nhất từ học kỳ {})",
-                hocKyGanNhat, hocKyGanNhat);
+        // Lấy danh sách học phần đã đăn ký của sinh viên
+        List<String> maHocPhanDaDangKyList = khhtList.stream()
+                .map(KeHoachHocTap::getMaHocPhan)
+                .distinct() // Loại bỏ trùng lặp
+                .toList();
+        // Danh sách học phàn đã học của sinh viên
+        List<String> maHocPhanDaHocList = kQHTClient.getHocPhanByMaSo(maSo);
+        maHocPhanDaHocList.forEach(hp ->{
+            log.info("Học phần đã học của sinh viên {}: {}", maSo, hp);
+        });
+        if (maHocPhanDaHocList.isEmpty()) {
+            log.info("Sinh viên {} chưa học học phần nào", maSo);
+            return Collections.emptyList();
+        }
+        List<KeHoachHocTapMau> keHoachHocTapMau = keHoachHocTapMauRepository.findByKhoaHocAndMaNganh(khoaHoc, maNganh);
+        if (keHoachHocTapMau.isEmpty()) {
+            log.info("Không tìm thấy kế hoạch học tập mẫu cho khóa {} ngành {}", khoaHoc, maNganh);
+            return Collections.emptyList();
+        }
+        // Lọc học phần sinh viên chưa đăng ký và chưa học
+        Set<String> filteredMaHocPhan = new HashSet<>(maHocPhanDaDangKyList);
+        filteredMaHocPhan.addAll(maHocPhanDaHocList);
+        log.info("Đã lọc {} học phần đã đăng ký và đã học của sinh viên {}", filteredMaHocPhan.size(), maSo);
+//      Lấy danh sách học phần đã lọc
+        List<HocPhanDTO> hocPhanDaLoc = hocPhanClient.getHocPhanIn(new ArrayList<>(filteredMaHocPhan));
 
-        // Lọc ra những học phần chưa có trong kế hoạch học tập hiện tại và tồn tại
-        List<String> maHocPhanGoiY = khhtMauList.stream()
+//        // Sắp xếp lại dựa trên kế hoạch học tập mẫu keHoachHocTapMau
+//        List<KeHoachHocTapMau> sortedKeHoachHocTapMau = keHoachHocTapMau.stream()
+//                .filter(khhtMau -> hocPhanDaLoc.stream()
+//                        .anyMatch(hp -> hp.getMaHp().equals(khhtMau.getMaHocPhan())))
+//                .sorted(Comparator.comparing(KeHoachHocTapMau::getMaHocKy))
+//                .toList();
+
+        // Lọc KHHT mẫu để chỉ giữ những học phần sinh viên CHƯA đăng ký và CHƯA học
+        List<KeHoachHocTapMau> sortedKeHoachHocTapMau = keHoachHocTapMau.stream()
+                .filter(khhtMau -> !filteredMaHocPhan.contains(khhtMau.getMaHocPhan()))
+                .sorted(Comparator.comparing(KeHoachHocTapMau::getMaHocKy))
+                .toList();
+
+
+        // Lấy học kỳ gần nhất từ kế hoạch học tập của sinh viên
+        Long hocKyGanNhat = khhtList.stream()
+                .map(KeHoachHocTap::getMaHocKy)
+                .max(Long::compareTo)
+                .orElse(0L);
+        log.info("Học kỳ gần nhất của sinh viên {} là: {}", maSo, hocKyGanNhat);
+
+        // Lọc kế hoạch học tập mẫu theo 2 học kỳ gần nhất
+        List<KeHoachHocTapMau> khhtGoiY = sortedKeHoachHocTapMau.stream()
+                .filter(khhtMau -> khhtMau.getMaHocKy() >= hocKyGanNhat && khhtMau.getMaHocKy() <= hocKyGanNhat + 2)
+                .toList();
+
+        // Lấy kế hoạch học tập mẫu từ học kỳ gần nhất trở đi
+
+        // Lấy danh sách học phần đã đăng ký của sinh viên
+
+        // Lấy mã học phần gợi ý từ kế hoạch học tập mẫu
+        List<String> maHocPhanGoiY = khhtGoiY.stream()
                 .map(KeHoachHocTapMau::getMaHocPhan)
-                .distinct() // Loại bỏ trùng lặp ngay từ đầu
-                .filter(maHocPhan -> !isKeHoachHocTapExist(maSo, maHocPhan)) // Sửa logic: chỉ lấy những HP chưa đăng ký
                 .collect(Collectors.toList());
 
         if (maHocPhanGoiY.isEmpty()) {

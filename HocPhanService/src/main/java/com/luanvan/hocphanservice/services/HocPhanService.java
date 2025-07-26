@@ -30,6 +30,14 @@ public class HocPhanService {
     private final HocPhanTuChonService hocPhanTuChonService;
 
 
+    public List<HocPhanDTO> getAll(){
+        List<HocPhan> hocPhanList = hocPhanRepository.findAll();
+        return hocPhanList.stream()
+                .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
+                .collect(Collectors.toList());
+    }
+
+
     public List<HocPhanDTO> getDSHocPhanIn(List<String> maHocPhanList) {
         if (maHocPhanList.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);

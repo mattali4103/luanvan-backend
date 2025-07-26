@@ -5,6 +5,7 @@ import com.luanvan.hocphanservice.entity.HocPhan;
 import com.luanvan.hocphanservice.entity.HocPhanTuChon;
 import com.luanvan.hocphanservice.exception.AppException;
 import com.luanvan.hocphanservice.exception.ErrorCode;
+import com.luanvan.hocphanservice.model.HocPhanTuChonDTO;
 import com.luanvan.hocphanservice.model.Request.ChuongTrinhDaoTaoRequest;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.Request.CTDTDescriptionRequest;
@@ -144,9 +145,7 @@ public class ChuongTrinhDaoTaoService {
         }
         ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
-        chuongTrinhDaoTao.getNhomHocPhanTuChon().forEach(hocPhanTuChon -> {
-            hocPhanTuChonService.deleteById(hocPhanTuChon.getId());
-        });
+        chuongTrinhDaoTao.getNhomHocPhanTuChon().forEach(hocPhanTuChon -> hocPhanTuChonService.deleteById(hocPhanTuChon.getId()));
         chuongTrinhDaoTaoRepository.delete(chuongTrinhDaoTao);
     }
 
@@ -330,5 +329,84 @@ public class ChuongTrinhDaoTaoService {
         return ctdt.getHocPhanList().stream()
                 .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
                 .collect(Collectors.toList());
+    }
+    @Transactional
+    public ChuongTrinhDaoTaoRequest addHocPhanTuChon(ChuongTrinhDaoTaoRequest request) {
+        if (request == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(request.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        List<HocPhanTuChonDTO> hocPhanTuChonList = request.getNhomHocPhanTuChon();
+
+        if (hocPhanTuChonList == null || hocPhanTuChonList.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        List<HocPhanTuChon> newHocPhanTuChonList = hocPhanTuChonList.stream()
+                .map(hptc -> hocPhanTuChonService.createFromCTDT(chuongTrinhDaoTao, hptc))
+                .toList();
+
+        List<HocPhanTuChon> currentList = chuongTrinhDaoTao.getNhomHocPhanTuChon();
+
+        if (currentList == null) currentList = new LinkedList<>();
+        currentList.addAll(newHocPhanTuChonList);
+
+        chuongTrinhDaoTao.setNhomHocPhanTuChon(currentList);
+        chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
+        // Chuyển đổi lại về ChuongTrinhDaoTaoRequest để trả về
+        return modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoRequest.class);
+    }
+
+
+    public void deleteHocPhanInCTDT(ChuongTrinhDaoTaoRequest request) {
+        if (request == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(request.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        List<String> maHocPhanList = request.getHocPhanList().stream()
+                .map(HocPhanDTO::getMaHp)
+                .toList();
+        chuongTrinhDaoTao.getHocPhanList().removeAll(
+                chuongTrinhDaoTao.getHocPhanList().stream()
+                        .filter(hocPhan -> maHocPhanList.contains(hocPhan.getMaHp()))
+                        .toList()
+        );
+        chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
+    }
+    // Xoá học phần tự chọn trong học phần tự chọn hoặc xoá học phần trong học phần tự chọn
+    @Transactional
+    public void deleteHocPhanTuChonInCTDT(ChuongTrinhDaoTaoRequest request) {
+        if (request == null || request.getKhoaHoc() == null || request.getMaNganh() == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(request.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        List<Long> maNhomHocPhanTuChonList = request.getNhomHocPhanTuChon().stream()
+                .map(HocPhanTuChonDTO::getId)
+                .toList();
+        maNhomHocPhanTuChonList.forEach(hocPhanTuChonService::deleteHocPhanTuChon);
+        // Xoá học phần tự chọn trong chương trình đào tạo
+        chuongTrinhDaoTao.setNhomHocPhanTuChon(
+                chuongTrinhDaoTao.getNhomHocPhanTuChon().stream()
+                        .filter(hocPhanTuChon -> !maNhomHocPhanTuChonList.contains(hocPhanTuChon.getId()))
+                        .collect(Collectors.toList())
+        );
+        chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
+    }
+    @Transactional
+    public void deleteHocPhanInHocPhanTuChon(ChuongTrinhDaoTaoRequest request) {
+        if (request == null || request.getKhoaHoc() == null || request.getMaNganh() == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(request.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        request.getNhomHocPhanTuChon().forEach( hptc ->{
+            List<String> maHocPhanList = hptc.getHocPhanTuChonList().stream()
+                    .map(HocPhanDTO::getMaHp)
+                    .toList();
+            hocPhanTuChonService.deleteHocPhanInHocPhanTuChon(hptc.getId(), maHocPhanList);
+        });
     }
 }
