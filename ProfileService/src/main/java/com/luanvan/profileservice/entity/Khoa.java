@@ -22,6 +22,6 @@ public class Khoa {
     String tenKhoa;
     @OneToMany(mappedBy = "khoa")
     @Nullable
-    @JsonManagedReference
+    @JsonManagedReference("khoa-nganh")
     List<Nganh> DSNganh;
 }

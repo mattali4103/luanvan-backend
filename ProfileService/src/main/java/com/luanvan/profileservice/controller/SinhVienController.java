@@ -2,10 +2,7 @@ package com.luanvan.profileservice.controller;
 
 import com.luanvan.profileservice.dto.SinhVienDTO;
 import com.luanvan.profileservice.dto.request.CreateSinhVienRequest;
-import com.luanvan.profileservice.dto.response.ApiResponse;
-import com.luanvan.profileservice.dto.response.ProfileResponse;
-import com.luanvan.profileservice.dto.response.SinhVienPreviewProfile;
-import com.luanvan.profileservice.dto.response.ThongKeKetQuaSinhVien;
+import com.luanvan.profileservice.dto.response.*;
 import com.luanvan.profileservice.services.SinhVienService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -70,6 +67,14 @@ public class SinhVienController {
         return ApiResponse.<Void>builder()
                 .code(200)
                 .message("OK")
+                .build();
+    }
+    @GetMapping("/thong_tin_gia_dinh/{maSo}")
+    public ApiResponse<GiaDinhResponse> getThongTinNguoiThan(@PathVariable String maSo) {
+        return ApiResponse.<GiaDinhResponse>builder()
+                .code(200)
+                .message("OK")
+                .data(sinhVienService.getThongTinNguoiThan(maSo))
                 .build();
     }
     @GetMapping("/thongke/{maSo}")

@@ -21,9 +21,13 @@ public class GlobalException {
     @ExceptionHandler(value = AppException.class)
     ResponseEntity<ApiResponse<Object>> handlingAppException(AppException ex){
         ErrorCode errorCode = ex.getErrorCode();
+        // Ưu tiên lấy message từ exception (custom message), nếu không có thì lấy từ errorCode
+        String message = ex.getMessage() != null && !ex.getMessage().equals(errorCode.getMessage())
+                        ? ex.getMessage()
+                        : errorCode.getMessage();
         return ResponseEntity.badRequest().body(ApiResponse.builder()
                 .code(errorCode.getCode())
-                .message(errorCode.getMessage())
+                .message(message)
                 .build());
     }
     @ExceptionHandler(value = MethodArgumentNotValidException.class)

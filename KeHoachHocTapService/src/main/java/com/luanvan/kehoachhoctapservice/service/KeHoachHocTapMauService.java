@@ -153,13 +153,30 @@ public class KeHoachHocTapMauService {
         return getKeHoachHocTapDetail(list, hocPhanDTOList, hocKyDTOList);
     }
 
-    // Xoá 1 kế hoạch học tập mẫu theo khoa học, mã ngành và mã học phần và mã học kỳ
+    // Xoá 1 học phần trong kế hoạch học tập mẫu (API chi truyền vào id)
     public void deleteKeHoachHocTapMau(KeHoachHocTapMauDTO dto) {
         if(dto.getId() == null ) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
+        log.info("Học phần cần xoá: {}", dto.getMaHocPhan());
         KeHoachHocTapMau keHoachHocTapMau = keHoachHocTapMauRepository.findById(dto.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        List<KeHoachHocTapMau> existing = keHoachHocTapMauRepository.findKeHoachHocTapMauByKhoaHocAndMaNganhOrderByMaHocKy(
+                keHoachHocTapMau.getKhoaHoc(), keHoachHocTapMau.getMaNganh());
+        List<String> maHocPhanList = existing.stream()
+                .map(KeHoachHocTapMau::getMaHocPhan)
+                .filter(hp -> !hp.equals(dto.getMaHocPhan()))
+                .distinct()
+                .toList();
+        //Kiểm tra học phần tuyên quyết có tồn tại trong hệ thống không
+        List<HocPhanDTO> hocPhanDTOList = hocPhanClient.getHocPhanIn(maHocPhanList);
+        List<String> hocPhanTuyenQuyetList = extractPrerequisiteCourses(hocPhanDTOList);
+        log.info("Danh sách hc phần tuyên quyết: {}", hocPhanTuyenQuyetList);
+        // Kiểm tra xem học phần này có phải là học phần tuyên quyết của học phần khác không
+        if (hocPhanTuyenQuyetList.contains(keHoachHocTapMau.getMaHocPhan())) {
+            throw new AppException(ErrorCode.CUSTOM_MESSAGE, "Không thể xoá học phần vì học phần " + keHoachHocTapMau.getMaHocPhan() + " là học phần tuyên quyết của học phần khác.");
+        }
+
         keHoachHocTapMauRepository.delete(keHoachHocTapMau);
     }
 
@@ -252,6 +269,7 @@ public class KeHoachHocTapMauService {
         return result;
     }
 
+
     private List<HocPhanDTO> getHocPhanFromKHHTMau(List<KeHoachHocTapMau> keHoachHocTapMauList) {
         List<String> maHocPhanList = keHoachHocTapMauList.stream()
                 .map(KeHoachHocTapMau::getMaHocPhan)
@@ -299,4 +317,19 @@ public class KeHoachHocTapMauService {
         keHoachHocTapMauRepository.saveAll(result);
     }
 
+    /**
+     * Trích xuất danh sách mã học phần tiên quyết từ danh sách HocPhanDTO
+     * @param hocPhanDTOList danh sách học phần
+     * @return danh sách mã học phần tiên quyết
+     */
+    private List<String> extractPrerequisiteCourses(List<HocPhanDTO> hocPhanDTOList) {
+        return hocPhanDTOList.stream()
+                .map(HocPhanDTO::getHocPhanTienQuyet)
+                .filter(Objects::nonNull)
+                .flatMap(hp -> Arrays.stream(hp.split(",")))
+                .map(String::trim)
+                .filter(prerequisite -> !prerequisite.isEmpty())
+                .toList();
+    }
 }
+

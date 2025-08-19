@@ -18,7 +18,7 @@ public interface KetQuaHocTapRepository extends JpaRepository<KetQuaHocTap, Long
     List<Long> findMaHocKyByMaSo(@Param("maSo") String maSo);
     @Query("SELECT k " +
             "FROM KetQuaHocTap k " +
-            "WHERE k.maSo = :maSo AND k.diemSo <= 7.0 " +
+            "WHERE k.maSo = :maSo AND k.diemSo <= 6.5 " +
             "ORDER BY k.diemSo ASC")
     List<KetQuaHocTap> findMaHpByMaSoAndDiemSoLessThan7(@Param("maSo") String maSo);
     @Query("SELECT k " +

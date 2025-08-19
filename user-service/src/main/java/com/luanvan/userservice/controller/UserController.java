@@ -14,7 +14,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @RequestMapping("/info/{maSo}")
+    @GetMapping("/info/{maSo}")
     public ApiResponse<UserDTO> getUserByMaSo(@PathVariable String maSo){
         return ApiResponse.<UserDTO>builder()
                 .code(200)

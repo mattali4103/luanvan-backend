@@ -1,5 +1,6 @@
 package com.luanvan.profileservice.services;
 
+import com.luanvan.profileservice.dto.GiangVienDTO;
 import com.luanvan.profileservice.dto.LopDTO;
 import com.luanvan.profileservice.dto.response.ProfileResponse;
 import com.luanvan.profileservice.dto.response.SinhVienPreviewProfile;
@@ -29,15 +30,41 @@ public class LopService {
     private final NganhRepository nganhRepository;
 
     public List<LopDTO> getDSLopByChuNhiem(String maGiangVien) {
-        List<Lop> lops = lopRepository.findByChuNhiem(maGiangVien);
+        List<Lop> lops = lopRepository.findByChuNhiem_MaSo(maGiangVien);
         if (lops.isEmpty()) {
             return Collections.emptyList();
         }
         return lops.stream().map(lop -> {
             LopDTO lopDTO = modelMapper.map(lop, LopDTO.class);
             lopDTO.setDSSinhVien(null);
+
+            // Mapping GiangVien thành GiangVienDTO nếu có chủ nhiệm
+            if (lop.getChuNhiem() != null) {
+                GiangVienDTO giangVienDTO = modelMapper.map(lop.getChuNhiem(), GiangVienDTO.class);
+                lopDTO.setChuNhiem(giangVienDTO);
+            }
+
             return lopDTO;
         }).toList();
+    }
+
+    public StatisticsLopResponse getStatisticsByChuNhiem(String maGiangVien) {
+        List<Lop> danhSachLop = lopRepository.findByChuNhiem_MaSo(maGiangVien);
+        if(danhSachLop.isEmpty()) {
+            return new StatisticsLopResponse(0L, 0L);
+        }
+        StatisticsLopResponse result = new StatisticsLopResponse();
+
+        // Tính tổng số lớp
+        for(Lop lop : danhSachLop) {
+            Long siSo = lopRepository.countSinhVienByMaLop(lop.getMaLop());
+            log.info("Lớp: {}, Sĩ số: {}", lop.getMaLop(), siSo);
+            result.setTongSoSinhVien(result.getTongSoSinhVien() + siSo);
+        }
+        log.info("Tổng số sinh viên trong các lớp do giảng viên {} chủ nhiệm: {}", maGiangVien, result.getTongSoSinhVien());
+
+        result.setSoLopHoc((long) danhSachLop.size());
+        return result;
     }
 
     public StatisticsLopResponse getStatistics(Long maNganh) {
@@ -130,4 +157,5 @@ public class LopService {
             updateSiSoCon(lop.getMaLop());
         }
     }
+
 }

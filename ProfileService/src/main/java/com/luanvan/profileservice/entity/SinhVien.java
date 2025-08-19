@@ -43,6 +43,10 @@ public class SinhVien {
     @Column(name = "noi_cap_cccd")
     String noiCapCCCD;
 
+    String hoTenCha;
+    String hoTenMe;
+    String soDienThoaiNguoiThan;
+
     @ManyToOne
     @JoinColumn(name = "maLop")
     @JsonManagedReference

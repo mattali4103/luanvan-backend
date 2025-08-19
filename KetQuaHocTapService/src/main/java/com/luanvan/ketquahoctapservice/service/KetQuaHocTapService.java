@@ -8,6 +8,7 @@ import com.luanvan.ketquahoctapservice.exception.ErrorCode;
 import com.luanvan.ketquahoctapservice.model.Response.*;
 import com.luanvan.ketquahoctapservice.model.dto.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -25,6 +26,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class KetQuaHocTapService {
@@ -142,6 +144,7 @@ public class KetQuaHocTapService {
         // Lấy danh sách kết quả học tập theo mã số sinh viên
         List<KetQuaHocTap> ketQuaHocTapList = ketQuaHocTapRepository.findByMaSo(maSo);
         if (ketQuaHocTapList == null || ketQuaHocTapList.isEmpty()) {
+            log.info("Không có kết quả học tập cho mã số sinh viên: {}", maSo);
             return new ThongKeKetQuaSinhVien();
         }
         List<HocKyDTO> hocKyDTOList = getMaHocKyByMaSo(maSo);
@@ -199,7 +202,7 @@ public class KetQuaHocTapService {
 //        if(hocKyHienTai.getMaHocKy() - hocKyGanNhat > 1) {
 //            canhBaoHocVu.setLyDo("Bạn đã không đăng ký học phần trong " + (hocKyHienTai.getMaHocKy() - hocKyGanNhat - 1) + " học kỳ gần nhất.");
 //        }
-         if(soTinChiTrungBinh < 15) {
+         if(soTinChiTrungBinh < 10) {
             canhBaoHocVu.setLyDo("Trễ tiến độ học tập");
         }
         else if(hocKyDTOList.size() == 1 && diemTrungBinhTichLuy <= 1.2) {
@@ -313,6 +316,32 @@ public class KetQuaHocTapService {
             throw new AppException(ErrorCode.KET_QUA_HOC_TAP_EMPTY);
         }
         return calculateDiemTrungBinh(kqhtList);
+    }
+    public List<KetQuaHocTapDetail> getAllKetQuaHocTapDetailByMaso(String maSo){
+        if(maSo==null){
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        List<KetQuaHocTap> ketQuaHocTapList = ketQuaHocTapRepository.findByMaSo(maSo);
+        if (ketQuaHocTapList == null || ketQuaHocTapList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<String> maHocPhanList = ketQuaHocTapList.stream()
+                .map(KetQuaHocTap::getMaHp)
+                .distinct()
+                .toList();
+        List<HocPhanDTO> hocPhanDTOList = hocPhanClient.getHocPhanIn(maHocPhanList);
+
+        List<HocKyDTO> hocKyDTOList = hocPhanClient.getHocKyIn(
+                ketQuaHocTapList.stream()
+                        .map(KetQuaHocTap::getMaHocKy)
+                        .distinct()
+                        .toList()
+        );
+        return getKetQuaHocTapDetailList(
+                ketQuaHocTapList.stream().map(k -> modelMapper.map(k, KetQuaHocTapDTO.class)).toList(),
+                hocPhanDTOList,
+                hocKyDTOList
+        );
     }
 
     // Get all KetQuaHocTapDetail by maSo
@@ -545,7 +574,7 @@ public class KetQuaHocTapService {
 
     private Double calculateDiemTrungBinh(List<KetQuaHocTap> ketQuaHocTapList) {
         if (ketQuaHocTapList == null || ketQuaHocTapList.isEmpty()) {
-            return null;
+            return 0.0;
         }
         double diemTB = 0.0;
         long tongSoTinChi = 0;
@@ -560,11 +589,11 @@ public class KetQuaHocTapService {
         }
         // Nếu tổng số tín chỉ là 0, trả về null
         if (tongSoTinChi == 0) {
-            return null;
+            return 0.0;
         }
         double result = (diemTB / tongSoTinChi);
         // Trả về điểm trung bình nếu tổng số tín chỉ lớn hơn 0, ngược lại trả về null
-        return diemTB > 0 ? LamTronDiem(result) : null;
+        return diemTB > 0 ? LamTronDiem(result) : 0.0;
     }
 
     private double LamTronDiem(double diem) {

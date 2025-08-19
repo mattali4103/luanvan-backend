@@ -24,6 +24,5 @@ public interface LopRepository extends JpaRepository<Lop, String> {
     void updateSiSoCon(@Param("maLop") String maLop, @Param("siSoCon") Long siSoCon);
     List<Lop> findByNganhMaNganh(Long maNganh);
 
-    List<Lop> findByChuNhiem(String maGiangVien);
-
+    List<Lop> findByChuNhiem_MaSo(String maGiangVien);
 }

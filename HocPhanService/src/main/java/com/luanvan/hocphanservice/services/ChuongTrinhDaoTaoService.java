@@ -10,6 +10,7 @@ import com.luanvan.hocphanservice.model.Request.ChuongTrinhDaoTaoRequest;
 import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.Request.CTDTDescriptionRequest;
 import com.luanvan.hocphanservice.model.Request.KeHoachHocTapRequest;
+import com.luanvan.hocphanservice.model.Request.NganhDTO;
 import com.luanvan.hocphanservice.model.Response.ThongKeCTDT;
 import com.luanvan.hocphanservice.model.Response.TinChiResponse;
 import com.luanvan.hocphanservice.repository.ChuongTrinhDaoTaoRepository;
@@ -17,19 +18,13 @@ import com.luanvan.hocphanservice.repository.HocPhanRepository;
 import com.luanvan.hocphanservice.repository.httpClient.NganhClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -72,11 +67,13 @@ public class ChuongTrinhDaoTaoService {
         if (maNganh == null && khoaHoc == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-
         ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findByKhoaHocAndMaNganh(khoaHoc, maNganh)
                 .orElse(new ChuongTrinhDaoTao());
-
-        return modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoRequest.class);
+        NganhDTO nganhDTO = nganhClient.findBymaNganh(maNganh);
+        log.info("nganhDTO={}", nganhDTO);
+        ChuongTrinhDaoTaoRequest response = modelMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoRequest.class);
+        response.setTenNganh(nganhDTO.getTenNganh());
+        return response;
     }
 
     public ChuongTrinhDaoTaoRequest create(ChuongTrinhDaoTaoRequest dto) {
@@ -110,24 +107,105 @@ public class ChuongTrinhDaoTaoService {
     }
 
 
+    @Transactional
     public ChuongTrinhDaoTaoRequest update(ChuongTrinhDaoTaoRequest dto) {
-        ModelMapper updateMapper = new ModelMapper();
-
-        if (dto == null || dto.getMaNganh() == null) {
+        if (dto == null || dto.getMaNganh() == null || dto.getKhoaHoc() == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        ChuongTrinhDaoTao ctdt = chuongTrinhDaoTaoRepository.findChuongTrinhDaoTaoByKhoaHocAndMaNganh(dto.getKhoaHoc(), dto.getMaNganh());
-        if (ctdt == null) {
+
+        // Tìm chương trình đào tạo hiện tại
+        ChuongTrinhDaoTao existingCTDT = chuongTrinhDaoTaoRepository.findChuongTrinhDaoTaoByKhoaHocAndMaNganh(
+                dto.getKhoaHoc(), dto.getMaNganh());
+        if (existingCTDT == null) {
             throw new AppException(ErrorCode.NOTFOUND);
         }
-        updateMapper.getConfiguration().setSkipNullEnabled(true);
-        updateMapper.typeMap(ChuongTrinhDaoTaoRequest.class, ChuongTrinhDaoTao.class)
-                .addMappings(mapper -> mapper.skip(ChuongTrinhDaoTao::setId));
-        ChuongTrinhDaoTao chuongTrinhDaoTao = updateMapper.map(dto, ChuongTrinhDaoTao.class);
-        chuongTrinhDaoTao.setId(ctdt.getId());
-        chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
 
-        return updateMapper.map(chuongTrinhDaoTao, ChuongTrinhDaoTaoRequest.class);
+        // Cập nhật thông tin cơ bản
+        if (dto.getTenChuongTrinhDaoTao() != null) {
+            existingCTDT.setTenChuongTrinhDaoTao(dto.getTenChuongTrinhDaoTao());
+        }
+        if (dto.getNoiDung() != null) {
+            existingCTDT.setNoiDung(dto.getNoiDung());
+        }
+        if (dto.getTongSoTinChi() != null) {
+            existingCTDT.setTongSoTinChi(dto.getTongSoTinChi());
+        }
+        if (dto.getTongSoTinChiTuChon() != null) {
+            existingCTDT.setTongSoTinChiTuChon(dto.getTongSoTinChiTuChon());
+        }
+
+        // Cập nhật danh sách học phần nếu có
+        if (dto.getHocPhanList() != null) {
+            if (!dto.getHocPhanList().isEmpty()) {
+                List<String> maHocPhanList = dto.getHocPhanList().stream()
+                        .map(HocPhanDTO::getMaHp)
+                        .toList();
+                List<HocPhan> newHocPhanList = hocPhanRepository.findByMaHpIn(maHocPhanList);
+
+                // Khởi tạo danh sách hiện có nếu null
+                if (existingCTDT.getHocPhanList() == null) {
+                    existingCTDT.setHocPhanList(new ArrayList<>());
+                }
+
+                // Lọc ra các học phần chưa có trong danh sách hiện tại
+                List<String> existingMaHocPhan = existingCTDT.getHocPhanList().stream()
+                        .map(HocPhan::getMaHp)
+                        .toList();
+
+                List<HocPhan> hocPhanToAdd = newHocPhanList.stream()
+                        .filter(hp -> !existingMaHocPhan.contains(hp.getMaHp()))
+                        .toList();
+
+                // Thêm các học phần mới vào danh sách hiện có
+                existingCTDT.getHocPhanList().addAll(hocPhanToAdd);
+
+                log.info("Added {} new courses to curriculum {} (total: {})",
+                        hocPhanToAdd.size(),
+                        existingCTDT.getTenChuongTrinhDaoTao(),
+                        existingCTDT.getHocPhanList().size());
+            } else {
+                // Nếu truyền danh sách rỗng thì xóa hết học phần
+                existingCTDT.setHocPhanList(new ArrayList<>());
+                log.info("Cleared all courses for curriculum {}", existingCTDT.getTenChuongTrinhDaoTao());
+            }
+        }
+        // Nếu không truyền hocPhanList (null) thì giữ nguyên danh sách hiện tại
+
+        // Xử lý nhóm học phần tự chọn với orphan removal an toàn
+        if (dto.getNhomHocPhanTuChon() != null) {
+            // Khởi tạo collection nếu null
+            if (existingCTDT.getNhomHocPhanTuChon() == null) {
+                existingCTDT.setNhomHocPhanTuChon(new ArrayList<>());
+            }
+
+            // Xóa tất cả các orphan một cách an toàn
+            existingCTDT.getNhomHocPhanTuChon().clear();
+
+            // Flush để đảm bảo orphan removal được thực hiện
+            chuongTrinhDaoTaoRepository.saveAndFlush(existingCTDT);
+
+            // Tạo các nhóm học phần tự chọn mới nếu có
+            if (!dto.getNhomHocPhanTuChon().isEmpty()) {
+                List<HocPhanTuChon> nhomHocPhanTuChon = dto.getNhomHocPhanTuChon().stream()
+                        .map(hocPhanTuChonDTO -> {
+                            HocPhanTuChon entity = hocPhanTuChonService.createFromCTDT(existingCTDT, hocPhanTuChonDTO);
+                            entity.setChuongTrinhDaoTao(existingCTDT); // Đảm bảo reference được set
+                            return entity;
+                        })
+                        .toList();
+
+                existingCTDT.getNhomHocPhanTuChon().addAll(nhomHocPhanTuChon);
+                log.info("Created {} new elective course groups", nhomHocPhanTuChon.size());
+            } else {
+                log.info("Cleared all elective course groups");
+            }
+        }
+        // Nếu không truyền nhomHocPhanTuChon (null) thì giữ nguyên danh sách hiện tại
+
+        // Lưu và trả về
+        chuongTrinhDaoTaoRepository.save(existingCTDT);
+        log.info("Successfully updated curriculum: {}", existingCTDT.getTenChuongTrinhDaoTao());
+        return modelMapper.map(existingCTDT, ChuongTrinhDaoTaoRequest.class);
     }
 
     public ChuongTrinhDaoTaoRequest getByKhoaHocAndMaNganh(String khoaHoc, Long maNganh) {
@@ -150,75 +228,176 @@ public class ChuongTrinhDaoTaoService {
     }
 
 
+// Các import khác cần thiết...
+
     @Transactional
     public void createDSHocPhanFromFile(CTDTDescriptionRequest request, MultipartFile file) {
         if (request == null || file == null || file.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-
         if (request.getMaNganh() == null || request.getKhoaHoc() == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-
         boolean nganhExists = nganhClient.existByMaNganh(request.getMaNganh());
         if (!nganhExists) {
             throw new AppException(ErrorCode.NOTFOUND);
         }
-
-        if(chuongTrinhDaoTaoRepository.existsChuongTrinhDaoTaoByKhoaHocAndMaNganh(request.getKhoaHoc(), request.getMaNganh())) {
-            throw new AppException("Chương trình đào tạo đã tồn tại cho khóa học và ngành này", ErrorCode.INVALID_INPUT);
+        if (chuongTrinhDaoTaoRepository.existsChuongTrinhDaoTaoByKhoaHocAndMaNganh(request.getKhoaHoc(), request.getMaNganh())) {
+            throw new AppException(ErrorCode.CTDT_EXISTED);
         }
 
-        try {
-            Workbook workbook = WorkbookFactory.create(file.getInputStream());
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
-            List<String> maHocPhanList = new LinkedList<>();
+            List<String> maHocPhanList = new ArrayList<>();
 
-            // Skip the header row if it exists (start from row 1)
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                var row = sheet.getRow(i);
+            log.info("Starting to read course data from row: 14");
+
+            // Bắt đầu từ dòng 14 (index 13)
+            for (int i = 13; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                var cell = row.getCell(0);
-                if (cell != null && !cell.getStringCellValue().trim().isEmpty()) {
-                    String maHocPhan = cell.getStringCellValue().trim();
-                    log.info("Reading course code: {}", maHocPhan);
-                    maHocPhanList.add(maHocPhan);
+                String maHp = getCellValue(row.getCell(0)); // Cột A - Mã học phần
+
+                if (maHp == null || maHp.isBlank() || maHp.equalsIgnoreCase("Tổng cộng")) {
+                    break;
+                }
+
+                // Kiểm tra định dạng mã học phần
+                if (maHp.matches(".*[a-zA-Z0-9]+.*")) {
+                    maHocPhanList.add(maHp.trim());
+                    log.debug("Added course code: {}", maHp.trim());
                 }
             }
 
-            log.info("Total course codes found: {}", maHocPhanList.size());
+            log.info("Found {} course codes in file", maHocPhanList.size());
 
             if (maHocPhanList.isEmpty()) {
-                throw new AppException("No course codes found in the file", ErrorCode.INVALID_INPUT);
+                throw new AppException("Không tìm thấy mã học phần nào trong file!", ErrorCode.INVALID_INPUT);
             }
 
-            List<HocPhan> chuongTrinhList = hocPhanRepository.findByMaHpIn(maHocPhanList);
-            log.info("Found {} courses in database out of {} requested", chuongTrinhList.size(), maHocPhanList.size());
+            // Tìm học phần trong database
+            List<HocPhan> hocPhanList = hocPhanRepository.findByMaHpIn(maHocPhanList);
 
-            log.info("Course not found in database: {}",
-                    maHocPhanList.stream()
-                            .filter(maHocPhan -> chuongTrinhList.stream()
-                                    .noneMatch(hocPhan -> hocPhan.getMaHp().equals(maHocPhan)))
-                            .toList());
+            // Log các học phần không tìm thấy
+            List<String> notFoundCourses = maHocPhanList.stream()
+                    .filter(maHp -> hocPhanList.stream().noneMatch(hp -> hp.getMaHp().equals(maHp)))
+                    .toList();
 
-            if (chuongTrinhList.isEmpty()) {
-                throw new AppException(ErrorCode.NOTFOUND);
+            if (!notFoundCourses.isEmpty()) {
+                log.warn("Courses not found in database: {}", notFoundCourses);
             }
 
+            if (hocPhanList.isEmpty()) {
+                throw new AppException("Không tìm thấy học phần nào trong cơ sở dữ liệu!", ErrorCode.NOTFOUND);
+            }
+
+            // Tạo chương trình đào tạo
             modelMapper.typeMap(CTDTDescriptionRequest.class, ChuongTrinhDaoTao.class)
                     .addMappings(mapper -> mapper.skip(ChuongTrinhDaoTao::setHocPhanList));
-
             ChuongTrinhDaoTao chuongTrinhDaoTao = modelMapper.map(request, ChuongTrinhDaoTao.class);
-            chuongTrinhDaoTao.setHocPhanList(chuongTrinhList);
+            chuongTrinhDaoTao.setHocPhanList(hocPhanList);
+
             chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
 
-            log.info("Successfully created curriculum with {} courses", chuongTrinhList.size());
-        } catch (IOException e) {
-            log.error("Error reading Excel file: {}", e.getMessage());
-            throw new AppException(ErrorCode.INVALID_INPUT);
+            log.info("Successfully created curriculum: {} with {} courses",
+                    chuongTrinhDaoTao.getTenChuongTrinhDaoTao(),
+                    hocPhanList.size());
+
+        } catch (Exception e) {
+            log.error("Error reading Excel file: {}", e.getMessage(), e);
+            throw new AppException("Lỗi xử lý file Excel: " + e.getMessage(), ErrorCode.INVALID_INPUT);
         }
     }
+
+    // Hàm lấy giá trị ô cell
+    private String getCellValue(Cell cell) {
+        if (cell == null) return "";
+        switch (cell.getCellType()) {
+            case STRING: return cell.getStringCellValue().trim();
+            case NUMERIC:
+                double v = cell.getNumericCellValue();
+                if (v == Math.floor(v)) {
+                    return String.valueOf((int) v);
+                } else {
+                    return String.valueOf(v);
+                }
+            case BOOLEAN: return String.valueOf(cell.getBooleanCellValue());
+            default: return "";
+        }
+    }
+
+
+
+//    @Transactional
+//    public void createDSHocPhanFromFile(CTDTDescriptionRequest request, MultipartFile file) {
+//        if (request == null || file == null || file.isEmpty()) {
+//            throw new AppException(ErrorCode.INVALID_REQUEST);
+//        }
+//
+//        if (request.getMaNganh() == null || request.getKhoaHoc() == null) {
+//            throw new AppException(ErrorCode.INVALID_REQUEST);
+//        }
+//
+//        boolean nganhExists = nganhClient.existByMaNganh(request.getMaNganh());
+//        if (!nganhExists) {
+//            throw new AppException(ErrorCode.NOTFOUND);
+//        }
+//
+//        if(chuongTrinhDaoTaoRepository.existsChuongTrinhDaoTaoByKhoaHocAndMaNganh(request.getKhoaHoc(), request.getMaNganh())) {
+//            throw new AppException(ErrorCode.CTDT_EXISTED);
+//        }
+//
+//        try {
+//            Workbook workbook = WorkbookFactory.create(file.getInputStream());
+//            Sheet sheet = workbook.getSheetAt(0);
+//            List<String> maHocPhanList = new LinkedList<>();
+//
+//            // Skip the header row if it exists (start from row 1)
+//            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+//                var row = sheet.getRow(i);
+//                if (row == null) continue;
+//
+//                var cell = row.getCell(0);
+//                if (cell != null && !cell.getStringCellValue().trim().isEmpty()) {
+//                    String maHocPhan = cell.getStringCellValue().trim();
+//                    log.info("Reading course code: {}", maHocPhan);
+//                    maHocPhanList.add(maHocPhan);
+//                }
+//            }
+//
+//            log.info("Total course codes found: {}", maHocPhanList.size());
+//
+//            if (maHocPhanList.isEmpty()) {
+//                throw new AppException("No course codes found in the file", ErrorCode.INVALID_INPUT);
+//            }
+//
+//            List<HocPhan> chuongTrinhList = hocPhanRepository.findByMaHpIn(maHocPhanList);
+//            log.info("Found {} courses in database out of {} requested", chuongTrinhList.size(), maHocPhanList.size());
+//
+//            log.info("Course not found in database: {}",
+//                    maHocPhanList.stream()
+//                            .filter(maHocPhan -> chuongTrinhList.stream()
+//                                    .noneMatch(hocPhan -> hocPhan.getMaHp().equals(maHocPhan)))
+//                            .toList());
+//
+//            if (chuongTrinhList.isEmpty()) {
+//                throw new AppException(ErrorCode.NOTFOUND);
+//            }
+//
+//            modelMapper.typeMap(CTDTDescriptionRequest.class, ChuongTrinhDaoTao.class)
+//                    .addMappings(mapper -> mapper.skip(ChuongTrinhDaoTao::setHocPhanList));
+//
+//            ChuongTrinhDaoTao chuongTrinhDaoTao = modelMapper.map(request, ChuongTrinhDaoTao.class);
+//            chuongTrinhDaoTao.setHocPhanList(chuongTrinhList);
+//            chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
+//
+//            log.info("Successfully created curriculum with {} courses", chuongTrinhList.size());
+//        } catch (IOException e) {
+//            log.error("Error reading Excel file: {}", e.getMessage());
+//            throw new AppException(ErrorCode.INVALID_INPUT);
+//        }
+//    }
 
     public List<HocPhanDTO> getHocPhanInCTDTByKhoaHoc(String khoaHoc, Long maNganh) {
         if (khoaHoc == null || khoaHoc.isEmpty()) {
@@ -318,18 +497,6 @@ public class ChuongTrinhDaoTaoService {
         tinChiResponse.setSoTinChiCaiThien(hocPhanRepository.countTinChiIn(hocPhanCaiThienList));
         return tinChiResponse;
     }
-
-
-    public List<HocPhanDTO> getNhomHocPhanTheChat() {
-        ChuongTrinhDaoTao ctdt = chuongTrinhDaoTaoRepository.findById(4L)
-                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
-        if(ctdt == null ){
-            throw new AppException(ErrorCode.NOTFOUND);
-        }
-        return ctdt.getHocPhanList().stream()
-                .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
-                .collect(Collectors.toList());
-    }
     @Transactional
     public ChuongTrinhDaoTaoRequest addHocPhanTuChon(ChuongTrinhDaoTaoRequest request) {
         if (request == null) {
@@ -409,4 +576,6 @@ public class ChuongTrinhDaoTaoService {
             hocPhanTuChonService.deleteHocPhanInHocPhanTuChon(hptc.getId(), maHocPhanList);
         });
     }
+
+
 }

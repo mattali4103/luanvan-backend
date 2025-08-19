@@ -18,10 +18,13 @@ public class Lop {
     @Id
     String maLop;
     String tenLop;
-    String chuNhiem;
     Long siSo;
     Long siSoCon;
 
+    @ManyToOne
+    @JoinColumn(name = "chu_nhiem")
+    @JsonBackReference("giang-vien-lop")
+    GiangVien chuNhiem;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "maLop")
     @JsonBackReference
@@ -29,6 +32,6 @@ public class Lop {
 
     @ManyToOne
     @JoinColumn(name = "maNganh")
-    @JsonBackReference
+    @JsonBackReference("nganh-lop")
     Nganh nganh;
 }

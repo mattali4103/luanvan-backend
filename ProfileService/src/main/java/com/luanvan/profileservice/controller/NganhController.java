@@ -34,6 +34,10 @@ public class NganhController {
                 .data(nganhService.getNganhByMaNganh(maNganh))
                 .build();
     }
+    @GetMapping("/private/id/{maNganh}")
+    public NganhDTO getNganhByMaNganhPrivate(@PathVariable Long maNganh) {
+        return nganhService.getNganhByMaNganh(maNganh);
+    }
 
     @PutMapping("/update/{maNganh}")
     public ApiResponse<NganhDTO> updateNganh( @RequestBody NganhDTO nganhDTO) {

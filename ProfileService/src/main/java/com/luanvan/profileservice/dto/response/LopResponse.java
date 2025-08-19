@@ -1,10 +1,11 @@
-package com.luanvan.profileservice.dto;
+package com.luanvan.profileservice.dto.response;
 
+import com.luanvan.profileservice.dto.NganhDTO;
+import com.luanvan.profileservice.dto.SinhVienDTO;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
-
 @Data
 @Getter
 @Setter
@@ -12,11 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class LopDTO {
+public class LopResponse {
     String maLop;
     String tenLop;
-    GiangVienDTO chuNhiem;
+    String chuNhiem;
     Long siSo;
     Long siSoCon;
-    List<SinhVienDTO> DSSinhVien;
 }

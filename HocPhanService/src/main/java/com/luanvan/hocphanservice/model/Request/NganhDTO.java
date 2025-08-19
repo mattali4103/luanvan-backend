@@ -1,4 +1,4 @@
-package com.luanvan.profileservice.dto;
+package com.luanvan.hocphanservice.model.Request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -16,5 +16,5 @@ public class NganhDTO {
     Long maNganh;
     String tenNganh;
     Long maKhoa;
-    List<LopDTO> DSLop;
+
 }

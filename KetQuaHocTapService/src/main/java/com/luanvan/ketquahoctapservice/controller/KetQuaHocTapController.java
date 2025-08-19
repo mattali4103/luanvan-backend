@@ -85,6 +85,16 @@ public class KetQuaHocTapController {
                 .data(ketQuaHocTapService.getKetQuaHocTapDetailList(maSo, page, size))
                 .build();
     }
+    @GetMapping("/detail/all")
+    public ApiResponse<List<KetQuaHocTapDetail>> getKetQuaHocTapDetail(
+            @RequestParam(value = "maSo") String maSo)
+    {
+        return ApiResponse.<List<KetQuaHocTapDetail>>builder()
+                .code(200)
+                .message("OK")
+                .data(ketQuaHocTapService.getAllKetQuaHocTapDetailByMaso(maSo))
+                .build();
+    }
 
     //   Lấy mã học kỳ theo mã số sinh viên
     @GetMapping("/hoc-ky/{maSo}")

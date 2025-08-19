@@ -23,6 +23,7 @@ public class ChuongTrinhDaoTaoRequest {
     String khoaHoc;
     @NotBlank(message = "Mã ngành không được null")
     Long maNganh;
+    String tenNganh;
     String noiDung;
     List<HocPhanDTO> hocPhanList;
     List<HocPhanTuChonDTO> nhomHocPhanTuChon;

@@ -1,6 +1,7 @@
 package com.luanvan.profileservice.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.luanvan.profileservice.dto.LopDTO;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -35,4 +36,8 @@ public class ProfileResponse {
     String cccd;
     String ngayCapCCCD;
     String noiCapCCCD;
+    LopDTO lop;
+    String hoTenCha;
+    String hoTenMe;
+    String soDienThoaiNguoiThan;
 }

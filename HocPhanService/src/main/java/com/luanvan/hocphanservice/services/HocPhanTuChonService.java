@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,36 @@ public class HocPhanTuChonService {
     private final HocPhanTuChonRepository hocPhanTuChonRepository;
     private final HocPhanRepository hocPhanRepository;
     private final ChuongTrinhDaoTaoRepository chuongTrinhDaoTaoRepository;
+
+    public HocPhanTuChonDTO update(HocPhanTuChonDTO dto) {
+        validate(dto);
+        HocPhanTuChon hocPhanTuChon = hocPhanTuChonRepository.findById(dto.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST));
+
+        // Map thay đổi từ dto sang entity
+        modelMapper.typeMap(HocPhanTuChonDTO.class, HocPhanTuChon.class)
+                .addMappings(config -> config.skip(HocPhanTuChon::setHocPhanTuChonList));
+        modelMapper.map(dto, hocPhanTuChon);
+
+        // Update list học phần
+        if (dto.getHocPhanTuChonList() != null && !dto.getHocPhanTuChonList().isEmpty()) {
+            List<String> ids = dto.getHocPhanTuChonList().stream().map(HocPhanDTO::getMaHp).collect(Collectors.toList());
+            List<HocPhan> hocPhanList = hocPhanRepository.findAllById(ids);
+            if (hocPhanList.size() != ids.size()) {
+                throw new AppException(ErrorCode.INVALID_REQUEST);
+            }
+            hocPhanTuChon.setHocPhanTuChonList(hocPhanList);
+        }
+
+        // Set chương trình đào tạo
+        hocPhanTuChon.setChuongTrinhDaoTao(
+                chuongTrinhDaoTaoRepository.findByKhoaHocAndMaNganh(dto.getKhoaHoc(), dto.getMaNganh())
+                        .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST))
+        );
+
+        return modelMapper.map(hocPhanTuChonRepository.save(hocPhanTuChon), HocPhanTuChonDTO.class);
+    }
+
 
     public List<HocPhanTuChonDTO> getHocPhanTuChonByNameAndKhoaHoc(String tenNhom, String khoaHoc, Long maNganh) {
         List<HocPhanTuChon> hptcList = hocPhanTuChonRepository.findByTenNhomLikeAndChuongTrinhDaoTaoAndKhoaHocAndMaNganh("%" + tenNhom + "%", khoaHoc, maNganh);
@@ -168,17 +199,34 @@ public class HocPhanTuChonService {
         hocPhanTuChonRepository.deleteById(id);
     }
     // Tạo từ ChuongTrinhDaoTaoDTO, hocPhan chỉ có maHp, yêu cầu phải truyền vào id của ctdt
-    public HocPhanTuChon createFromCTDT(ChuongTrinhDaoTao ctdt, HocPhanTuChonDTO dto) {
+    public HocPhanTuChon createFromCTDT(ChuongTrinhDaoTao chuongTrinhDaoTao, HocPhanTuChonDTO dto) {
         validate(dto);
-        HocPhanTuChon hocPhanTuChon = modelMapper.map(dto, HocPhanTuChon.class);
-        List<HocPhan> hocPhanList = new LinkedList<>();
-        dto.getHocPhanTuChonList().forEach(hocPhanDTO -> {
-            HocPhan hocPhan = hocPhanRepository.findById(hocPhanDTO.getMaHp()).orElse(new HocPhan());
-            hocPhanList.add(hocPhan);
-        });
-        hocPhanTuChon.setHocPhanTuChonList(hocPhanList);
-        hocPhanTuChon.setChuongTrinhDaoTao(ctdt);
-        hocPhanTuChonRepository.save(hocPhanTuChon);
-        return hocPhanTuChon;
+        validate(chuongTrinhDaoTao);
+
+        HocPhanTuChon hocPhanTuChon = new HocPhanTuChon();
+        hocPhanTuChon.setTenNhom(dto.getTenNhom());
+        hocPhanTuChon.setTinChiYeuCau(dto.getTinChiYeuCau());
+        hocPhanTuChon.setChuongTrinhDaoTao(chuongTrinhDaoTao);
+
+        // Xử lý danh sách học phần tự chọn
+        if (dto.getHocPhanTuChonList() != null && !dto.getHocPhanTuChonList().isEmpty()) {
+            List<String> maHocPhanList = dto.getHocPhanTuChonList().stream()
+                    .map(HocPhanDTO::getMaHp)
+                    .collect(Collectors.toList());
+
+            List<HocPhan> hocPhanList = hocPhanRepository.findByMaHpIn(maHocPhanList);
+
+            // Kiểm tra nếu có học phần không tìm thấy
+            if (hocPhanList.size() != maHocPhanList.size()) {
+                List<String> notFound = maHocPhanList.stream()
+                        .filter(maHp -> hocPhanList.stream().noneMatch(hp -> hp.getMaHp().equals(maHp)))
+                        .collect(Collectors.toList());
+                throw new AppException("Các học phần không tìm thấy: " + String.join(", ", notFound), ErrorCode.NOTFOUND);
+            }
+
+            hocPhanTuChon.setHocPhanTuChonList(hocPhanList);
+        }
+
+        return hocPhanTuChonRepository.save(hocPhanTuChon);
     }
 }

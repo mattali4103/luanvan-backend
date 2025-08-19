@@ -1,5 +1,6 @@
 package com.luanvan.hocphanservice.repository.httpClient;
 
+import com.luanvan.hocphanservice.model.Request.NganhDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,6 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface NganhClient {
     @GetMapping("/nganh/id/{maNganh}/exist")
     boolean existByMaNganh(@PathVariable Long maNganh);
-    @GetMapping("/nganh/id/{maNganh}")
-    Object findBymaNganh(@PathVariable String maNganh);
+    @GetMapping("/nganh/private/id/{maNganh}")
+    NganhDTO findBymaNganh(@PathVariable Long maNganh);
 }

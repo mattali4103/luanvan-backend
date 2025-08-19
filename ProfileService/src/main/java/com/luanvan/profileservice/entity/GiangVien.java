@@ -1,9 +1,12 @@
 package com.luanvan.profileservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -22,4 +25,8 @@ public class GiangVien {
     @JoinColumn(name = "maKhoa")
     @JsonBackReference
     Khoa khoa;
+
+    @OneToMany(mappedBy = "chuNhiem")
+    @JsonManagedReference("giang-vien-lop")
+    List<Lop> DSLop;
 }

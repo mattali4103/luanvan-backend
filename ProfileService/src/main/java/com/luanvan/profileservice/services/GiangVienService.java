@@ -11,9 +11,11 @@ import com.luanvan.profileservice.repository.GiangVienRepository;
 import com.luanvan.profileservice.repository.KhoaRepository;
 import com.luanvan.profileservice.repository.httpClient.UserClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GiangVienService {
@@ -27,9 +29,11 @@ public class GiangVienService {
         }
         GiangVien giangVien = giangVienRepository.findById(maSo).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
         UserDTO userDTO = userClient.getUserById(maSo);
+        log.info("User info: {} {} {}", userDTO.getMaSo(), userDTO.getHoTen(), userDTO.getEmail());
         return ProfileResponse.builder()
                 .maSo(maSo)
                 .hoTen(userDTO.getHoTen())
+                .email(userDTO.getEmail())
                 .gioiTinh(userDTO.isGioiTinh())
                 .ngaySinh(userDTO.getNgaySinh())
                 .maKhoa(giangVien.getKhoa().getMaKhoa())
@@ -51,9 +55,6 @@ public class GiangVienService {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
 
-        if(!khoaRepository.existsById(giangVienDTO.getKhoaDTO().getMaKhoa())) {
-            throw new AppException(ErrorCode.NOTFOUND);
-        }
 
         GiangVien gv = giangVienRepository.findById(giangVienDTO.getMaSo())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
@@ -72,10 +73,6 @@ public class GiangVienService {
         modelMapper.typeMap(GiangVienDTO.class, GiangVien.class)
                 .addMappings(mapper -> mapper.skip(GiangVien::setKhoa));
         modelMapper.map(giangVienDTO, gv);
-
-        Khoa khoa = khoaRepository.findById(giangVienDTO.getKhoaDTO().getMaKhoa())
-                .orElseThrow(() -> new AppException(ErrorCode.NGANH_NOTNULL));
-        gv.setKhoa(khoa);
 
         giangVienRepository.save(gv);
         return modelMapper.map(gv, GiangVienDTO.class);

@@ -2,6 +2,7 @@ package com.luanvan.hocphanservice.controller;
 
 import com.luanvan.hocphanservice.model.HocPhanDTO;
 import com.luanvan.hocphanservice.model.HocPhanTuChonDTO;
+import com.luanvan.hocphanservice.model.Request.ChuongTrinhDaoTaoRequest;
 import com.luanvan.hocphanservice.model.Request.HocPhanRequest;
 import com.luanvan.hocphanservice.model.Response.ApiResponse;
 import com.luanvan.hocphanservice.services.HocPhanTuChonService;
@@ -18,6 +19,14 @@ public class HocPhanTuChonController {
     public HocPhanTuChonController(HocPhanTuChonService hocPhanTuChonService ) {
         this.hocPhanTuChonService = hocPhanTuChonService;
 
+    }
+    @PutMapping("/update_hoc_phan_tu_chon")
+    public ApiResponse<HocPhanTuChonDTO> updateHocPhanTuChonInCTDT(@RequestBody HocPhanTuChonDTO dto) {
+        return ApiResponse.<HocPhanTuChonDTO>builder()
+                .code(200)
+                .message("OK")
+                .data(hocPhanTuChonService.update(dto))
+                .build();
     }
 
     @PostMapping("/create")

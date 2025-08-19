@@ -59,9 +59,15 @@ public class KhoaService {
     }
 
     public KhoaDTO getKhoaByMaKhoa(Long maKhoa) {
-        return khoaRepository.findById(maKhoa)
-                .map(khoa -> modelMapper.map(khoa, KhoaDTO.class))
+        Khoa khoa = khoaRepository.findById(maKhoa)
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        if(khoa.getDSNganh() == null || khoa.getDSNganh().isEmpty()) {
+            throw new AppException(ErrorCode.NOTFOUND);
+        }
+        khoa.getDSNganh().forEach(nganh -> {
+            nganh.setDsLop(null); // Giả sử bạn không muốn trả về danh sách lớp trong NganhDTO
+        });
+        return modelMapper.map(khoa, KhoaDTO.class);
     }
 
     public KhoaDTO updateKhoa(Long maKhoa, KhoaDTO khoaDTO) {

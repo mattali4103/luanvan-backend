@@ -53,7 +53,7 @@ public class HocPhanController {
     }
 
     @PostMapping("/create")
-    public ApiResponse<HocPhanDTO> createHocPhan(@RequestBody HocPhanDTO hocPhanDTO) {
+        public ApiResponse<HocPhanDTO> createHocPhan(@RequestBody HocPhanDTO hocPhanDTO) {
         return ApiResponse.<HocPhanDTO>builder()
                 .code(200)
                 .message("success")

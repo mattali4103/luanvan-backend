@@ -2,6 +2,7 @@ package com.luanvan.profileservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,11 +23,11 @@ public class Nganh {
     String tenNganh;
 
     @OneToMany(mappedBy = "nganh")
-    @JsonBackReference
+    @JsonManagedReference("nganh-lop")
     List<Lop> dsLop;
 
     @ManyToOne
     @JoinColumn(name = "maKhoa")
-    @JsonBackReference
+    @JsonBackReference("khoa-nganh")
     Khoa khoa;
 }

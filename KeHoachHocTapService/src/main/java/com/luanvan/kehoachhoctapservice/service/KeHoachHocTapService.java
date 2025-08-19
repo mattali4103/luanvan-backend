@@ -163,25 +163,6 @@ public class KeHoachHocTapService {
         return result;
     }
 
-    @Transactional
-    public KeHoachHocTapDTO create(AddKHHTRequest request) {
-        if (request == null) {
-            throw new AppException(ErrorCode.INVALID_REQUEST);
-        }
-        //        Kiểm tra học phần này con tồn tại trong hệ thống không
-        if (isHocPhanExist(request.getMaHocPhan())) {
-            throw new AppException(ErrorCode.HOCPHAN_NOTFOUND);
-        }
-//      Kiểm tra học phần đang nhập có phải là học phần cải thiện không
-        if (request.isHocPhanCaiThien() && isKeHoachHocTapExist(request.getMaSo(), request.getMaHocPhan())) {
-            throw new AppException(ErrorCode.KHHT_NOTFOUND);
-        }
-
-        KeHoachHocTap khht = modelMapper.map(request, KeHoachHocTap.class);
-
-        keHoachHocTapRepository.save(khht);
-        return modelMapper.map(khht, KeHoachHocTapDTO.class);
-    }
 
     public List<HocPhanDTO> getHocPhanNotInCTDT(String maSo, String khoaHoc, Long maNganh) {
         List<String> maHpInKHHT = keHoachHocTapRepository.findMaHocPhanByMaSo(maSo);
@@ -310,12 +291,53 @@ public class KeHoachHocTapService {
         return modelMapper.map(existingKHHT, KeHoachHocTapDTO.class);
     }
 
+
+    @Transactional
+    public KeHoachHocTapDTO create(AddKHHTRequest request) {
+        if (request == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        //Kiểm tra học phần này con tồn tại trong hệ thống không
+        if (isHocPhanExist(request.getMaHocPhan())) {
+            throw new AppException(ErrorCode.HOCPHAN_NOTFOUND);
+        }
+//      Kiểm tra học phần đang nhập có phải là học phần cải thiện không
+        if (request.isHocPhanCaiThien() && isKeHoachHocTapExist(request.getMaSo(), request.getMaHocPhan())) {
+            throw new AppException(ErrorCode.KHHT_NOTFOUND);
+        }
+
+        KeHoachHocTap khht = modelMapper.map(request, KeHoachHocTap.class);
+
+        keHoachHocTapRepository.save(khht);
+        return modelMapper.map(khht, KeHoachHocTapDTO.class);
+    }
+
     public void creates(List<KeHoachHocTapRequest> request) {
         if (request == null || request.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
         List<KeHoachHocTap> khht = request.stream().map(
                 khhtRequest -> modelMapper.map(khhtRequest, KeHoachHocTap.class)).toList();
+        // Kiểm tra từng học phần trong kế hoạch học tập
+        for (KeHoachHocTap khhtItem : khht) {
+            // Kiểm tra học phần có tồn tại trong hệ thống không
+            if (!isHocPhanExist(khhtItem.getMaHocPhan())) {
+                throw new AppException(ErrorCode.HOCPHAN_NOTFOUND);
+            }
+        }
+        //Kiểm tra học phần tuyên quyết
+        List<String> maHpInKhht = khht.stream()
+                .map(KeHoachHocTap::getMaHocPhan)
+                .distinct()
+                .toList();
+        List<String> maHpInRequest = request.stream()
+                .map(KeHoachHocTapRequest::getMaHocPhan)
+                .distinct()
+                .toList();
+
+        checkHocPhanTuyenQuyet(maHpInKhht, maHpInRequest);
+
+        // Lưu tất cả kế hoạch học tập vào cơ sở dữ liệu
         keHoachHocTapRepository.saveAll(khht);
     }
 
@@ -325,6 +347,29 @@ public class KeHoachHocTapService {
         }
         KeHoachHocTap existingKHHT = keHoachHocTapRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        List<KeHoachHocTap> khhtList = keHoachHocTapRepository.findKeHoachHocTapsByMaSo(existingKHHT.getMaSo());
+        List<String> kqhtList = kQHTClient.getHocPhanByMaSo(existingKHHT.getMaSo());
+        // Kiểm tra nếu sinh viên đã đăng ký học phần này trong kết quả học tập thì không được xóa
+        if (khhtList.stream().anyMatch(khht -> khht.getMaHocPhan().equals(existingKHHT.getMaHocPhan())) ||
+                kqhtList.contains(existingKHHT.getMaHocPhan())) {
+            throw new AppException(ErrorCode.CUSTOM_MESSAGE, "Bạn không thể xóa học phần đã học");
+        }
+        // Kiểm tra xem học phần này có phải là điều kiện tiên quyết của học phần khác không
+        List<String> maHocPhanList = khhtList.stream()
+                .map(KeHoachHocTap::getMaHocPhan)
+                .distinct()
+                .toList();
+        List<HocPhanDTO> hocPhanDTOList = hocPhanClient.getHocPhanIn(maHocPhanList);
+        List<String> hocPhanTuyenQuyetList = hocPhanDTOList.stream()
+                .map(HocPhanDTO::getHocPhanTienQuyet)
+                .filter(Objects::nonNull)
+                .flatMap(hp -> Arrays.stream(hp.split(",")))
+                .toList();
+        log.info("Danh sách hc phần tuyên quyết: {}", hocPhanTuyenQuyetList);
+        // Kiểm tra xem học phần này có phải là học phần tuyên quyết của học phần khác không
+        if (hocPhanTuyenQuyetList.contains(existingKHHT.getMaHocPhan())) {
+            throw new AppException(ErrorCode.CUSTOM_MESSAGE, "Không thể xoá học phần vì học phần " + existingKHHT.getMaHocPhan() + " là học phần tuyên quyết của học phần khác.");
+        }
         keHoachHocTapRepository.delete(existingKHHT);
     }
 
@@ -443,6 +488,21 @@ public class KeHoachHocTapService {
             }
         });
         return result;
+    }
+    public void checkHocPhanTuyenQuyet(List<String> maHocPhanList, List<String> pendingList) {
+        // Lấy thông tin học phần trong danh sách pending
+        List<HocPhanDTO> hocPhanDTOList = hocPhanClient.getHocPhanIn(pendingList);
+        // Kiểm tra học phần tuyên quyết
+        hocPhanDTOList.forEach(hocPhanDTO -> {
+            if (hocPhanDTO.getHocPhanTienQuyet() != null && !hocPhanDTO.getHocPhanTienQuyet().isEmpty()) {
+                String[] maHocPhanTuyenQuyet = hocPhanDTO.getHocPhanTienQuyet().split(",");
+                for (String maHocPhan : maHocPhanTuyenQuyet) {
+                    if (maHocPhanList.stream().noneMatch(kh -> kh.equals(maHocPhan))) {
+                        throw new AppException(ErrorCode.CUSTOM_MESSAGE, "Học phần " + hocPhanDTO.getMaHp() + " không đáp ứng điều kiện tuyên quyết: " + maHocPhan);
+                    }
+                }
+            }
+        });
     }
 
     //    // Private methods

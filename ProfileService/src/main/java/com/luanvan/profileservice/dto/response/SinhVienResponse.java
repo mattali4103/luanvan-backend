@@ -1,6 +1,6 @@
-package com.luanvan.profileservice.dto;
+package com.luanvan.profileservice.dto.response;
 
-
+import com.luanvan.profileservice.dto.LopDTO;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Repository;
@@ -15,11 +15,11 @@ import java.time.LocalDate;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SinhVienDTO {
+public class SinhVienResponse {
     String maSo;
     String khoaHoc;
     String maLop;
-    LopDTO lop;
+    String tenNganh;
     String soDienThoai;
     String email;
     String diaChi;
@@ -30,7 +30,4 @@ public class SinhVienDTO {
     String cccd;
     String ngayCapCCCD;
     String noiCapCCCD;
-    String hoTenCha;
-    String hoTenMe;
-    String soDienThoaiNguoiThan;
 }

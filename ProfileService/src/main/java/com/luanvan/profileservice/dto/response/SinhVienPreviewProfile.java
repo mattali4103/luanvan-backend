@@ -1,5 +1,6 @@
 package com.luanvan.profileservice.dto.response;
 
+import com.luanvan.profileservice.dto.LopDTO;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,6 +30,8 @@ public class SinhVienPreviewProfile {
     boolean gioiTinh;
     String khoaHoc;
     String maLop;
+    LopDTO lop;
+    Long maNganh;
     String tenNganh;
     String xepLoaiHocLuc;
     Double diemTrungBinhTichLuy;

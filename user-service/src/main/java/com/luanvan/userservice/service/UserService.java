@@ -84,6 +84,7 @@ public class UserService {
                 .hoTen(user.getHoTen())
                 .gioiTinh(user.isGioiTinh())
                 .ngaySinh(user.getNgaySinh())
+                .email(user.getEmail())
                 .build();
     }
 }

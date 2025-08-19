@@ -1,5 +1,6 @@
 package com.luanvan.profileservice.dto;
 
+import com.luanvan.profileservice.dto.response.SinhVienResponse;
 import com.luanvan.profileservice.entity.SinhVien;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -19,5 +20,5 @@ public class CertificateDTO {
     String tenChungChi;
     LocalDate ngayCap;
     String imageUrl;
-    SinhVienDTO sinhVien;
+    SinhVienResponse sinhVien;
 }

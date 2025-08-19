@@ -33,6 +33,14 @@ public class LopController {
                 .data(lopService.getDSLopByChuNhiem(maGiangVien))
                 .build();
     }
+    @GetMapping("/thongke/chu_nhiem/{maGiangVien}")
+    public ApiResponse<StatisticsLopResponse> getStatisticsLopByChuNhiem(@PathVariable String maGiangVien) {
+        return ApiResponse.<StatisticsLopResponse>builder()
+                .code(200)
+                .message("OK")
+                .data(lopService.getStatisticsByChuNhiem(maGiangVien))
+                .build();
+    }
 
     @GetMapping("/preview/{maLop}")
     public ApiResponse<List<SinhVienPreviewProfile>> getSinhVienPreviewProfileByMaLop(@PathVariable String maLop) {

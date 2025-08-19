@@ -3,6 +3,7 @@ package com.luanvan.profileservice.controller;
 import com.luanvan.profileservice.dto.CertificateDTO;
 import com.luanvan.profileservice.dto.SinhVienDTO;
 import com.luanvan.profileservice.dto.response.ApiResponse;
+import com.luanvan.profileservice.dto.response.SinhVienResponse;
 import com.luanvan.profileservice.services.CertificateService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,7 +37,7 @@ public class CertificateController {
     ) {
         CertificateDTO certificateDTO = new CertificateDTO();
         certificateDTO.setTenChungChi(tenChungChi);
-        certificateDTO.setSinhVien(new SinhVienDTO());
+        certificateDTO.setSinhVien(new SinhVienResponse());
         certificateDTO.getSinhVien().setMaSo(maSo);
         certificateDTO.setNgayCap(LocalDate.parse(ngayCap));
 

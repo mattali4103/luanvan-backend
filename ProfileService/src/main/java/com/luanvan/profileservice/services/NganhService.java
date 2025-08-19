@@ -2,6 +2,7 @@ package com.luanvan.profileservice.services;
 
 import com.luanvan.profileservice.dto.LopDTO;
 import com.luanvan.profileservice.dto.NganhDTO;
+import com.luanvan.profileservice.entity.Khoa;
 import com.luanvan.profileservice.entity.Nganh;
 import com.luanvan.profileservice.exception.AppException;
 import com.luanvan.profileservice.exception.ErrorCode;
@@ -19,12 +20,12 @@ public class NganhService {
 
     private final ModelMapper modelMapper;
     private final NganhRepository nganhRepository;
+    private final KhoaService khoaService;
 
     public NganhDTO createNganh(NganhDTO nganhDTO) {
         if(nganhDTO == null){
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
-
         modelMapper.typeMap(NganhDTO.class, Nganh.class)
                 .addMappings(mapper -> mapper.skip(Nganh::setMaNganh))
                 .addMappings(mapper -> mapper.skip(Nganh::setDsLop));

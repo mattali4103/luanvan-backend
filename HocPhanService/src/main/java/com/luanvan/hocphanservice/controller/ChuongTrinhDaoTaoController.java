@@ -9,6 +9,7 @@ import com.luanvan.hocphanservice.model.Response.ThongKeCTDT;
 import com.luanvan.hocphanservice.model.Response.TinChiResponse;
 import com.luanvan.hocphanservice.services.ChuongTrinhDaoTaoService;
 import com.luanvan.hocphanservice.services.HocPhanService;
+import com.luanvan.hocphanservice.services.HocPhanTuChonService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,10 +20,12 @@ import java.util.List;
 public class ChuongTrinhDaoTaoController {
     private final ChuongTrinhDaoTaoService chuongTrinhDaoTaoService;
     private final HocPhanService hocPhanService;
+    private final HocPhanTuChonService hocPhanTuChonService;
 
-    public ChuongTrinhDaoTaoController(ChuongTrinhDaoTaoService chuongTrinhDaoTaoService, HocPhanService hocPhanService) {
+    public ChuongTrinhDaoTaoController(ChuongTrinhDaoTaoService chuongTrinhDaoTaoService, HocPhanService hocPhanService, HocPhanTuChonService hocPhanTuChonService) {
         this.chuongTrinhDaoTaoService = chuongTrinhDaoTaoService;
         this.hocPhanService = hocPhanService;
+        this.hocPhanTuChonService = hocPhanTuChonService;
     }
 
     @GetMapping("/thongke")
@@ -112,7 +115,7 @@ public class ChuongTrinhDaoTaoController {
                 .build();
         chuongTrinhDaoTaoService.createDSHocPhanFromFile(request, file);
         return ApiResponse.<ChuongTrinhDaoTaoRequest>builder()
-                .code(201)
+                .code(200)
                 .message("Created OK")
                 .build();
     }
@@ -179,6 +182,7 @@ public class ChuongTrinhDaoTaoController {
                 .data(chuongTrinhDaoTaoService.addHocPhanTuChon(request))
                 .build();
     }
+
 
 
 
