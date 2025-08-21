@@ -16,7 +16,7 @@ import java.util.List;
 
 @FeignClient(name ="hoc-phan-service", url = "${hoc_phan_service_url}")
 public interface HocPhanClient {
-    @GetMapping(value ="/id/{maHocPhan}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value ="/hocphan/id/{maHocPhan}", produces = MediaType.APPLICATION_JSON_VALUE)
     boolean getHocPhanById(@PathVariable String maHocPhan);
     @PostMapping(value = "/hocphan/sinhvien/hoc_phan_in_khht", produces = MediaType.APPLICATION_JSON_VALUE)
     List<HocPhanDTO> getHocPhanIn(@RequestBody List<String> hocPhanList);

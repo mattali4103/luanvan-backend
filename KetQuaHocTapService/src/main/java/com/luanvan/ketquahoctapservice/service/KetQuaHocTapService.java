@@ -199,9 +199,9 @@ public class KetQuaHocTapService {
                 .orElse(0L);
 
         //Nếu sinh viên có trên 1 học kỳ so với học kỳ hiện tại có tín chỉ tích luỹ thì cảnh báo học vụ
-//        if(hocKyHienTai.getMaHocKy() - hocKyGanNhat > 1) {
-//            canhBaoHocVu.setLyDo("Bạn đã không đăng ký học phần trong " + (hocKyHienTai.getMaHocKy() - hocKyGanNhat - 1) + " học kỳ gần nhất.");
-//        }
+        if(hocKyHienTai.getMaHocKy() - hocKyGanNhat > 2) {
+            canhBaoHocVu.setLyDo("Bạn đã không đăng ký học phần trong 2 học kỳ liên tiếp");
+        }
          if(soTinChiTrungBinh < 10) {
             canhBaoHocVu.setLyDo("Trễ tiến độ học tập");
         }

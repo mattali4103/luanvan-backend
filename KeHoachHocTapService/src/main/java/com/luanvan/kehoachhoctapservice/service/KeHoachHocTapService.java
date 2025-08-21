@@ -318,13 +318,6 @@ public class KeHoachHocTapService {
         }
         List<KeHoachHocTap> khht = request.stream().map(
                 khhtRequest -> modelMapper.map(khhtRequest, KeHoachHocTap.class)).toList();
-        // Kiểm tra từng học phần trong kế hoạch học tập
-        for (KeHoachHocTap khhtItem : khht) {
-            // Kiểm tra học phần có tồn tại trong hệ thống không
-            if (!isHocPhanExist(khhtItem.getMaHocPhan())) {
-                throw new AppException(ErrorCode.HOCPHAN_NOTFOUND);
-            }
-        }
         //Kiểm tra học phần tuyên quyết
         List<String> maHpInKhht = khht.stream()
                 .map(KeHoachHocTap::getMaHocPhan)

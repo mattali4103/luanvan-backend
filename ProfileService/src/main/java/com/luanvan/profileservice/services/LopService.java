@@ -2,15 +2,18 @@ package com.luanvan.profileservice.services;
 
 import com.luanvan.profileservice.dto.GiangVienDTO;
 import com.luanvan.profileservice.dto.LopDTO;
+import com.luanvan.profileservice.dto.UserDTO;
 import com.luanvan.profileservice.dto.response.ProfileResponse;
 import com.luanvan.profileservice.dto.response.SinhVienPreviewProfile;
 import com.luanvan.profileservice.dto.response.StatisticsLopResponse;
+import com.luanvan.profileservice.entity.GiangVien;
 import com.luanvan.profileservice.entity.Lop;
 import com.luanvan.profileservice.entity.Nganh;
 import com.luanvan.profileservice.exception.AppException;
 import com.luanvan.profileservice.exception.ErrorCode;
 import com.luanvan.profileservice.repository.LopRepository;
 import com.luanvan.profileservice.repository.NganhRepository;
+import com.luanvan.profileservice.repository.httpClient.UserClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -28,6 +31,7 @@ public class LopService {
     private final ModelMapper modelMapper;
     private final SinhVienService sinhVienService;
     private final NganhRepository nganhRepository;
+    private final UserClient userClient;
 
     public List<LopDTO> getDSLopByChuNhiem(String maGiangVien) {
         List<Lop> lops = lopRepository.findByChuNhiem_MaSo(maGiangVien);
@@ -121,6 +125,19 @@ public class LopService {
             return Collections.emptyList();
         }
         return list;
+    }
+    public LopDTO getLopInfoByMaLop(String maLop) {
+        Lop lop = lopRepository.findById(maLop)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+        LopDTO lopDTO = modelMapper.map(lop, LopDTO.class);
+
+        UserDTO chuNhiem = userClient.getUserById(lopDTO.getChuNhiem().getMaSo());
+        lopDTO.getChuNhiem().setHoTen(chuNhiem.getHoTen());
+        lopDTO.getChuNhiem().setEmail(chuNhiem.getEmail());
+
+        lopDTO.setSiSoCon(lopRepository.countSinhVienByMaLop(maLop));
+        lopDTO.setDSSinhVien(null); // Không cần danh sách sinh viên trong thông tin lớp
+        return lopDTO;
     }
 
     public List<SinhVienPreviewProfile> getPreviewProfileByMaLop(String maLop) {

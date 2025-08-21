@@ -42,6 +42,15 @@ public class LopController {
                 .build();
     }
 
+    @GetMapping("/id/{maLop}")
+    public ApiResponse<LopDTO> getLopInfoByMaLop(@PathVariable String maLop) {
+        return ApiResponse.<LopDTO>builder()
+                .code(200)
+                .message("OK")
+                .data(lopService.getLopInfoByMaLop(maLop))
+                .build();
+    }
+
     @GetMapping("/preview/{maLop}")
     public ApiResponse<List<SinhVienPreviewProfile>> getSinhVienPreviewProfileByMaLop(@PathVariable String maLop) {
         return ApiResponse.<List<SinhVienPreviewProfile>>builder()
