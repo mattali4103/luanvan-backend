@@ -11,7 +11,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -31,7 +30,6 @@ public class NamHocService {
                 .ifPresent(namHoc -> {
                     throw new AppException(ErrorCode.EXISTED);
                 });
-        ;
         NamHoc namHoc = modelMapper.map(namHocDTO, NamHoc.class);
         namHocRepository.save(namHoc);
         return modelMapper.map(namHoc, NamHocDTO.class);

@@ -21,14 +21,6 @@ public class CertificateService {
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
 
-    public CertificateDTO getCertificateById(Long id) {
-        if (id == null) {
-            throw new AppException(ErrorCode.INVALID_REQUEST);
-        }
-        Certificate certificate = certificateRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
-        return modelMapper.map(certificate, CertificateDTO.class);
-    }
 
     public List<CertificateDTO> getCertificatesByMaSo(String maSo) {
         if (maSo == null || maSo.isEmpty()) {
@@ -81,9 +73,7 @@ public class CertificateService {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.typeMap(
                 CertificateDTO.class, Certificate.class
-        ).addMappings(mapper -> {
-            mapper.skip(Certificate::setImageUrl);
-        });
+        ).addMappings(mapper -> mapper.skip(Certificate::setImageUrl));
 
         modelMapper.map(certificateDTO, certificate);
         if (file != null && !file.isEmpty()) {

@@ -6,7 +6,6 @@ import com.luanvan.profileservice.dto.UserDTO;
 import com.luanvan.profileservice.dto.response.ProfileResponse;
 import com.luanvan.profileservice.dto.response.SinhVienPreviewProfile;
 import com.luanvan.profileservice.dto.response.StatisticsLopResponse;
-import com.luanvan.profileservice.entity.GiangVien;
 import com.luanvan.profileservice.entity.Lop;
 import com.luanvan.profileservice.entity.Nganh;
 import com.luanvan.profileservice.exception.AppException;
@@ -62,7 +61,6 @@ public class LopService {
         // Tính tổng số lớp
         for(Lop lop : danhSachLop) {
             Long siSo = lopRepository.countSinhVienByMaLop(lop.getMaLop());
-            log.info("Lớp: {}, Sĩ số: {}", lop.getMaLop(), siSo);
             result.setTongSoSinhVien(result.getTongSoSinhVien() + siSo);
         }
         log.info("Tổng số sinh viên trong các lớp do giảng viên {} chủ nhiệm: {}", maGiangVien, result.getTongSoSinhVien());
@@ -155,24 +153,4 @@ public class LopService {
         }
         return list;
     }
-
-    /**
-     * Cập nhật số lượng sinh viên hiện tại (siSoCon) của lớp
-     * @param maLop mã lớp cần cập nhật
-     */
-    public void updateSiSoCon(String maLop) {
-        Long siSoCon = lopRepository.countSinhVienByMaLop(maLop);
-        lopRepository.updateSiSoCon(maLop, siSoCon);
-    }
-
-    /**
-     * Cập nhật siSoCon cho tất cả các lớp
-     */
-    public void updateAllSiSoCon() {
-        List<Lop> allLops = lopRepository.findAll();
-        for (Lop lop : allLops) {
-            updateSiSoCon(lop.getMaLop());
-        }
-    }
-
 }

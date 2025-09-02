@@ -15,7 +15,7 @@ public enum ErrorCode {
     INVALID_INPUT(4011,"Lỗi khi đọc file excel" ),
     CTDT_EXISTED(4012,"Chương trình đào tạo đã tồn tại trong năm học này"),
     KE_HOACH_HOC_TAP_EMPTY(4013,"Kế hoạch học tập rỗng, liên hệ quản trị viên để được hỗ trợ"),
-    ;
+    HOCPHAN_EXISTED(4014,"Học phần đã tồn tại trong hệ thống"),;
     private final int code;
     private final String message;
 

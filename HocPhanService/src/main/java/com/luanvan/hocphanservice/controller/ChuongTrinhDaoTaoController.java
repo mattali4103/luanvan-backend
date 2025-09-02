@@ -20,12 +20,10 @@ import java.util.List;
 public class ChuongTrinhDaoTaoController {
     private final ChuongTrinhDaoTaoService chuongTrinhDaoTaoService;
     private final HocPhanService hocPhanService;
-    private final HocPhanTuChonService hocPhanTuChonService;
 
     public ChuongTrinhDaoTaoController(ChuongTrinhDaoTaoService chuongTrinhDaoTaoService, HocPhanService hocPhanService, HocPhanTuChonService hocPhanTuChonService) {
         this.chuongTrinhDaoTaoService = chuongTrinhDaoTaoService;
         this.hocPhanService = hocPhanService;
-        this.hocPhanTuChonService = hocPhanTuChonService;
     }
 
     @GetMapping("/thongke")

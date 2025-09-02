@@ -316,10 +316,9 @@ public class KeHoachHocTapService {
         if (request == null || request.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        List<KeHoachHocTap> khht = request.stream().map(
-                khhtRequest -> modelMapper.map(khhtRequest, KeHoachHocTap.class)).toList();
+        List<KeHoachHocTap> existingKhht = keHoachHocTapRepository.findKeHoachHocTapsByMaSo(request.get(0).getMaSo());
         //Kiểm tra học phần tuyên quyết
-        List<String> maHpInKhht = khht.stream()
+        List<String> maHpInKhht = existingKhht.stream()
                 .map(KeHoachHocTap::getMaHocPhan)
                 .distinct()
                 .toList();
@@ -329,9 +328,14 @@ public class KeHoachHocTapService {
                 .toList();
 
         checkHocPhanTuyenQuyet(maHpInKhht, maHpInRequest);
+        log.info("Đã kiểm tra học phần tuyên quyết thành công");
+        // Chuyển đổi request thành entities
+        List<KeHoachHocTap> newKhhtList = request.stream()
+                .map(req -> modelMapper.map(req, KeHoachHocTap.class))
+                .toList();
 
         // Lưu tất cả kế hoạch học tập vào cơ sở dữ liệu
-        keHoachHocTapRepository.saveAll(khht);
+        keHoachHocTapRepository.saveAll(newKhhtList);
     }
 
     public void delete(Long id) {
@@ -340,11 +344,16 @@ public class KeHoachHocTapService {
         }
         KeHoachHocTap existingKHHT = keHoachHocTapRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
+
+        if(existingKHHT.isHocPhanCaiThien()) {
+            keHoachHocTapRepository.delete(existingKHHT);
+            return;
+        }
+
         List<KeHoachHocTap> khhtList = keHoachHocTapRepository.findKeHoachHocTapsByMaSo(existingKHHT.getMaSo());
         List<String> kqhtList = kQHTClient.getHocPhanByMaSo(existingKHHT.getMaSo());
         // Kiểm tra nếu sinh viên đã đăng ký học phần này trong kết quả học tập thì không được xóa
-        if (khhtList.stream().anyMatch(khht -> khht.getMaHocPhan().equals(existingKHHT.getMaHocPhan())) ||
-                kqhtList.contains(existingKHHT.getMaHocPhan())) {
+        if (kqhtList.contains(existingKHHT.getMaHocPhan())) {
             throw new AppException(ErrorCode.CUSTOM_MESSAGE, "Bạn không thể xóa học phần đã học");
         }
         // Kiểm tra xem học phần này có phải là điều kiện tiên quyết của học phần khác không
@@ -386,9 +395,7 @@ public class KeHoachHocTapService {
                 .toList();
         // Danh sách học phàn đã học của sinh viên
         List<String> maHocPhanDaHocList = kQHTClient.getHocPhanByMaSo(maSo);
-        maHocPhanDaHocList.forEach(hp ->{
-            log.info("Học phần đã học của sinh viên {}: {}", maSo, hp);
-        });
+        maHocPhanDaHocList.forEach(hp -> log.info("Học phần đã học của sinh viên {}: {}", maSo, hp));
         if (maHocPhanDaHocList.isEmpty()) {
             log.info("Sinh viên {} chưa học học phần nào", maSo);
             return Collections.emptyList();
@@ -403,7 +410,6 @@ public class KeHoachHocTapService {
         filteredMaHocPhan.addAll(maHocPhanDaHocList);
         log.info("Đã lọc {} học phần đã đăng ký và đã học của sinh viên {}", filteredMaHocPhan.size(), maSo);
 //      Lấy danh sách học phần đã lọc
-        List<HocPhanDTO> hocPhanDaLoc = hocPhanClient.getHocPhanIn(new ArrayList<>(filteredMaHocPhan));
 
 //        // Sắp xếp lại dựa trên kế hoạch học tập mẫu keHoachHocTapMau
 //        List<KeHoachHocTapMau> sortedKeHoachHocTapMau = keHoachHocTapMau.stream()
@@ -486,9 +492,11 @@ public class KeHoachHocTapService {
         // Lấy thông tin học phần trong danh sách pending
         List<HocPhanDTO> hocPhanDTOList = hocPhanClient.getHocPhanIn(pendingList);
         // Kiểm tra học phần tuyên quyết
+        maHocPhanList.forEach(hp -> log.info("Học phần đã đăng ký: {}", hp));
         hocPhanDTOList.forEach(hocPhanDTO -> {
             if (hocPhanDTO.getHocPhanTienQuyet() != null && !hocPhanDTO.getHocPhanTienQuyet().isEmpty()) {
                 String[] maHocPhanTuyenQuyet = hocPhanDTO.getHocPhanTienQuyet().split(",");
+                log.info("Học phần {} có học phần tuyên quyết: {}", hocPhanDTO.getMaHp(), Arrays.toString(maHocPhanTuyenQuyet));
                 for (String maHocPhan : maHocPhanTuyenQuyet) {
                     if (maHocPhanList.stream().noneMatch(kh -> kh.equals(maHocPhan))) {
                         throw new AppException(ErrorCode.CUSTOM_MESSAGE, "Học phần " + hocPhanDTO.getMaHp() + " không đáp ứng điều kiện tuyên quyết: " + maHocPhan);

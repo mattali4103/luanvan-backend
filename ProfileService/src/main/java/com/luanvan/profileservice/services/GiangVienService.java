@@ -4,7 +4,6 @@ import com.luanvan.profileservice.dto.GiangVienDTO;
 import com.luanvan.profileservice.dto.UserDTO;
 import com.luanvan.profileservice.dto.response.ProfileResponse;
 import com.luanvan.profileservice.entity.GiangVien;
-import com.luanvan.profileservice.entity.Khoa;
 import com.luanvan.profileservice.exception.AppException;
 import com.luanvan.profileservice.exception.ErrorCode;
 import com.luanvan.profileservice.repository.GiangVienRepository;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class GiangVienService {
     private final GiangVienRepository giangVienRepository;
-    private final KhoaRepository khoaRepository;
     private final UserClient userClient;
 
     public ProfileResponse getMyInfo(String maSo) {

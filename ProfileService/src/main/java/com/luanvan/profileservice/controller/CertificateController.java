@@ -1,7 +1,6 @@
 package com.luanvan.profileservice.controller;
 
 import com.luanvan.profileservice.dto.CertificateDTO;
-import com.luanvan.profileservice.dto.SinhVienDTO;
 import com.luanvan.profileservice.dto.response.ApiResponse;
 import com.luanvan.profileservice.dto.response.SinhVienResponse;
 import com.luanvan.profileservice.services.CertificateService;

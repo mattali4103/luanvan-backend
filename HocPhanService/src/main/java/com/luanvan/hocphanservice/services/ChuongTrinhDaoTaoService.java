@@ -227,9 +227,6 @@ public class ChuongTrinhDaoTaoService {
         chuongTrinhDaoTaoRepository.delete(chuongTrinhDaoTao);
     }
 
-
-// Các import khác cần thiết...
-
     @Transactional
     public void createDSHocPhanFromFile(CTDTDescriptionRequest request, MultipartFile file) {
         if (request == null || file == null || file.isEmpty()) {
@@ -328,76 +325,6 @@ public class ChuongTrinhDaoTaoService {
     }
 
 
-
-//    @Transactional
-//    public void createDSHocPhanFromFile(CTDTDescriptionRequest request, MultipartFile file) {
-//        if (request == null || file == null || file.isEmpty()) {
-//            throw new AppException(ErrorCode.INVALID_REQUEST);
-//        }
-//
-//        if (request.getMaNganh() == null || request.getKhoaHoc() == null) {
-//            throw new AppException(ErrorCode.INVALID_REQUEST);
-//        }
-//
-//        boolean nganhExists = nganhClient.existByMaNganh(request.getMaNganh());
-//        if (!nganhExists) {
-//            throw new AppException(ErrorCode.NOTFOUND);
-//        }
-//
-//        if(chuongTrinhDaoTaoRepository.existsChuongTrinhDaoTaoByKhoaHocAndMaNganh(request.getKhoaHoc(), request.getMaNganh())) {
-//            throw new AppException(ErrorCode.CTDT_EXISTED);
-//        }
-//
-//        try {
-//            Workbook workbook = WorkbookFactory.create(file.getInputStream());
-//            Sheet sheet = workbook.getSheetAt(0);
-//            List<String> maHocPhanList = new LinkedList<>();
-//
-//            // Skip the header row if it exists (start from row 1)
-//            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-//                var row = sheet.getRow(i);
-//                if (row == null) continue;
-//
-//                var cell = row.getCell(0);
-//                if (cell != null && !cell.getStringCellValue().trim().isEmpty()) {
-//                    String maHocPhan = cell.getStringCellValue().trim();
-//                    log.info("Reading course code: {}", maHocPhan);
-//                    maHocPhanList.add(maHocPhan);
-//                }
-//            }
-//
-//            log.info("Total course codes found: {}", maHocPhanList.size());
-//
-//            if (maHocPhanList.isEmpty()) {
-//                throw new AppException("No course codes found in the file", ErrorCode.INVALID_INPUT);
-//            }
-//
-//            List<HocPhan> chuongTrinhList = hocPhanRepository.findByMaHpIn(maHocPhanList);
-//            log.info("Found {} courses in database out of {} requested", chuongTrinhList.size(), maHocPhanList.size());
-//
-//            log.info("Course not found in database: {}",
-//                    maHocPhanList.stream()
-//                            .filter(maHocPhan -> chuongTrinhList.stream()
-//                                    .noneMatch(hocPhan -> hocPhan.getMaHp().equals(maHocPhan)))
-//                            .toList());
-//
-//            if (chuongTrinhList.isEmpty()) {
-//                throw new AppException(ErrorCode.NOTFOUND);
-//            }
-//
-//            modelMapper.typeMap(CTDTDescriptionRequest.class, ChuongTrinhDaoTao.class)
-//                    .addMappings(mapper -> mapper.skip(ChuongTrinhDaoTao::setHocPhanList));
-//
-//            ChuongTrinhDaoTao chuongTrinhDaoTao = modelMapper.map(request, ChuongTrinhDaoTao.class);
-//            chuongTrinhDaoTao.setHocPhanList(chuongTrinhList);
-//            chuongTrinhDaoTaoRepository.save(chuongTrinhDaoTao);
-//
-//            log.info("Successfully created curriculum with {} courses", chuongTrinhList.size());
-//        } catch (IOException e) {
-//            log.error("Error reading Excel file: {}", e.getMessage());
-//            throw new AppException(ErrorCode.INVALID_INPUT);
-//        }
-//    }
 
     public List<HocPhanDTO> getHocPhanInCTDTByKhoaHoc(String khoaHoc, Long maNganh) {
         if (khoaHoc == null || khoaHoc.isEmpty()) {
@@ -567,8 +494,6 @@ public class ChuongTrinhDaoTaoService {
         if (request == null || request.getKhoaHoc() == null || request.getMaNganh() == null) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
-        ChuongTrinhDaoTao chuongTrinhDaoTao = chuongTrinhDaoTaoRepository.findById(request.getId())
-                .orElseThrow(() -> new AppException(ErrorCode.NOTFOUND));
         request.getNhomHocPhanTuChon().forEach( hptc ->{
             List<String> maHocPhanList = hptc.getHocPhanTuChonList().stream()
                     .map(HocPhanDTO::getMaHp)

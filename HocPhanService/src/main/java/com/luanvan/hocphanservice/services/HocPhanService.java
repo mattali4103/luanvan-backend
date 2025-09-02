@@ -30,14 +30,6 @@ public class HocPhanService {
     private final HocPhanTuChonService hocPhanTuChonService;
 
 
-    public List<HocPhanDTO> getAll(){
-        List<HocPhan> hocPhanList = hocPhanRepository.findAll();
-        return hocPhanList.stream()
-                .map(hocPhan -> modelMapper.map(hocPhan, HocPhanDTO.class))
-                .collect(Collectors.toList());
-    }
-
-
     public List<HocPhanDTO> getDSHocPhanIn(List<String> maHocPhanList) {
         if (maHocPhanList.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
@@ -62,8 +54,9 @@ public class HocPhanService {
     //    Yêu cầu NhomHP not null
     public HocPhanDTO createHocPhan(HocPhanDTO hocPhanDTO) {
         ModelMapper modelMapper = new ModelMapper();
-        if (hocPhanRepository.findByTenHp(hocPhanDTO.getTenHp()).isPresent()) {
-            throw new AppException(ErrorCode.EXISTED);
+        if (hocPhanRepository.findByTenHp(hocPhanDTO.getTenHp()).isPresent() ||
+                hocPhanRepository.findById(hocPhanDTO.getMaHp()).isPresent()) {
+            throw new AppException(ErrorCode.HOCPHAN_EXISTED);
         }
 
         modelMapper.typeMap(HocPhanDTO.class, HocPhan.class).addMappings(
