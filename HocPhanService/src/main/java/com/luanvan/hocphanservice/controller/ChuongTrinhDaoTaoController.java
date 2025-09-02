@@ -9,7 +9,6 @@ import com.luanvan.hocphanservice.model.Response.ThongKeCTDT;
 import com.luanvan.hocphanservice.model.Response.TinChiResponse;
 import com.luanvan.hocphanservice.services.ChuongTrinhDaoTaoService;
 import com.luanvan.hocphanservice.services.HocPhanService;
-import com.luanvan.hocphanservice.services.HocPhanTuChonService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,7 +20,7 @@ public class ChuongTrinhDaoTaoController {
     private final ChuongTrinhDaoTaoService chuongTrinhDaoTaoService;
     private final HocPhanService hocPhanService;
 
-    public ChuongTrinhDaoTaoController(ChuongTrinhDaoTaoService chuongTrinhDaoTaoService, HocPhanService hocPhanService, HocPhanTuChonService hocPhanTuChonService) {
+    public ChuongTrinhDaoTaoController(ChuongTrinhDaoTaoService chuongTrinhDaoTaoService, HocPhanService hocPhanService) {
         this.chuongTrinhDaoTaoService = chuongTrinhDaoTaoService;
         this.hocPhanService = hocPhanService;
     }

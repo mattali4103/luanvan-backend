@@ -6,7 +6,6 @@ import com.luanvan.profileservice.dto.SinhVienDTO;
 import com.luanvan.profileservice.dto.UserDTO;
 import com.luanvan.profileservice.dto.request.CreateSinhVienRequest;
 import com.luanvan.profileservice.dto.response.*;
-import com.luanvan.profileservice.entity.GiangVien;
 import com.luanvan.profileservice.entity.Lop;
 import com.luanvan.profileservice.entity.SinhVien;
 import com.luanvan.profileservice.exception.AppException;
@@ -20,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service

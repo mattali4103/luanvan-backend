@@ -7,7 +7,6 @@ import com.luanvan.profileservice.entity.GiangVien;
 import com.luanvan.profileservice.exception.AppException;
 import com.luanvan.profileservice.exception.ErrorCode;
 import com.luanvan.profileservice.repository.GiangVienRepository;
-import com.luanvan.profileservice.repository.KhoaRepository;
 import com.luanvan.profileservice.repository.httpClient.UserClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
